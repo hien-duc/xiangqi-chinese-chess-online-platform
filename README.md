@@ -32,6 +32,26 @@ graph TD
     API --> Moves
     API --> GameStates
 ```
+### System Flow
+1. **Express.js API (Server Entry Point)**
+   - Handles HTTP requests from clients
+   - Routes game operations and moves
+   - Manages user sessions and authentication
+
+2. **Game Logic**
+   - Validates moves according to Xiangqi rules
+   - Manages game states and turn flow
+   - Coordinates with UCCI handler for AI moves
+
+3. **UCCI Handler**
+   - Translates game moves to UCCI protocol
+   - Interfaces with Chinese Chess engines
+   - Processes engine responses back to game format
+
+4. **Database Layer**
+   - Stores user information and game states
+   - Tracks move history and game progression
+   - Maintains player statistics and rankings
 
 ## Tech Stack
 
