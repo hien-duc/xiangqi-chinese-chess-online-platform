@@ -110,7 +110,7 @@ GET  /api/users/stats         // Get user statistics
 
 This project is part of the Xiangqi (Chinese Chess) application:
 
-- Frontend Repository: [xiangqi-frontend](https://github.com/hien-duc/xiangqi-frontend)
+- Frontend Repository: [xiangqi-frontend](https://github.com/NCongMinh/xiangqi-frontend)
 - Backend Repository: [xiangqi-backend](https://github.com/hien-duc/xiangqi-backend)
 
 ## Project Structure
