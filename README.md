@@ -75,9 +75,36 @@ graph TD
 
 ### Game Management
 - Create/join games
+- Spectator mode
 - Turn-based gameplay
 - Move validation
 - Game state persistence
+- Basic AI opponent for practice
+
+## Key API Endpoints:
+
+### Game Management
+```
+POST /api/games/create           // Create new game
+POST /api/games/join/:gameId     // Join existing game
+GET  /api/games/:gameId         // Get game state
+POST /api/games/:gameId/move    // Make a move
+```
+
+### UCCI Integration
+```
+POST /api/ucci/position         // Send position to engine
+POST /api/ucci/analyze         // Request position analysis
+GET  /api/ucci/bestmove        // Get engine's best move
+```
+
+### User Management
+```
+POST /api/auth/register        // Register new user
+POST /api/auth/login          // Login user
+GET  /api/users/profile       // Get user profile
+GET  /api/users/stats         // Get user statistics
+```
 
 ## Related Repositories
 
