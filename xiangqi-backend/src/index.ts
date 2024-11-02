@@ -1,24 +1,24 @@
+// src/server.ts
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
+import mongoose from 'mongoose';
+import { ucciRoutes } from './routes/ucci';
 
-dotenv.config();
+const app = express();
 
-const server = express();
-const port = process.env.PORT || 3001;
+// Middleware
+app.use(cors());
+app.use(express.json());
 
-server.use(cors({
-    origin: process.env.NODE_ENV === 'production'
-        ? 'your-production-domain.com'
-        : 'http://localhost:3000'
-}));
+// MongoDB connection
+mongoose.connect('mongodb://localhost:27017/xiangqi')
+    .then(() => console.log('Connected to MongoDB'))
+    .catch((error) => console.error('MongoDB connection error:', error));
 
-server.use(express.json());
+// UCCI routes
+app.use('/api/ucci', ucciRoutes);
 
-server.get('/hello', function (req, res) {
-    res.json('Hello World!');
-});
-
-server.listen(port, function () {
-    console.log('Listening on ' + port);
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
 });
