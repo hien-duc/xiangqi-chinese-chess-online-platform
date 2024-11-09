@@ -1,24 +1,26 @@
 {
-  "name": "my-fullstack-project",
-  "version": "1.0.0",
-  "description": "Full stack application with Next.js and Express",
+  "name": "xiangqi",
+  "version": "0.1.0",
+  "private": true,
   "scripts": {
-    "install:all": "npm install && cd client && npm install && cd ../server && npm install",
-    "dev:client": "cd client && npm run dev",
-    "dev:server": "cd server && npm run dev",
-    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
-    "build:client": "cd client && npm run build",
-    "build:server": "cd server && npm run build",
-    "build": "npm run build:server && npm run build:client",
-    "start:client": "cd client && npm start",
-    "start:server": "cd server && npm start",
-    "start": "concurrently \"npm run start:server\" \"npm run start:client\"",
-    "clean": "rm -rf node_modules && cd client && rm -rf node_modules && cd ../server && rm -rf node_modules"
-  },
-  "devDependencies": {
-    "concurrently": "^8.2.2"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
   },
   "dependencies": {
-    "package.json": "^0.0.0"
+    "chess-web": "file:",
+    "next": "15.0.1",
+    "react": "19.0.0-rc-69d4b800-20241021",
+    "react-dom": "19.0.0-rc-69d4b800-20241021",
+    "shadcn-ui": "^0.9.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "eslint": "^8",
+    "eslint-config-next": "15.0.1",
+    "typescript": "^5"
   }
 }
