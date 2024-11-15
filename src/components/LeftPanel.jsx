@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import styles from "../styles/LeftPanel.module.css";
 
-const LeftPanel = ({ gameState }) => {
+const LeftPanel = () => {
   const [activeView, setActiveView] = useState("view");
 
   const renderPanel = () => {
@@ -11,10 +11,8 @@ const LeftPanel = ({ gameState }) => {
           <div className={styles.panelContent}>
             <h3>Game Information</h3>
             <div>
-              <p>Current Side: {gameState.side === 1 ? "Red" : "Green"}</p>
-              <p>
-                Pieces Captured: {gameState.pieces.filter((p) => p.dead).length}
-              </p>
+              <p>Current Side: </p>
+              <p>Pieces Captured:</p>
             </div>
           </div>
         );
@@ -45,9 +43,7 @@ const LeftPanel = ({ gameState }) => {
   return (
     <div className={styles.leftPanel}>
       {/* Turn indicator */}
-      <div className={styles.turnIndicator}>
-        {gameState.side === 1 ? "Red's Turn" : "Green's Turn"}
-      </div>
+      <div className={styles.turnIndicator}>RedTurn</div>
 
       {/* Content panel */}
       <div className={styles.contentPanel}>{renderPanel()}</div>

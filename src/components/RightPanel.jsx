@@ -31,7 +31,7 @@ const PlayerInfo = ({ name, level, avatarUrl }) => (
   </div>
 );
 
-const RightPanel = ({ gameState }) => {
+const RightPanel = () => {
   return (
     <div className={styles["right-panel"]}>
       {/* Player 1 Info */}
@@ -45,11 +45,6 @@ const RightPanel = ({ gameState }) => {
       <div className={styles["move-history"]}>  
         <h3>Move History</h3>
         <div className={styles["moves-list"]}>
-          {gameState.moveHistory.map((move, index) => (
-            <div key={index} className={styles["move-item"]}>
-              {`${index + 1}. ${move}`}
-            </div>
-          ))}
         </div>
       </div>
 

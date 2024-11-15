@@ -1,0 +1,43 @@
+/** Embedded SVGs for all pieces pieces */
+.cg-wrap piece.pawn.white {
+  background-image: url("../../public/assets/pieces/red_pawn.svg");
+}
+.cg-wrap piece.cannon.white {
+  background-image: url("../../public/assets/pieces/red_cannon.svg");
+}
+.cg-wrap piece.elephant.white {
+  background-image: url("../../public/assets/pieces/red_elephant.svg");
+}
+.cg-wrap piece.horse.white {
+  background-image: url("../../public/assets/pieces/red_horse.svg");
+}
+.cg-wrap piece.chariot.white {
+  background-image: url("../../public/assets/pieces/red_chariot.svg");
+}
+.cg-wrap piece.advisor.white {
+  background-image: url("../../public/assets/pieces/red_advisor.svg");
+}
+.cg-wrap piece.king.white {
+  background-image: url("../../public/assets/pieces/red_king.svg");
+}
+.cg-wrap piece.pawn.black {
+  background-image: url("../../public/assets/pieces/black_pawn.svg");
+}
+.cg-wrap piece.cannon.black {
+  background-image: url("../../public/assets/pieces/black_cannon.svg");
+}
+.cg-wrap piece.elephant.black {
+  background-image: url("../../public/assets/pieces/black_elephant.svg");
+}
+.cg-wrap piece.horse.black {
+  background-image: url("../../public/assets/pieces/black_horse.svg");
+}
+.cg-wrap piece.chariot.black {
+  background-image: url("../../public/assets/pieces/black_chariot.svg");
+}
+.cg-wrap piece.advisor.black {
+  background-image: url("../../public/assets/pieces/black_advisor.svg");
+}
+.cg-wrap piece.king.black {
+  background-image: url("../../public/assets/pieces/black_king.svg");
+}

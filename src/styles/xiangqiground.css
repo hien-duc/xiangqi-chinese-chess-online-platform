@@ -1,0 +1,11 @@
+/* styles/xiangqiground.css */
+
+@import "xiangqiground.base.css";
+@import "xiangqiground.board.css";
+@import "xiangqiground.pieces.css";
+
+.xiangqiground {
+  width: 540px;
+  height: 600px;
+}
+
