@@ -1,141 +1,71 @@
-<svg id="Layer_2" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" width="540" height="600" viewBox="0 0 2404 2704">
+<svg width="540" height="600" viewBox="0 0 540 600" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <style>
       .cls-1 {
-        stroke-width: 6px;
-      }
-
-      .cls-1, .cls-2 {
+        stroke-width: 3px;
         stroke-miterlimit: 10;
       }
-
       .cls-1, .cls-2, .cls-3 {
         fill: none;
         stroke: rgb(102, 79, 76);
       }
-
       .cls-4 {
-        fill: rgb(183, 163, 168);
+        fill: rgb(220, 224, 232);
       }
-
-      .cls-2, .cls-3 {
-        stroke-width: 6px;
+      .cls-2 {
+        stroke-width: 3px;
+        stroke-miterlimit: 10;
       }
-
       .cls-3 {
+        stroke-width: 3px;
         stroke-linejoin: bevel;
       }
     </style>
   </defs>
-  <g id="Layer_1-2" data-name="Layer 1">
-    <g>
-      <g>
-        <g>
-          <line class="cls-2" x1="2" y1="302" x2="2402" y2="302"/>
-          <line class="cls-2" x1="2" y1="602" x2="2402" y2="602"/>
-          <line class="cls-2" x1="2" y1="902" x2="2402" y2="902"/>
-          <line class="cls-2" x1="2" y1="1202" x2="2402" y2="1202"/>
-          <line class="cls-2" x1="2" y1="1502" x2="2402" y2="1502"/>
-          <line class="cls-2" x1="2" y1="1802" x2="2402" y2="1802"/>
-          <line class="cls-2" x1="2" y1="2102" x2="2402" y2="2102"/>
-          <line class="cls-2" x1="2" y1="2402" x2="2402" y2="2402"/>
-          <rect class="cls-2" x="2" y="2" width="2400" height="2700"/>
-          <line class="cls-2" x1="302" y1="1502" x2="302" y2="2702"/>
-          <line class="cls-2" x1="302" y1="2" x2="302" y2="1202"/>
-          <line class="cls-2" x1="602" y1="1502" x2="602" y2="2702"/>
-          <line class="cls-2" x1="602" y1="2" x2="602" y2="1202"/>
-          <polyline class="cls-3" points="902 1502 902 2702 1502 2102"/>
-          <polyline class="cls-3" points="902 1202 902 2 1502 602"/>
-          <line class="cls-2" x1="1202" y1="1502" x2="1202" y2="2702"/>
-          <line class="cls-2" x1="1202" y1="1202" x2="1202" y2="2"/>
-          <polyline class="cls-3" points="902 2102 1502 2702 1502 1502"/>
-          <polyline class="cls-3" points="1502 1202 1502 2 902 602"/>
-          <line class="cls-2" x1="1802" y1="1502" x2="1802" y2="2702"/>
-          <line class="cls-2" x1="1802" y1="1202" x2="1802" y2="2"/>
-          <line class="cls-2" x1="2102" y1="1502" x2="2102" y2="2702"/>
-          <line class="cls-2" x1="2102" y1="2" x2="2102" y2="1202"/>
-        </g>
-        <g>
-        </g>
-      </g>
-      <g>
-        <g>
-          <polyline class="cls-1" points="247.54 576.38 276.1 576.38 276.1 547.83"/>
-          <polyline class="cls-1" points="247.54 627.56 276.1 627.56 276.1 656.11"/>
-          <polyline class="cls-1" points="327.9 656.11 327.9 627.56 356.46 627.56"/>
-          <polyline class="cls-1" points="356.46 575.75 327.9 575.75 327.9 547.2"/>
-        </g>
-        <g>
-          <polyline class="cls-1" points="2047.54 576.38 2076.1 576.38 2076.1 547.83"/>
-          <polyline class="cls-1" points="2047.54 627.56 2076.1 627.56 2076.1 656.11"/>
-          <polyline class="cls-1" points="2127.9 656.11 2127.9 627.56 2156.46 627.56"/>
-          <polyline class="cls-1" points="2156.46 575.75 2127.9 575.75 2127.9 547.2"/>
-        </g>
-        <g>
-          <polyline class="cls-1" points="2347.54 876.38 2376.1 876.38 2376.1 847.83"/>
-          <polyline class="cls-1" points="2347.54 927.56 2376.1 927.56 2376.1 956.11"/>
-        </g>
-        <g>
-          <polyline class="cls-1" points="1747.54 876.38 1776.1 876.38 1776.1 847.83"/>
-          <polyline class="cls-1" points="1747.54 927.56 1776.1 927.56 1776.1 956.11"/>
-          <polyline class="cls-1" points="1827.9 956.11 1827.9 927.56 1856.46 927.56"/>
-          <polyline class="cls-1" points="1856.46 875.75 1827.9 875.75 1827.9 847.2"/>
-        </g>
-        <g>
-          <polyline class="cls-1" points="1147.54 876.38 1176.1 876.38 1176.1 847.83"/>
-          <polyline class="cls-1" points="1147.54 927.56 1176.1 927.56 1176.1 956.11"/>
-          <polyline class="cls-1" points="1227.9 956.11 1227.9 927.56 1256.46 927.56"/>
-          <polyline class="cls-1" points="1256.46 875.75 1227.9 875.75 1227.9 847.2"/>
-        </g>
-        <g>
-          <polyline class="cls-1" points="547.54 876.38 576.1 876.38 576.1 847.83"/>
-          <polyline class="cls-1" points="547.54 927.56 576.1 927.56 576.1 956.11"/>
-          <polyline class="cls-1" points="627.9 956.11 627.9 927.56 656.46 927.56"/>
-          <polyline class="cls-1" points="656.46 875.75 627.9 875.75 627.9 847.2"/>
-        </g>
-        <g>
-          <polyline class="cls-1" points="27.9 956.11 27.9 927.56 56.46 927.56"/>
-          <polyline class="cls-1" points="56.46 875.75 27.9 875.75 27.9 847.2"/>
-        </g>
-        <g>
-          <polyline class="cls-1" points="2156.46 2128.31 2127.9 2128.31 2127.9 2156.86"/>
-          <polyline class="cls-1" points="2156.46 2077.12 2127.9 2077.12 2127.9 2048.57"/>
-          <polyline class="cls-1" points="2076.1 2048.57 2076.1 2077.12 2047.54 2077.12"/>
-          <polyline class="cls-1" points="2047.54 2128.93 2076.1 2128.93 2076.1 2157.48"/>
-        </g>
-        <g>
-          <polyline class="cls-1" points="356.46 2128.31 327.9 2128.31 327.9 2156.86"/>
-          <polyline class="cls-1" points="356.46 2077.12 327.9 2077.12 327.9 2048.57"/>
-          <polyline class="cls-1" points="276.1 2048.57 276.1 2077.12 247.54 2077.12"/>
-          <polyline class="cls-1" points="247.54 2128.93 276.1 2128.93 276.1 2157.48"/>
-        </g>
-        <g>
-          <polyline class="cls-1" points="56.46 1828.31 27.9 1828.31 27.9 1856.86"/>
-          <polyline class="cls-1" points="56.46 1777.12 27.9 1777.12 27.9 1748.57"/>
-        </g>
-        <g>
-          <polyline class="cls-1" points="656.46 1828.31 627.9 1828.31 627.9 1856.86"/>
-          <polyline class="cls-1" points="656.46 1777.12 627.9 1777.12 627.9 1748.57"/>
-          <polyline class="cls-1" points="576.1 1748.57 576.1 1777.12 547.54 1777.12"/>
-          <polyline class="cls-1" points="547.54 1828.93 576.1 1828.93 576.1 1857.48"/>
-        </g>
-        <g>
-          <polyline class="cls-1" points="1256.46 1828.31 1227.9 1828.31 1227.9 1856.86"/>
-          <polyline class="cls-1" points="1256.46 1777.12 1227.9 1777.12 1227.9 1748.57"/>
-          <polyline class="cls-1" points="1176.1 1748.57 1176.1 1777.12 1147.54 1777.12"/>
-          <polyline class="cls-1" points="1147.54 1828.93 1176.1 1828.93 1176.1 1857.48"/>
-        </g>
-        <g>
-          <polyline class="cls-1" points="1856.46 1828.31 1827.9 1828.31 1827.9 1856.86"/>
-          <polyline class="cls-1" points="1856.46 1777.12 1827.9 1777.12 1827.9 1748.57"/>
-          <polyline class="cls-1" points="1776.1 1748.57 1776.1 1777.12 1747.54 1777.12"/>
-          <polyline class="cls-1" points="1747.54 1828.93 1776.1 1828.93 1776.1 1857.48"/>
-        </g>
-        <g>
-          <polyline class="cls-1" points="2376.1 1748.57 2376.1 1777.12 2347.54 1777.12"/>
-          <polyline class="cls-1" points="2347.54 1828.93 2376.1 1828.93 2376.1 1857.48"/>
-        </g>
-      </g>
-    </g>
+  
+  <!-- Board Background -->
+  <rect width="540" height="600" class="cls-4" />
+  
+  <!-- Grid lines -->
+  <g class="cls-2">
+    <!-- Horizontal lines -->
+    <line x1="30" y1="30" x2="510" y2="30" />
+    <line x1="30" y1="90" x2="510" y2="90" />
+    <line x1="30" y1="150" x2="510" y2="150" />
+    <line x1="30" y1="210" x2="510" y2="210" />
+    <line x1="30" y1="270" x2="510" y2="270" />
+    <line x1="30" y1="330" x2="510" y2="330" />
+    <line x1="30" y1="390" x2="510" y2="390" />
+    <line x1="30" y1="450" x2="510" y2="450" />
+    <line x1="30" y1="510" x2="510" y2="510" />
+    <line x1="30" y1="570" x2="510" y2="570" />
+    
+    <!-- Vertical lines -->
+    <line x1="30" y1="30" x2="30" y2="570" />
+    <line x1="90" y1="30" x2="90" y2="270" />
+    <line x1="150" y1="30" x2="150" y2="270" />
+    <line x1="210" y1="30" x2="210" y2="270" />
+    <line x1="270" y1="30" x2="270" y2="270" />
+    <line x1="330" y1="30" x2="330" y2="270" />
+    <line x1="390" y1="30" x2="390" y2="270" />
+    <line x1="450" y1="30" x2="450" y2="270" />
+    <line x1="510" y1="30" x2="510" y2="570" />
+    <line x1="90" y1="330" x2="90" y2="570" />
+    <line x1="150" y1="330" x2="150" y2="570" />
+    <line x1="210" y1="330" x2="210" y2="570" />
+    <line x1="270" y1="330" x2="270" y2="570" />
+    <line x1="330" y1="330" x2="330" y2="570" />
+    <line x1="390" y1="330" x2="390" y2="570" />
+    <line x1="450" y1="330" x2="450" y2="570" />
+  </g>
+  
+  <!-- Palaces -->
+  <g class="cls-3">
+    <!-- Top Palace -->
+    <line x1="210" y1="30" x2="330" y2="150" />
+    <line x1="330" y1="30" x2="210" y2="150" />
+    <!-- Bottom Palace -->
+    <line x1="210" y1="450" x2="330" y2="570" />
+    <line x1="330" y1="450" x2="210" y2="570" />
   </g>
 </svg>
