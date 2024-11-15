@@ -19,12 +19,34 @@
    inkscape:version="0.91 r13725"
    sodipodi:docname="black_advisor.svg"
    width="4.2632923cm"
-   height="4.2632923cm"><metadata
-     id="metadata223"><rdf:RDF><cc:Work
-         rdf:about=""><dc:format>image/svg+xml</dc:format><dc:type
-           rdf:resource="http://purl.org/dc/dcmitype/StillImage" /><dc:date>2015-05-20</dc:date><dc:creator><cc:Agent><dc:title>Jasmin Scharrer (original artwork, http://jasminscharrer.com/), Sebastian Pipping (post-processing, https://blog.hartwork.org/)</dc:title></cc:Agent></dc:creator><dc:subject><rdf:Bag><rdf:li>Chinese chess</rdf:li><rdf:li>Xiangqi</rdf:li><rdf:li>chess</rdf:li><rdf:li>board game</rdf:li><rdf:li>game</rdf:li></rdf:Bag></dc:subject><cc:license
-           rdf:resource="http://creativecommons.org/licenses/by/4.0/" /><dc:title></dc:title></cc:Work></rdf:RDF></metadata><defs
-     id="defs221" /><sodipodi:namedview
+   height="4.2632923cm">
+   <metadata id="metadata223">
+      <rdf:RDF>
+         <cc:Work rdf:about="">
+            <dc:format>image/svg+xml</dc:format>
+            <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+            <dc:date>2015-05-20</dc:date>
+            <dc:creator>
+               <cc:Agent>
+                  <dc:title>Jasmin Scharrer (original artwork, http://jasminscharrer.com/), Sebastian Pipping (post-processing, https://blog.hartwork.org/)</dc:title>
+               </cc:Agent>
+            </dc:creator>
+            <dc:subject>
+               <rdf:Bag>
+                  <rdf:li>Chinese chess</rdf:li>
+                  <rdf:li>Xiangqi</rdf:li>
+                  <rdf:li>chess</rdf:li>
+                  <rdf:li>board game</rdf:li>
+                  <rdf:li>game</rdf:li>
+               </rdf:Bag>
+            </dc:subject>
+            <cc:license rdf:resource="http://creativecommons.org/licenses/by/4.0/" />
+            <dc:title></dc:title>
+         </cc:Work>
+      </rdf:RDF>
+   </metadata>
+   <defs id="defs221" />
+   <sodipodi:namedview
      pagecolor="#ffffff"
      bordercolor="#666666"
      borderopacity="1"
@@ -50,34 +72,40 @@
      fit-margin-right="0"
      fit-margin-bottom="0"
      units="cm"
-     showguides="true" /><g
-     id="black_advisor"
-     transform="translate(-129.94143,-278.18206)"><circle
-       style="color:#000000;display:inline;overflow:visible;visibility:visible;opacity:1;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:3.45000005;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:10;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker:none;enable-background:accumulate"
-       id="circle4368"
-       cx="205.47217"
-       cy="353.71283"
-       r="73.805771" /><g
-       transform="translate(-17.270095,4.7473634)"
-       id="g137"><path
-         sodipodi:nodetypes="ccccccccc"
-         style="fill:#ffffff;stroke:#000000;stroke-width:3;stroke-miterlimit:10"
-         inkscape:connector-curvature="0"
-         id="path139"
-         d="m 256.1,302.8 c -11.9,3.3 -22.5,4.9 -34.1,4.9 -11.25335,-0.10988 -23.45096,-2.17116 -32.6,-4.7 -2.4,20.3 -4.4,40.4 -4.1,60.6 0,0 7.7,21 37.1,39.9 0,0 0.1,0.2 0.2,0.1 0.2,0.1 0.5,-0.3 0.5,-0.3 29.4,-19 37.1,-39.9 37.1,-39.9 0.2,-20.2 -1.7,-40.3 -4.1,-60.6 z"
-         stroke-miterlimit="10" /><g
-         id="g141"><line
-           style="fill:none;stroke:#000000;stroke-width:3;stroke-miterlimit:10"
-           id="line143"
-           y2="364.5"
-           x2="240.8"
-           y1="328.20001"
-           x1="204.60001"
-           stroke-miterlimit="10" /><line
-           style="fill:none;stroke:#000000;stroke-width:3;stroke-miterlimit:10"
-           id="line145"
-           y2="364.5"
-           x2="204.60001"
-           y1="328.20001"
-           x1="240.8"
-           stroke-miterlimit="10" /></g></g></g></svg>
+     showguides="true" />
+   <g id="black_advisor" transform="translate(-129.94143,-278.18206)">
+      <circle
+        style="color:#000000;display:inline;overflow:visible;visibility:visible;opacity:1;fill:#24273a;fill-opacity:1;fill-rule:nonzero;stroke:#ffffff;stroke-width:4;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:10;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker:none;enable-background:accumulate"
+        id="circle4368"
+        cx="205.47217"
+        cy="353.71283"
+        r="73.805771" />
+      <g transform="translate(-17.270095,4.7473634)" id="g137">
+         <path
+           sodipodi:nodetypes="ccccccccc"
+           style="fill:#24273a;stroke:#ffffff;stroke-width:4;stroke-miterlimit:10"
+           inkscape:connector-curvature="0"
+           id="path139"
+           d="m 256.1,302.8 c -11.9,3.3 -22.5,4.9 -34.1,4.9 -11.25335,-0.10988 -23.45096,-2.17116 -32.6,-4.7 -2.4,20.3 -4.4,40.4 -4.1,60.6 0,0 7.7,21 37.1,39.9 0,0 0.1,0.2 0.2,0.1 0.2,0.1 0.5,-0.3 0.5,-0.3 29.4,-19 37.1,-39.9 37.1,-39.9 0.2,-20.2 -1.7,-40.3 -4.1,-60.6 z"
+           stroke-miterlimit="10" />
+         <g id="g141">
+            <line
+              style="fill:none;stroke:#ffffff;stroke-width:4;stroke-miterlimit:10"
+              id="line143"
+              y2="364.5"
+              x2="240.8"
+              y1="328.20001"
+              x1="204.60001"
+              stroke-miterlimit="10" />
+            <line
+              style="fill:none;stroke:#ffffff;stroke-width:4;stroke-miterlimit:10"
+              id="line145"
+              y2="364.5"
+              x2="204.60001"
+              y1="328.20001"
+              x1="240.8"
+              stroke-miterlimit="10" />
+         </g>
+      </g>
+   </g>
+</svg>
