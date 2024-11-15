@@ -1,7 +1,13 @@
-import { State } from './state.ts';
-import { unselect, cancelMove, getKeyAtDomPos, getSnappedKeyAtDomPos, whitePov } from './board.ts';
-import { eventPosition, isRightButton } from './util.ts';
-import * as cg from './types.ts';
+import { State } from "./state.ts";
+import {
+  unselect,
+  cancelMove,
+  getKeyAtDomPos,
+  getSnappedKeyAtDomPos,
+  whitePov,
+} from "./board.ts";
+import { eventPosition, isRightButton } from "./util.ts";
+import * as cg from "./types.ts";
 
 export interface DrawShape {
   orig: cg.Key;
@@ -9,7 +15,7 @@ export interface DrawShape {
   brush?: string; // if no brush, no shape. label moved to top right of square
   modifiers?: DrawModifiers;
   piece?: DrawShapePiece;
-  customSvg?: { html: string; center?: 'orig' | 'dest' | 'label' }; // 100 x 100 viewbox cenetered at [50,50]
+  customSvg?: { html: string; center?: "orig" | "dest" | "label" }; // 100 x 100 viewbox cenetered at [50,50]
   label?: { text: string; fill?: string }; // fill is in '#rrggbb' format
 }
 
@@ -61,7 +67,7 @@ export interface DrawCurrent {
   snapToValidMove: boolean; // whether to snap to valid piece moves
 }
 
-const brushes: cg.BrushColor[] = ['green', 'red', 'blue', 'yellow'];
+const brushes: cg.BrushColor[] = ["green", "red", "blue", "yellow"];
 
 export function start(state: State, e: cg.MouchEvent): void {
   // support one finger touch only
@@ -86,12 +92,22 @@ export function processDraw(state: State): void {
   requestAnimationFrame(() => {
     const cur = state.drawable.current;
     if (cur) {
-      const keyAtDomPos = getKeyAtDomPos(cur.pos, whitePov(state), state.dom.bounds());
+      const keyAtDomPos = getKeyAtDomPos(
+        cur.pos,
+        whitePov(state),
+        state.dom.bounds()
+      );
+      console.log("cur.pos: ", cur.pos);
       if (!keyAtDomPos) {
         cur.snapToValidMove = false;
       }
       const mouseSq = cur.snapToValidMove
-        ? getSnappedKeyAtDomPos(cur.orig, cur.pos, whitePov(state), state.dom.bounds())
+        ? getSnappedKeyAtDomPos(
+            cur.orig,
+            cur.pos,
+            whitePov(state),
+            state.dom.bounds()
+          )
         : keyAtDomPos;
       if (mouseSq !== cur.mouseSq) {
         cur.mouseSq = mouseSq;
@@ -132,14 +148,15 @@ export function clear(state: State): void {
 
 function eventBrush(e: cg.MouchEvent): cg.BrushColor {
   const modA = (e.shiftKey || e.ctrlKey) && isRightButton(e);
-  const modB = e.altKey || e.metaKey || e.getModifierState?.('AltGraph');
+  const modB = e.altKey || e.metaKey || e.getModifierState?.("AltGraph");
   return brushes[(modA ? 1 : 0) + (modB ? 2 : 0)];
 }
 
 function addShape(drawable: Drawable, cur: DrawCurrent): void {
-  const sameShape = (s: DrawShape) => s.orig === cur.orig && s.dest === cur.dest;
+  const sameShape = (s: DrawShape) =>
+    s.orig === cur.orig && s.dest === cur.dest;
   const similar = drawable.shapes.find(sameShape);
-  if (similar) drawable.shapes = drawable.shapes.filter(s => !sameShape(s));
+  if (similar) drawable.shapes = drawable.shapes.filter((s) => !sameShape(s));
   if (!similar || similar.brush !== cur.brush)
     drawable.shapes.push({
       orig: cur.orig,

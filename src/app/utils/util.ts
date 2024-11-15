@@ -6,7 +6,7 @@ export const allKeys: readonly cg.Key[] = Array.prototype.concat(
   ...cg.files.map(c => cg.ranks.map(r => c + r)),
 );
 
-console.log(allKeys);
+// console.log(allKeys);
 
 export const pos2key = (pos: cg.Pos): cg.Key => allKeys[10 * pos[0] + pos[1]];
 
@@ -103,7 +103,7 @@ export const createEl = (tagName: string, className?: string): HTMLElement => {
 
 export function computeSquareCenter(key: cg.Key, asWhite: boolean, bounds: DOMRectReadOnly): cg.NumberPair {
   const pos = key2pos(key);
-  console.log(pos);
+  // console.log(pos);
   if (!asWhite) {
     pos[0] = 8 - pos[0];
     pos[1] = 9 - pos[1];

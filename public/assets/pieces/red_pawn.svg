@@ -43,9 +43,9 @@
     visibility:visible;
     opacity:1;
     fill:#ed8796;
-    fill-opacity: 1;
+fill-opacity: 1;
     fill-rule:nonzero;
-    stroke:#dd7878;
+    stroke:#ffffff;
     stroke-width:3.45000005;
     stroke-linecap:round;
     stroke-linejoin:miter;

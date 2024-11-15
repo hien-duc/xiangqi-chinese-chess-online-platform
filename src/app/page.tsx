@@ -6,13 +6,54 @@ import XiangqiBoard from "../components/XiangqiBoard";
 import '../styles/xiangqiground.css';
 import "./globals.css"
 
+
+const config = {
+  // orientation: 'red' as const,
+  // viewOnly: false,
+  // movable: {
+  //   free: false,
+  //   color: 'red',
+  //   showDests: true,
+  //   events: {
+  //     after: (orig: string, dest: string) => {
+  //       console.log(`Moved from ${orig} to ${dest}`);
+  //     }
+  //   }
+  // },
+  premovable: {
+    enabled: true,
+    showDests: true,
+    events: {
+      set: (orig: string, dest: string) => {
+        console.log(`Premove set from ${orig} to ${dest}`);
+      },
+      unset: () => {
+        console.log('Premove unset');
+      }
+    }
+  },
+  // draggable: {
+  //   enabled: true,
+  //   showGhost: true
+  // },
+  // highlight: {
+  //   lastMove: true,
+  //   check: true
+  // },
+  // animation: {
+  //   enabled: true,
+  //   duration: 200
+  // }
+};
+
 export default function Home() {
+
   return (
     <main className="p-8">
       <div className={styles["container"]}>
         <div className={styles["game-container"]}>
           <LeftPanel />
-          <XiangqiBoard />
+          <XiangqiBoard config={config} />
           <RightPanel />
         </div>
       </div>

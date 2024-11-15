@@ -44,7 +44,7 @@ export function read(fen: cg.FEN): cg.Pieces {
         if (nb < 58) col += nb - 48;
         else {
           const role = c.toLowerCase();
-          console.log(col, row);
+          // console.log(col, row);
           pieces.set(pos2key([col, row]), {
             role: roles[role],
             color: c === role ? 'black' : 'white',
