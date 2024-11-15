@@ -14,8 +14,7 @@
     "react": "19.0.0-rc-69d4b800-20241021",
     "react-dom": "19.0.0-rc-69d4b800-20241021",
     "shadcn-ui": "^0.2.3",
-    "xiangqi": "file:",
-    "xiangqiground": "^0.1.0"
+    "xiangqi": "file:"
   },
   "devDependencies": {
     "@types/node": "^20",

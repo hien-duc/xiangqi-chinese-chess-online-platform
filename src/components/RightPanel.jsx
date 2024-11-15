@@ -38,21 +38,20 @@ const RightPanel = () => {
       <PlayerInfo
         name="Cong Minh"
         level={75}
-        avatarUrl="/api/placeholder/80/80"
+        avatarUrl="/assets/avtDemo/avt1.jpg"
       />
 
       {/* Move History */}
-      <div className={styles["move-history"]}>  
+      <div className={styles["move-history"]}>
         <h3>Move History</h3>
-        <div className={styles["moves-list"]}>
-        </div>
+        <div className={styles["moves-list"]}></div>
       </div>
 
       {/* Player 2 Info */}
       <PlayerInfo
         name="Hien Duc"
         level={45}
-        avatarUrl="/api/placeholder/80/80"
+        avatarUrl="/assets/avtDemo/avt2.jpg"
       />
     </div>
   );

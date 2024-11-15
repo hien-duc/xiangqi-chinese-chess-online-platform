@@ -1,5 +1,6 @@
 /** Embedded SVGs for all pieces pieces */
 .cg-wrap piece.pawn.white {
+  stroke: red;
   background-image: url("../../public/assets/pieces/red_pawn.svg");
 }
 .cg-wrap piece.cannon.white {

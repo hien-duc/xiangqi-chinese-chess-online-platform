@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
-import { Xiangqiground } from "xiangqiground";
+import { Xiangqiground } from "../app/utils/xiangqiground";
 
-const XiangqiBoard = ({ config = {},  className = "" }) => {
+const XiangqiBoard = ({ config = {}, className = "" }) => {
   const boardRef = useRef(null);
   const groundRef = useRef(null);
 

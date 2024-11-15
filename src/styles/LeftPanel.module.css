@@ -6,7 +6,8 @@
 }
 
 .turnIndicator {
-  background-color: white;
+  background-color: #40a02b;
+  color: white;
   padding: 12px;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -17,7 +18,7 @@
 
 .contentPanel {
   height: 450px;
-  background-color: white;
+  background-color: #fffbf2;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
   overflow: hidden;
@@ -25,6 +26,7 @@
 
 .panelContent {
   padding: 16px;
+  color: #181926;
 }
 
 .panelContent h3 {
@@ -34,7 +36,7 @@
 }
 
 .chatContainer {
-  background-color: white;
+  background-color:#fffbf2;
   padding: 8px;
   border-radius: 4px;
   height: 200px;
@@ -50,17 +52,20 @@
 .navButton {
   padding: 8px;
   border-radius: 6px;
-  border: none;
-  background-color: #e0e0e0;
+  border: 0px solid black;
+  background-color: #40a02b;
   cursor: pointer;
+  color: white;
   transition: background-color 0.2s;
 }
 
 .navButton:hover {
-  background-color: #d0d0d0;
+  border: 1px solid #40a02b;
+  color: white;
 }
 
 .navButton.active {
-  background-color: #2196f3;
-  color: white;
+  background-color: #fffbf2;
+  border: 2px solid #fffbf2;;
+  color: black;
 }

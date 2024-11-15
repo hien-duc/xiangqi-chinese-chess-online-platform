@@ -2,22 +2,22 @@
   <defs>
     <style>
       .cls-1 {
-        stroke-width: 3px;
+        stroke-width: 1px;
         stroke-miterlimit: 10;
       }
       .cls-1, .cls-2, .cls-3 {
         fill: none;
-        stroke: rgb(102, 79, 76);
+        stroke: #181926;
       }
       .cls-4 {
-        fill: rgb(220, 224, 232);
+        fill: #fffbf2;
       }
       .cls-2 {
-        stroke-width: 3px;
+        stroke-width: 1px;
         stroke-miterlimit: 10;
       }
       .cls-3 {
-        stroke-width: 3px;
+        stroke-width: 1px;
         stroke-linejoin: bevel;
       }
     </style>

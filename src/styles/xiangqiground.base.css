@@ -51,10 +51,10 @@ cg-board square.last-move {
 
 .cg-wrap piece {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 11.11%;
-  height: 10%;
+  top: 0.25rem;
+  left: 0.3rem;
+  width: 9.25%;
+  height: 8.3142%;
   background-size: cover;
   z-index: 2;
   will-change: transform;
@@ -83,10 +83,9 @@ piece.fading {
 .cg-wrap piece svg {
   overflow: hidden;
   position: relative;
-  top: 0px;
-  left: 0px;
-  width: 100%;
-  height: 100%;
+  width: 80%;
+  height: 80%;
+  margin: 10%;
   pointer-events: none;
   z-index: 2;
   opacity: 0.6;
@@ -154,11 +153,14 @@ piece.fading {
 }
 
 .cg-wrap coords.files {
-  bottom: -25px;
+  bottom: -35px;
   left: 0;
   flex-flow: row;
+  color: #494d64;
   width: 100%;
   height: 20px;
+  font-weight: bold;
+  font-size: 1rem;
   text-transform: uppercase;
   text-align: center;
 }
@@ -184,12 +186,15 @@ piece.fading {
 }
 
 .cg-wrap coords.squares {
-  bottom: 0;
-  left: 0;
+  top: 15px;
+  color: #494d64;
+  left: -35px;
   text-transform: uppercase;
-  text-align: right;
+  text-align: left;
   flex-flow: column-reverse;
-  height: 100%;
+  gap: 34.5px;
+  font-weight: bold;
+  font-size: 0.95rem;
   width: 12.5%;
 }
 
