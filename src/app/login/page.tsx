@@ -1,7 +1,8 @@
 import { auth, signIn } from "@/auth"
 import { redirect } from "next/navigation"
-import { Github } from "lucide-react"
+import { Github, Mail } from "lucide-react"
 import "../../styles/login.css"
+import Google from "next-auth/providers/google"
 
 export default async function LoginPage() {
     const session = await auth()
@@ -28,6 +29,16 @@ export default async function LoginPage() {
                         <button type="submit" className="github-button">
                             <Github className="github-icon" />
                             Sign in with GitHub
+                        </button>
+                    </form>
+                    {/* Google Sign In */}
+                    <form action={async () => {
+                        "use server"
+                        await signIn("google", { redirectTo: "/" })
+                    }}>
+                        <button type="submit" className="google-button">
+                            <Mail className="google-icon" />
+                            Sign in with Google
                         </button>
                     </form>
 
