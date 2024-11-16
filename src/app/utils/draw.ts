@@ -56,6 +56,15 @@ export interface Drawable {
   current?: DrawCurrent;
   brushes: DrawBrushes;
   prevSvgHash: string;
+  moveIndicator?: {
+    enabled: boolean;
+    showDests: boolean;
+    brushes: {
+      normal: DrawBrush;
+      capture: DrawBrush;
+      check: DrawBrush;
+    };
+  };
 }
 
 export interface DrawCurrent {

@@ -10,16 +10,23 @@ import "./globals.css"
 const config = {
   // orientation: 'red' as const,
   // viewOnly: false,
-  // movable: {
-  //   free: false,
-  //   color: 'red',
-  //   showDests: true,
-  //   events: {
-  //     after: (orig: string, dest: string) => {
-  //       console.log(`Moved from ${orig} to ${dest}`);
-  //     }
-  //   }
-  // },
+  movable: {
+    free: true,
+    color: 'both',
+    showDests: true
+  },
+  drawable: {
+    enabled: true,
+    moveIndicator: {
+      enabled: true,
+      showDests: true,
+      brushes: {
+        normal: { key: 'normal', color: '#15781B', opacity: 0.5, lineWidth: 2 },
+        capture: { key: 'capture', color: '#882020', opacity: 0.7, lineWidth: 2 },
+        check: { key: 'check', color: '#E89B0C', opacity: 0.8, lineWidth: 2 }
+      }
+    }
+  },
   premovable: {
     enabled: true,
     showDests: true,
