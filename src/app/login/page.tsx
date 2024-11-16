@@ -3,7 +3,7 @@ import { redirect } from "next/navigation"
 import { Github } from "lucide-react"
 import "../../styles/login.css"
 
-export default async function SignInPage() {
+export default async function LoginPage() {
     const session = await auth()
 
     if (session?.user) {
@@ -11,8 +11,8 @@ export default async function SignInPage() {
     }
 
     return (
-        <div className="signin-container">
-            <div className="signin-card">
+        <div className="login-container">
+            <div className="login-card">
                 <div className="chess-pattern"></div>
 
                 <div className="content">

@@ -11,7 +11,9 @@ export const config = {
     ],
     pages: {
         signIn: "/login",
+        signOut: "/logout",
     },
+    
     trustHost: true,
 } satisfies NextAuthConfig
 
