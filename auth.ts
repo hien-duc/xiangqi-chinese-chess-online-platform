@@ -6,17 +6,20 @@ import type { NextAuthConfig, User } from "next-auth"
 import { z } from "zod"
 import bcrypt from "bcryptjs"
 import { findUserByEmail } from "./src/lib/user-service"
+import { MongoDBAdapter } from "@auth/mongodb-adapter"
+import clientPromise from "./src/lib/db/mongodb"
+import { signInSchema } from "./src/lib/zod"
 
 // Validation schema for credentials
-const signInSchema = z.object({
-    email: z.string()
-        .min(1, "Email is required")
-        .email("Invalid email"),
-    password: z.string()
-        .min(1, "Password is required")
-        .min(8, "Password must be more than 8 characters")
-        .max(32, "Password must be less than 32 characters"),
-})
+// const signInSchema = z.object({
+//     email: z.string()
+//         .min(1, "Email is required")
+//         .email("Invalid email"),
+//     password: z.string()
+//         .min(1, "Password is required")
+//         .min(8, "Password must be more than 8 characters")
+//         .max(32, "Password must be less than 32 characters"),
+// })
 
 // Type for our extended session user
 interface ExtendedUser extends User {
@@ -30,6 +33,12 @@ declare module "next-auth" {
 }
 
 export const config = {
+    adapter: MongoDBAdapter(clientPromise),
+    session: {
+        strategy: "database",
+        maxAge: 30 * 24 * 60 * 60, // 30 days
+        updateAge: 24 * 60 * 60, // 24 hours
+    },
     providers: [
         GitHub({
             clientId: process.env.GITHUB_ID,
@@ -102,28 +111,45 @@ export const config = {
         signOut: "/logout",
         error: "/error",
     },
-
     callbacks: {
-        async jwt({ token, user }) {
-            if (user) {
-                token.id = user.id ?? "";
-                token.email = user.email
-                token.name = user.name
-                //token.picture = user.image
-            }
-            return token
-        },
-        async session({ session, token }) {
+        async session({ session, user }) {
             if (session.user) {
-                //as string; Use `as` to assert type if needed
-                session.user.id = token.id
-                session.user.email = token.email!
-                session.user.name = token.name
-                //session.user.image = token.picture
+                session.user.id = user.id
+                session.user.email = user.email
+                session.user.name = user.name || null
             }
             return session
         }
     },
+    // callbacks: {
+    //     // with jwt ???
+    //     async jwt({ token, user }) {
+    //         if (user) {
+    //             token.id = user.id ?? "";
+    //             token.email = user.email
+    //             token.name = user.name
+    //             //token.picture = user.image
+    //         }
+    //         return token
+    //     },
+    //     async session({ session, token }) {
+    //         if (session.user) {
+    //             //as string; Use `as` to assert type if needed
+    //             session.user.id = token.id
+    //             session.user.email = token.email!
+    //             session.user.name = token.name
+    //             //session.user.image = token.picture
+    //         }
+    //         return session
+    //     }
+    // },
+    // wiht datbase ???
+    // callbacks: {
+    //     session({ session, user }) {
+    //         session.user.id = user.id
+    //         return session
+    //     },
+    // }
 
     trustHost: true,
 } satisfies NextAuthConfig

@@ -1,38 +1,45 @@
 "use client"
+import { AlertTriangle } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import "../../styles/error.css";
 
-import { useSearchParams } from "next/navigation"
-
-enum Error {
+enum ErrorType {
     Configuration = "Configuration",
+    AccessDenied = "AccessDenied",
+    Verification = "Verification",
+    Default = "Default",
 }
 
-const errorMap = {
-    [Error.Configuration]: (
-        <p>
-            There was a problem when trying to authenticate. Please contact us if this
-            error persists. Unique error code:{" "}
-            <code className="rounded-sm bg-slate-100 p-1 text-xs">Configuration</code>
-        </p>
-    ),
-}
+const errorMessages: Record<ErrorType, string> = {
+    [ErrorType.Configuration]:
+        "There was a problem with the server configuration. Please contact support if this error persists.",
+    [ErrorType.AccessDenied]:
+        "You do not have access to this resource. Please check your permissions.",
+    [ErrorType.Verification]:
+        "The verification process failed. This could be due to an expired token or a reused link.",
+    [ErrorType.Default]: "An unknown error occurred. Please try again later.",
+};
 
 export default function AuthErrorPage() {
-    const search = useSearchParams()
-    const error = search.get("error") as Error
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const error = searchParams.get("error") as ErrorType;
+
+    const errorMessage = errorMessages[error] || errorMessages[ErrorType.Default];
 
     return (
-        <div className="flex h-screen w-full flex-col items-center justify-center">
-            <a
-                href="#"
-                className="block max-w-sm rounded-lg border border-gray-200 bg-white p-6 text-center shadow hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700"
-            >
-                <h5 className="mb-2 flex flex-row items-center justify-center gap-2 text-xl font-bold tracking-tight text-gray-900 dark:text-white">
-                    Something went wrong
-                </h5>
-                <div className="font-normal text-gray-700 dark:text-gray-400">
-                    {errorMap[error] || "Please contact us if this error persists."}
-                </div>
-            </a>
+        <div className="error-container">
+            <div className="error-card">
+                <AlertTriangle className="error-icon" />
+                <h1>Oops! Something Went Wrong</h1>
+                <p>{errorMessage}</p>
+                <button
+                    className="error-button"
+                    onClick={() => router.push("/")} // Navigate to the homepage
+                >
+                    Go Back to Home
+                </button>
+            </div>
         </div>
-    )
+    );
 }

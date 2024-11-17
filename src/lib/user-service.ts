@@ -1,38 +1,50 @@
-import { User, IUser } from './db/models/user.model'
-import { connectToDatabase } from './db/mongodb'
-import bcrypt from 'bcryptjs'
+import { ObjectId } from "mongodb"
+import clientPromise from "./db/mongodb"
+import bcrypt from "bcryptjs"
 
-export async function findUserByEmail(email: string) {
-    try {
-        await connectToDatabase()
-        const user = await User.findOne({ email })
-        return user
-    } catch (error) {
-        console.error('Error finding user:', error)
-        throw error
-    }
+export interface User {
+    _id: ObjectId
+    email: string
+    hashedPassword: string
+    name?: string
 }
 
-export async function createUser(data: {
-    email: string,
-    password: string,
-    name?: string,
-    //image?: string
-}) {
-    try {
-        await connectToDatabase()
-        const hashedPassword = await bcrypt.hash(data.password, 12)
+export async function findUserByEmail(email: string): Promise<User | null> {
+    const client = await clientPromise
+    const collection = client.db().collection("users")
+    return collection.findOne({ email }) as Promise<User | null>
+}
 
-        const user = await User.create({
-            email: data.email,
-            hashedPassword,
-            name: data.name,
-            //image: data.image
-        })
+export async function createUser(
+    email: string, 
+    password: string, 
+    name?: string
+): Promise<User> {
+    const client = await clientPromise
+    const collection = client.db().collection("users")
+    
+    // Check if user already exists
+    const existingUser = await findUserByEmail(email)
+    if (existingUser) {
+        throw new Error("User already exists")
+    }
 
-        return user
-    } catch (error) {
-        console.error('Error creating user:', error)
-        throw error
+    // Hash password
+    const salt = await bcrypt.genSalt(10)
+    const hashedPassword = await bcrypt.hash(password, salt)
+
+    // Create new user
+    const result = await collection.insertOne({
+        email,
+        hashedPassword,
+        name,
+        createdAt: new Date()
+    })
+
+    return {
+        _id: result.insertedId,
+        email,
+        hashedPassword,
+        name
     }
 }
