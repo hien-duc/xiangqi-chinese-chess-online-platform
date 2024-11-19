@@ -10,21 +10,27 @@ import "./globals.css"
 const config = {
   // orientation: 'red' as const,
   // viewOnly: false,
+
+  // movable: {
+  //   free: true,
+  //   color: 'both',
+  //   showDests: true
+  // }, 
   movable: {
-    free: true,
-    color: 'both',
-    showDests: true
+    events: {
+      after: (orig: string, dest: string) => {
+        console.log(`Move from ${orig} to ${dest}`);
+      },
+    },
+    color: 'both', // Allow both colors to move
+    dests: undefined // Let the board calculate valid moves
   },
   drawable: {
     enabled: true,
     moveIndicator: {
-      enabled: true,
+      enabled: false,
       showDests: true,
-      brushes: {
-        normal: { key: 'normal', color: '#15781B', opacity: 0.5, lineWidth: 2 },
-        capture: { key: 'capture', color: '#882020', opacity: 0.7, lineWidth: 2 },
-        check: { key: 'check', color: '#E89B0C', opacity: 0.8, lineWidth: 2 }
-      }
+
     }
   },
   premovable: {
@@ -39,18 +45,18 @@ const config = {
       }
     }
   },
-  // draggable: {
-  //   enabled: true,
-  //   showGhost: true
-  // },
-  // highlight: {
-  //   lastMove: true,
-  //   check: true
-  // },
-  // animation: {
-  //   enabled: true,
-  //   duration: 200
-  // }
+  draggable: {
+    enabled: true,
+    showGhost: true
+  },
+  highlight: {
+    lastMove: true,
+    check: true
+  },
+  animation: {
+    enabled: true,
+    duration: 300
+  }
 };
 
 export default function Home() {
@@ -65,15 +71,15 @@ export default function Home() {
         </div>
       </div>
 
-      {/* <div className="mt-8">
+      <div className="mt-8">
         <h2 className="mb-4">Board with a FEN position</h2>
         <XiangqiBoard
           config={{
-            fen: '3k1a3/4a4/4P4/1R4C2/9/9/9/4E1r2/5p3/3AK2H1 b - - 2 25'
+            fen: 'rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR'
           }}
         />
       </div>
-      <div className="mt-8">
+      {/* <div className="mt-8">
         <h2 className="mb-4">Board with arrows and labels</h2>
         <XiangqiBoard
           config={{
@@ -90,8 +96,10 @@ export default function Home() {
               ]
             }
           }}
-        />
-      </div> */}
-    </main>
+        /> */}
+      {/* </div> */}
+    </main >
   );
 }
+
+

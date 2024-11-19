@@ -18,7 +18,12 @@
     "react": "19.0.0-rc-69d4b800-20241021",
     "react-dom": "19.0.0-rc-69d4b800-20241021",
     "shadcn-ui": "^0.2.3",
+<<<<<<< Updated upstream
     "xiangqi": "file:"
+=======
+    "xiangqi": "file:",
+    "zod": "^3.23.8"
+>>>>>>> Stashed changes
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",

@@ -10,10 +10,6 @@ export function generateMoveIndicators(
   if (!piece) return [];
 
   const shapes: DrawShape[] = [];
-  //   console.log("Piece at", orig, ":", piece);
-  //   console.log("Valid destinations:", state.movable.dests?.get(orig));
-  //   console.log("All destinations:", state.movable.dests);
-
   const dests = state.movable.dests?.get(orig) || [];
 
   // Circle on the selected piece
@@ -42,7 +38,7 @@ export function generateMoveIndicators(
 
 export function showMoveIndicators(state: State, orig: cg.Key): void {
   if (!state.drawable.moveIndicator?.enabled) return;
-
+  
   // Clear existing auto shapes
   state.drawable.autoShapes = [];
   // Generate and set new indicators

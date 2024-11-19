@@ -56,6 +56,7 @@ export interface Drawable {
   current?: DrawCurrent;
   brushes: DrawBrushes;
   prevSvgHash: string;
+
   moveIndicator?: {
     enabled: boolean;
     showDests: boolean;
@@ -106,7 +107,6 @@ export function processDraw(state: State): void {
         whitePov(state),
         state.dom.bounds()
       );
-      console.log("cur.pos: ", cur.pos);
       if (!keyAtDomPos) {
         cur.snapToValidMove = false;
       }

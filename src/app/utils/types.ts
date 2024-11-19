@@ -1,14 +1,8 @@
 import { DrawBrush } from "./draw";
 
 export type Color = (typeof colors)[number];
-export type Role =
-  | "king"
-  | "advisor"
-  | "chariot"
-  | "elephant"
-  | "horse"
-  | "pawn"
-  | "cannon";
+
+export type Role = (typeof roles)[number];
 export type File = (typeof files)[number];
 export type Rank = (typeof ranks)[number];
 export type Key = "a0" | `${File}${Rank}`;
@@ -105,7 +99,15 @@ export type Redraw = () => void;
 export type Unbind = () => void;
 export type Milliseconds = number;
 export type KHz = number;
-
+export const roles = [
+  "king",
+  "advisor",
+  "chariot",
+  "elephant",
+  "horse",
+  "pawn",
+  "cannon",
+] as const;
 export const colors = ["white", "black"] as const;
 export const files = [
   "a",
@@ -145,4 +147,27 @@ export interface MoveIndicator {
   dests: Key[];
   piece: Piece;
   brush: DrawBrush;
+}
+
+// types.ts
+export interface GameState {
+  id: string;
+  fen: string;
+  moves: Move[];
+  status: "active" | "complete";
+  winner?: "white" | "black" | "draw";
+  players: {
+    white: string;
+    black: string;
+  };
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface Move {
+  from: string;
+  to: string;
+  piece: string;
+  fen: string;
+  timestamp: Date;
 }
