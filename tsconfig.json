@@ -1,12 +1,9 @@
 {
   "compilerOptions": {
+    "baseUrl": ".",
     "allowImportingTsExtensions": true,
     "target": "ES2017",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -23,18 +20,11 @@
         "name": "next"
       }
     ],
-    "typeRoots": [
-      "./types",
-      "./node_modules/@types"
-    ],
+    "typeRoots": ["./types", "./node_modules/@types"],
     "paths": {
-      "@/*": [
-        "./src/*"
-      ],
-      "@/*": [
-        "./*"
-      ]
-    },
+      "@/*": ["./src/*"],
+      "@/*": ["./*"]
+    }
   },
   "include": [
     "next-env.d.ts",
@@ -43,7 +33,5 @@
     ".next/types/**/*.ts",
     "src/components/XiangqiBoard.jsx"
   ],
-  "exclude": [
-    "node_modules"
-  ]
+  "exclude": ["node_modules"]
 }

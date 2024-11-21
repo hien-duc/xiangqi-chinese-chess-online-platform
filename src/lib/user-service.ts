@@ -1,5 +1,5 @@
 import { ObjectId } from "mongodb"
-import clientPromise from "./db/mongodb"
+import clientPromise from "./db/db-connect"
 import bcrypt from "bcryptjs"
 
 export interface User {

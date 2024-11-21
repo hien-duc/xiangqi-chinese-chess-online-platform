@@ -1,3 +1,5 @@
+
+
 import { auth, signIn } from "@/auth"
 import { redirect, useSearchParams } from "next/navigation"
 import { Github, Mail } from "lucide-react"
@@ -7,8 +9,9 @@ import { useEffect, useState } from "react"
 
 export default async function LoginPage() {
 
-    const searchParams = useSearchParams()
-    const error = searchParams.get('error')
+    // const searchParams = useSearchParams()
+    // const error = searchParams.get('error')
+
 
     // const searchParams = useSearchParams()
     // const [error, setError] = useState<string | null>(null)
@@ -19,7 +22,7 @@ export default async function LoginPage() {
     //         setError(decodeURIComponent(errorParam))
     //     }
     // }, [searchParams])
-    
+
     const session = await auth()
 
 
@@ -56,11 +59,11 @@ export default async function LoginPage() {
 
     return (
         <div className="login-container">
-            {error && (
+            {/* {error && (
                 <div className="error-message">
                     {decodeURIComponent(error)}
                 </div>
-            )}
+            )} */}
             <div className="login-card">
                 <div className="chess-pattern"></div>
 

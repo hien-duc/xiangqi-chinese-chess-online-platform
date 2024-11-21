@@ -7,7 +7,7 @@ import { z } from "zod"
 import bcrypt from "bcryptjs"
 import { findUserByEmail } from "./src/lib/user-service"
 import { MongoDBAdapter } from "@auth/mongodb-adapter"
-import clientPromise from "./src/lib/db/mongodb"
+import clientPromise from "./src/lib/db/db-connect"
 import { signInSchema } from "./src/lib/zod"
 
 // Validation schema for credentials

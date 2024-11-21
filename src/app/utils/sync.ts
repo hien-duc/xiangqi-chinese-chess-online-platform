@@ -1,4 +1,4 @@
-import { DrawShape } from './draw';
+import { DrawShape } from "./draw";
 
 export interface SyncableShape {
   shape: DrawShape;
@@ -12,7 +12,7 @@ export type Hash = string;
 export function syncShapes(
   shapes: SyncableShape[],
   root: HTMLElement | SVGElement,
-  renderShape: (shape: SyncableShape) => HTMLElement | SVGElement,
+  renderShape: (shape: SyncableShape) => HTMLElement | SVGElement
 ): void {
   const hashesInDom = new Map(), // by hash
     toRemove: SVGElement[] = [];
@@ -20,7 +20,7 @@ export function syncShapes(
   let el: SVGElement | undefined = root.firstElementChild as SVGElement,
     elHash: Hash | null;
   while (el) {
-    elHash = el.getAttribute('cgHash') as Hash;
+    elHash = el.getAttribute("cgHash") as Hash;
     // found a shape element that's here to stay
     if (hashesInDom.has(elHash)) hashesInDom.set(elHash, true);
     // or remove it

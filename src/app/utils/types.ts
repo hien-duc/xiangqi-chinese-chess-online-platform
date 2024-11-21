@@ -146,3 +146,20 @@ export interface MoveIndicator {
   piece: Piece;
   brush: DrawBrush;
 }
+
+// types.ts
+export interface GameState {
+  id: string;
+  fen: string;
+  lastMove?: [string, string]; // [orig, dest]
+  turn: "white" | "black";
+  premove?: [string, string];
+  check?: string;
+  gameOver?: boolean;
+}
+
+export interface MoveResult {
+  success: boolean;
+  gameState?: GameState;
+  error?: string;
+}

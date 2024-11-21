@@ -2,14 +2,24 @@
 
 import React, { useEffect, useRef } from "react";
 import { Xiangqiground } from "../app/utils/xiangqiground";
+import { useGameState } from "../hooks/useGameState";
 
-const XiangqiBoard = ({ config = {}, className = "" }) => {
+const XiangqiBoard = ({ gameId, config = {}, className = "" }) => {
+  const { gameState, error, makeMove } = useGameState(gameId);
   const boardRef = useRef(null);
   const groundRef = useRef(null);
 
   useEffect(() => {
     if (boardRef.current && !groundRef.current) {
-      groundRef.current = Xiangqiground(boardRef.current, config);
+      groundRef.current = Xiangqiground(boardRef.current, {
+        ...config,
+        movable: {
+          ...config.movable,
+          events: {
+            after: (orig, dest) => makeMove(orig, dest),
+          },
+        },
+      });
     }
 
     // Cleanup function
@@ -19,7 +29,7 @@ const XiangqiBoard = ({ config = {}, className = "" }) => {
       }
       groundRef.current = null;
     };
-  }, [config]); // Re-run if config changes
+  }, [config, makeMove]); // Re-run if config or makeMove changes
 
   return (
     <div

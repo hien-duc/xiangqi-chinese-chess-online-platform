@@ -106,7 +106,7 @@ export function processDraw(state: State): void {
         whitePov(state),
         state.dom.bounds()
       );
-      console.log("cur.pos: ", cur.pos);
+      // console.log("cur.pos: ", cur.pos);
       if (!keyAtDomPos) {
         cur.snapToValidMove = false;
       }
