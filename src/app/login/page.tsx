@@ -1,7 +1,5 @@
-
-
 import { auth, signIn } from "@/auth"
-import { redirect, useSearchParams } from "next/navigation"
+import { redirect } from "next/navigation"
 import { Github, Mail } from "lucide-react"
 import "../../styles/login.css"
 import { signInSchema } from "../../lib/zod"
