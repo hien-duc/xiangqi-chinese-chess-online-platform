@@ -1,13 +1,13 @@
-import { HeadlessState } from './state.ts';
-import { setCheck, setSelected } from './board.ts';
-import { read as fenRead } from './fen.ts';
-import { DrawShape, DrawBrushes } from './draw.ts';
-import * as cg from './types.ts';
+import { HeadlessState } from "./state.ts";
+import { setCheck, setSelected } from "./board.ts";
+import { read as fenRead } from "./fen.ts";
+import { DrawShape, DrawBrushes } from "./draw.ts";
+import * as cg from "./types.ts";
 
 export interface Config {
   fen?: cg.FEN; // chess position in Forsyth notation
-  orientation?: cg.Color; // board orientation. white | black
-  turnColor?: cg.Color; // turn to play. white | black
+  orientation?: cg.Color; // board orientation. red | black
+  turnColor?: cg.Color; // turn to play. red | black
   check?: cg.Color | boolean; // true for current color, false to unset
   lastMove?: cg.Key[]; // squares part of the last move ["c3", "c4"]
   selected?: cg.Key; // square currently selected "a1"
@@ -30,12 +30,16 @@ export interface Config {
   };
   movable?: {
     free?: boolean; // all moves are valid - board editor
-    color?: cg.Color | 'both'; // color that can move. white | black | both | undefined
+    color?: cg.Color | "both"; // color that can move. red | black | both | undefined
     dests?: cg.Dests; // valid moves. {"a2" ["a3" "a4"] "b1" ["a3" "c3"]}
     showDests?: boolean; // whether to add the move-dest class on squares
     events?: {
       after?: (orig: cg.Key, dest: cg.Key, metadata: cg.MoveMetadata) => void; // called after the move has been played
-      afterNewPiece?: (role: cg.Role, key: cg.Key, metadata: cg.MoveMetadata) => void; // called after a new piece is dropped on the board
+      afterNewPiece?: (
+        role: cg.Role,
+        key: cg.Key,
+        metadata: cg.MoveMetadata
+      ) => void; // called after a new piece is dropped on the board
     };
   };
   premovable?: {
@@ -44,7 +48,11 @@ export interface Config {
     dests?: cg.Key[]; // premove destinations for the current selection
     customDests?: cg.Dests; // use custom valid premoves. {"a2" ["a3" "a4"] "b1" ["a3" "c3"]}
     events?: {
-      set?: (orig: cg.Key, dest: cg.Key, metadata?: cg.SetPremoveMetadata) => void; // called after the premove has been set
+      set?: (
+        orig: cg.Key,
+        dest: cg.Key,
+        metadata?: cg.SetPremoveMetadata
+      ) => void; // called after the premove has been set
       unset?: () => void; // called after the premove has been unset
     };
   };
@@ -69,7 +77,7 @@ export interface Config {
   events?: {
     change?: () => void; // called after the situation changes on the board
     // called after a piece has been moved.
-    // capturedPiece is undefined or like {color: 'white'; 'role': 'advisor'}
+    // capturedPiece is undefined or like {color: 'red'; 'role': 'advisor'}
     move?: (orig: cg.Key, dest: cg.Key, capturedPiece?: cg.Piece) => void;
     dropNewPiece?: (piece: cg.Piece, key: cg.Key) => void;
     select?: (key: cg.Key) => void; // called when a square is selected
@@ -111,8 +119,8 @@ export function configure(state: HeadlessState, config: Config): void {
   }
 
   // apply config values that could be undefined yet meaningful
-  if ('check' in config) setCheck(state, config.check || false);
-  if ('lastMove' in config && !config.lastMove) state.lastMove = undefined;
+  if ("check" in config) setCheck(state, config.check || false);
+  if ("lastMove" in config && !config.lastMove) state.lastMove = undefined;
   // in case of ZH drop last move, there's a single square.
   // if the previous last move had two squares,
   // the merge algorithm will incorrectly keep the second square.
@@ -125,18 +133,18 @@ export function configure(state: HeadlessState, config: Config): void {
 
   // TODO: WHAT IS THIS? for castling?
   if (state.movable.dests) {
-    const rank = state.movable.color === 'white' ? '1' : '8',
-      kingStartPos = ('e' + rank) as cg.Key,
+    const rank = state.movable.color === "red" ? "1" : "8",
+      kingStartPos = ("e" + rank) as cg.Key,
       dests = state.movable.dests.get(kingStartPos),
       king = state.pieces.get(kingStartPos);
-    if (!dests || !king || king.role !== 'king') return;
+    if (!dests || !king || king.role !== "king") return;
     state.movable.dests.set(
       kingStartPos,
       dests.filter(
-        d =>
-          !(d === 'a' + rank && dests.includes(('c' + rank) as cg.Key)) &&
-          !(d === 'h' + rank && dests.includes(('g' + rank) as cg.Key)),
-      ),
+        (d) =>
+          !(d === "a" + rank && dests.includes(("c" + rank) as cg.Key)) &&
+          !(d === "h" + rank && dests.includes(("g" + rank) as cg.Key))
+      )
     );
   }
 }
@@ -156,7 +164,7 @@ function deepMerge(base: any, extend: any): void {
 }
 
 function isPlainObject(o: unknown): boolean {
-  if (typeof o !== 'object' || o === null) return false;
+  if (typeof o !== "object" || o === null) return false;
   const proto = Object.getPrototypeOf(o);
   return proto === Object.prototype || proto === null;
 }

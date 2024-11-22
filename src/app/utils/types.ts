@@ -4,11 +4,11 @@ export type Color = (typeof colors)[number];
 export type Role =
   | "king"
   | "advisor"
-  | "chariot"
-  | "elephant"
-  | "horse"
-  | "pawn"
-  | "cannon";
+  | "bishop"
+  | "rook"
+  | "cannon"
+  | "knight"
+  | "pawn";
 export type File = (typeof files)[number];
 export type Rank = (typeof ranks)[number];
 export type Key = "a0" | `${File}${Rank}`;
@@ -106,21 +106,10 @@ export type Unbind = () => void;
 export type Milliseconds = number;
 export type KHz = number;
 
-export const colors = ["white", "black"] as const;
-export const files = [
-  "a",
-  "b",
-  "c",
-  "d",
-  "e",
-  "f",
-  "g",
-  "h",
-  "i",
-  "j",
-] as const;
-export const fileNums = ["1", "2", "3", "4", "5", "6", "7", "8", "9"] as const;
+export const colors = ["red", "black"] as const;
+export const files = ["a", "b", "c", "d", "e", "f", "g", "h", "i"] as const;
 export const ranks = [
+  "0",
   "1",
   "2",
   "3",
@@ -130,7 +119,18 @@ export const ranks = [
   "7",
   "8",
   "9",
-  "10",
+] as const;
+export const fileNums = [
+  "0",
+  "1",
+  "2",
+  "3",
+  "4",
+  "5",
+  "6",
+  "7",
+  "8",
+  "9",
 ] as const;
 
 export type BrushColor = "green" | "red" | "blue" | "yellow";
@@ -147,19 +147,8 @@ export interface MoveIndicator {
   brush: DrawBrush;
 }
 
-// types.ts
-export interface GameState {
-  id: string;
-  fen: string;
-  lastMove?: [string, string]; // [orig, dest]
-  turn: "white" | "black";
-  premove?: [string, string];
-  check?: string;
-  gameOver?: boolean;
-}
-
-export interface MoveResult {
-  success: boolean;
-  gameState?: GameState;
-  error?: string;
-}
+// export interface MoveResult {
+//   success: boolean;
+//   gameState?: GameState;
+//   error?: string;
+// }

@@ -1,8 +1,8 @@
-import { State } from './state.ts';
-import * as cg from './types.ts';
-import * as board from './board.ts';
-import * as util from './util.ts';
-import { cancel as dragCancel } from './drag.ts';
+import { State } from "./state.ts";
+import * as cg from "./types.ts";
+import * as board from "./board.ts";
+import * as util from "./util.ts";
+import { cancel as dragCancel } from "./drag.ts";
 
 export function setDropMode(s: State, piece?: cg.Piece): void {
   s.dropmode = {
@@ -27,10 +27,12 @@ export function drop(s: State, e: cg.MouchEvent): void {
   const piece = s.dropmode.piece;
 
   if (piece) {
-    s.pieces.set('a0', piece);
+    s.pieces.set("a0", piece);
     const position = util.eventPosition(e);
-    const dest = position && board.getKeyAtDomPos(position, board.whitePov(s), s.dom.bounds());
-    if (dest) board.dropNewPiece(s, 'a0', dest);
+    const dest =
+      position &&
+      board.getKeyAtDomPos(position, board.redPov(s), s.dom.bounds());
+    if (dest) board.dropNewPiece(s, "a0", dest);
   }
   s.dom.redraw();
 }

@@ -4,7 +4,7 @@ import {
   cancelMove,
   getKeyAtDomPos,
   getSnappedKeyAtDomPos,
-  whitePov,
+  redPov,
 } from "./board.ts";
 import { eventPosition, isRightButton } from "./util.ts";
 import * as cg from "./types.ts";
@@ -85,7 +85,7 @@ export function start(state: State, e: cg.MouchEvent): void {
   e.preventDefault();
   e.ctrlKey ? unselect(state) : cancelMove(state);
   const pos = eventPosition(e)!,
-    orig = getKeyAtDomPos(pos, whitePov(state), state.dom.bounds());
+    orig = getKeyAtDomPos(pos, redPov(state), state.dom.bounds());
   if (!orig) return;
   state.drawable.current = {
     orig,
@@ -103,7 +103,7 @@ export function processDraw(state: State): void {
     if (cur) {
       const keyAtDomPos = getKeyAtDomPos(
         cur.pos,
-        whitePov(state),
+        redPov(state),
         state.dom.bounds()
       );
       // console.log("cur.pos: ", cur.pos);
@@ -114,7 +114,7 @@ export function processDraw(state: State): void {
         ? getSnappedKeyAtDomPos(
             cur.orig,
             cur.pos,
-            whitePov(state),
+            redPov(state),
             state.dom.bounds()
           )
         : keyAtDomPos;

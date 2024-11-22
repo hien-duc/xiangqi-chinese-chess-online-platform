@@ -1,15 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectToDatabase } from "../../../../lib/db/db-connect";
-import GameModel from "../../../../lib/db/models/game.model";
-import PlayerModel from "../../../../lib/db/models/player.model";
+import { connectToDatabase } from "@/src/lib/db/db-connect";
+import GameModel from "@/src/lib/db/models/gameState";
+// import PlayerModel from "@/src/lib/db/models/player.model";
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
     await connectToDatabase();
-    const { gameId, orig, dest, fen, turn, playerId } = await req.json();
-
+    const { id, orig, dest, fen, turn, playerId } = await req.json();
     // Get current game
-    const game = await GameModel.findById(gameId);
+    const game = await GameModel.findById(id);
     if (!game) {
       return NextResponse.json({ error: "Game not found" }, { status: 404 });
     }
@@ -18,13 +17,13 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const isRed = turn === "red";
     const currentPlayerId = isRed ? game.players.red.id : game.players.black.id;
 
-    if (currentPlayerId !== playerId) {
+    if (currentPlayerId != playerId) {
       return NextResponse.json({ error: "Not your turn" }, { status: 400 });
     }
 
     // Update game state
     const updatedGame = await GameModel.findByIdAndUpdate(
-      gameId,
+      id,
       {
         $set: {
           fen,

@@ -383,13 +383,13 @@ export function stop(state: HeadlessState): void {
 
 export function getKeyAtDomPos(
   pos: cg.NumberPair,
-  asWhite: boolean,
+  asRed: boolean,
   bounds: DOMRectReadOnly
 ): cg.Key | undefined {
   let file = Math.floor((9 * (pos[0] - bounds.left)) / bounds.width);
-  if (!asWhite) file = 8 - file;
+  if (!asRed) file = 8 - file;
   let rank = 9 - Math.floor((10 * (pos[1] - bounds.top)) / bounds.height);
-  if (!asWhite) rank = 9 - rank;
+  if (!asRed) rank = 9 - rank;
   return file >= 0 && file < 9 && rank >= 0 && rank < 10
     ? pos2key([file, rank])
     : undefined;
@@ -398,7 +398,7 @@ export function getKeyAtDomPos(
 export function getSnappedKeyAtDomPos(
   orig: cg.Key,
   pos: cg.NumberPair,
-  asWhite: boolean,
+  asRed: boolean,
   bounds: DOMRectReadOnly
 ): cg.Key | undefined {
   const origPos = key2pos(orig);
@@ -409,7 +409,7 @@ export function getSnappedKeyAtDomPos(
       horse(origPos[0], origPos[1], pos2[0], pos2[1])
   );
   const validSnapCenters = validSnapPos.map((pos2) =>
-    computeSquareCenter(pos2key(pos2), asWhite, bounds)
+    computeSquareCenter(pos2key(pos2), asRed, bounds)
   );
   const validSnapDistances = validSnapCenters.map((pos2) =>
     distanceSq(pos, pos2)
@@ -421,5 +421,4 @@ export function getSnappedKeyAtDomPos(
   return pos2key(validSnapPos[closestSnapIndex]);
 }
 
-export const whitePov = (s: HeadlessState): boolean =>
-  s.orientation === "white";
+export const redPov = (s: HeadlessState): boolean => s.orientation === "red";

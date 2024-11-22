@@ -9,8 +9,8 @@ function isBlocked(pieces: cg.Pieces, x: number, y: number): boolean {
 // Pawn (soldier) movement
 function pawn(color: cg.Color): Mobility {
   return (x1, y1, x2, y2) => {
-    const forward = color === "white" ? 1 : -1;
-    const crossed = color === "white" ? y1 > 4 : y1 < 5;
+    const forward = color === "red" ? 1 : -1;
+    const crossed = color === "red" ? y1 > 4 : y1 < 5;
 
     if (crossed) {
       // Can move sideways after crossing river
@@ -110,7 +110,7 @@ export function getValidMoves(pieces: cg.Pieces, key: cg.Key): cg.Key[] {
       ? (x1, y1, x2, y2) => elephant(pieces, x1, y1, x2, y2)
       : piece.role === "horse"
       ? horse
-      : piece.role === "chariot"
+      : piece.role === "rook"
       ? chariot
       : piece.role === "cannon"
       ? (x1, y1, x2, y2) => cannon(pieces, x1, y1, x2, y2)

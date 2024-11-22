@@ -1,6 +1,6 @@
 import { HeadlessState } from "./state.ts";
 import { setVisible, createEl } from "./util.ts";
-import { colors, files, fileNums, Elements } from "./types.ts";
+import { colors, files, fileNums, Elements, ranks } from "./types.ts";
 import {
   createElement as createSVG,
   setAttributes,
@@ -71,10 +71,9 @@ export function renderWrap(element: HTMLElement, s: HeadlessState): Elements {
   }
 
   if (s.coordinates) {
-    container.appendChild(renderCoords(fileNums, "files"));
-    container.appendChild(renderCoords(files, "squares"));
+    container.appendChild(renderCoords(files, "files"));
+    container.appendChild(renderCoords(fileNums, "squares"));
   }
-
 
   let ghost: HTMLElement | undefined;
   if (s.draggable.enabled && s.draggable.showGhost) {

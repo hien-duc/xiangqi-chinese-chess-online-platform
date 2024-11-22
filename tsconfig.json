@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "baseUrl": ".",
+    "baseUrl": "./",
     "allowImportingTsExtensions": true,
     "target": "ES2017",
     "lib": ["dom", "dom.iterable", "esnext"],
@@ -22,7 +22,7 @@
     ],
     "typeRoots": ["./types", "./node_modules/@types"],
     "paths": {
-      "@/*": ["./src/*"],
+      // "@/*": ["./src/*"],
       "@/*": ["./*"]
     }
   },

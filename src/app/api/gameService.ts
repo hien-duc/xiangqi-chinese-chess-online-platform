@@ -1,8 +1,8 @@
 import { nanoid } from "nanoid";
-import { connectToDatabase } from "../../lib/db/db-connect";
-import GameModel, { IGame } from "../../lib/db/models/game.model";
-import GuestModel from "../../lib/db/models/guest.model";
-import { GameState } from "../utils/types";
+import { connectToDatabase } from "@/src/lib/db/db-connect";
+import GameModel, { IGameState } from "@/src/lib/db/models/gameState";
+import GuestModel from "@/src/lib/db/models/guest.model";
+import { GameState } from "@/src/app/utils/types";
 
 export async function updateGameState(
   gameId: string,

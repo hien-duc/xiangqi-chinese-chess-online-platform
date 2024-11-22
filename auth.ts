@@ -143,7 +143,7 @@ export const config = {
     //         return session
     //     }
     // },
-    // wiht datbase ???
+    // with datbase ???
     // callbacks: {
     //     session({ session, user }) {
     //         session.user.id = user.id

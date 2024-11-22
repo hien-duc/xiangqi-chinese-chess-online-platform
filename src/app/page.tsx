@@ -3,10 +3,8 @@ import styles from "../styles/Page.module.css";
 import LeftPanel from "../components/LeftPanel";
 import RightPanel from "../components/RightPanel";
 import XiangqiBoard from "../components/XiangqiBoard";
-import { useGameContext } from '../context/GameContext';
 import '../styles/xiangqiground.css';
 import "./globals.css";
-import gameModel from "../lib/db/models/game.model";
 
 const config = {
   movable: {
@@ -41,14 +39,13 @@ const config = {
 };
 
 export default function Home() {
-  const { gameId } = useGameContext(); // Get gameId from context
-  console.log(gameId);
+
   return (
     <main className="p-8">
       <div className={styles["container"]}>
         <div className={styles["game-container"]}>
           <LeftPanel />
-          <XiangqiBoard gameId={gameId} config={config} />
+          <XiangqiBoard config={config} />
           <RightPanel />
         </div>
       </div>

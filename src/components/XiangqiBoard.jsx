@@ -1,11 +1,9 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
-import { Xiangqiground } from "../app/utils/xiangqiground";
-import { useGameState } from "../hooks/useGameState";
+import { Xiangqiground } from "@/src/app/utils/xiangqiground";
 
-const XiangqiBoard = ({ gameId, config = {}, className = "" }) => {
-  const { gameState, error, makeMove } = useGameState(gameId);
+const XiangqiBoard = ({ config = {}, className = "" }) => {
   const boardRef = useRef(null);
   const groundRef = useRef(null);
 
@@ -29,7 +27,7 @@ const XiangqiBoard = ({ gameId, config = {}, className = "" }) => {
       }
       groundRef.current = null;
     };
-  }, [config, makeMove]); // Re-run if config or makeMove changes
+  }, [config]); // Re-run if config or makeMove changes
 
   return (
     <div

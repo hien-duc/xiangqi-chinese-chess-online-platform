@@ -392,7 +392,7 @@ function renderLabel(
 }
 
 function orient(pos: cg.Pos, color: cg.Color): cg.Pos {
-  return color === "white" ? pos : [7 - pos[0], 7 - pos[1]];
+  return color === "red" ? pos : [7 - pos[0], 7 - pos[1]];
 }
 
 function isShort(dest: cg.Key | undefined, dests: ArrowDests) {

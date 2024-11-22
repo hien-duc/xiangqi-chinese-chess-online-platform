@@ -1,15 +1,20 @@
-import { State } from './state.ts';
-import { key2pos, createEl, posToTranslate as posToTranslateFromBounds, translate } from './util.ts';
-import { whitePov } from './board.ts';
-import { AnimCurrent, AnimVectors, AnimVector, AnimFadings } from './anim.ts';
-import { DragCurrent } from './drag.ts';
-import * as cg from './types.ts';
+import { State } from "./state.ts";
+import {
+  key2pos,
+  createEl,
+  posToTranslate as posToTranslateFromBounds,
+  translate,
+} from "./util.ts";
+import { redPov } from "./board.ts";
+import { AnimCurrent, AnimVectors, AnimVector, AnimFadings } from "./anim.ts";
+import { DragCurrent } from "./drag.ts";
+import * as cg from "./types.ts";
 
 type PieceName = string; // `$color $role`
 
 // ported from https://github.com/lichess-org/lichobile/blob/master/src/chessground/render.ts
 export function render(s: State): void {
-  const asWhite: boolean = whitePov(s),
+  const asRed: boolean = redPov(s),
     posToTranslate = posToTranslateFromBounds(s.dom.bounds()),
     boardEl: HTMLElement = s.dom.elements.board,
     pieces: cg.Pieces = s.pieces,
@@ -44,14 +49,14 @@ export function render(s: State): void {
       elPieceName = el.cgPiece;
       // if piece not being dragged anymore, remove dragging style
       if (el.cgDragging && (!curDrag || curDrag.orig !== k)) {
-        el.classList.remove('dragging');
-        translate(el, posToTranslate(key2pos(k), asWhite));
+        el.classList.remove("dragging");
+        translate(el, posToTranslate(key2pos(k), asRed));
         el.cgDragging = false;
       }
       // remove fading class if it still remains
       if (!fading && el.cgFading) {
         el.cgFading = false;
-        el.classList.remove('fading');
+        el.classList.remove("fading");
       }
       // there is now a piece at this dom key
       if (pieceAtKey) {
@@ -61,22 +66,25 @@ export function render(s: State): void {
           const pos = key2pos(k);
           pos[0] += anim[2];
           pos[1] += anim[3];
-          el.classList.add('anim');
-          translate(el, posToTranslate(pos, asWhite));
+          el.classList.add("anim");
+          translate(el, posToTranslate(pos, asRed));
         } else if (el.cgAnimating) {
           el.cgAnimating = false;
-          el.classList.remove('anim');
-          translate(el, posToTranslate(key2pos(k), asWhite));
-          if (s.addPieceZIndex) el.style.zIndex = posZIndex(key2pos(k), asWhite);
+          el.classList.remove("anim");
+          translate(el, posToTranslate(key2pos(k), asRed));
+          if (s.addPieceZIndex) el.style.zIndex = posZIndex(key2pos(k), asRed);
         }
         // same piece: flag as same
-        if (elPieceName === pieceNameOf(pieceAtKey) && (!fading || !el.cgFading)) {
+        if (
+          elPieceName === pieceNameOf(pieceAtKey) &&
+          (!fading || !el.cgFading)
+        ) {
           samePieces.add(k);
         }
         // different piece: flag as moved unless it is a fading piece
         else {
           if (fading && elPieceName === pieceNameOf(fading)) {
-            el.classList.add('fading');
+            el.classList.add("fading");
             el.cgFading = true;
           } else {
             appendValue(movedPieces, elPieceName, el);
@@ -101,12 +109,12 @@ export function render(s: State): void {
     if (!sameSquares.has(sk)) {
       sMvdset = movedSquares.get(className);
       sMvd = sMvdset && sMvdset.pop();
-      const translation = posToTranslate(key2pos(sk), asWhite);
+      const translation = posToTranslate(key2pos(sk), asRed);
       if (sMvd) {
         sMvd.cgKey = sk;
         translate(sMvd, translation);
       } else {
-        const squareNode = createEl('square', className) as cg.SquareNode;
+        const squareNode = createEl("square", className) as cg.SquareNode;
         squareNode.cgKey = sk;
         translate(squareNode, translation);
         boardEl.insertBefore(squareNode, boardEl.firstChild);
@@ -126,24 +134,24 @@ export function render(s: State): void {
         // apply dom changes
         pMvd.cgKey = k;
         if (pMvd.cgFading) {
-          pMvd.classList.remove('fading');
+          pMvd.classList.remove("fading");
           pMvd.cgFading = false;
         }
         const pos = key2pos(k);
-        if (s.addPieceZIndex) pMvd.style.zIndex = posZIndex(pos, asWhite);
+        if (s.addPieceZIndex) pMvd.style.zIndex = posZIndex(pos, asRed);
         if (anim) {
           pMvd.cgAnimating = true;
-          pMvd.classList.add('anim');
+          pMvd.classList.add("anim");
           pos[0] += anim[2];
           pos[1] += anim[3];
         }
-        translate(pMvd, posToTranslate(pos, asWhite));
+        translate(pMvd, posToTranslate(pos, asRed));
       }
       // no piece in moved obj: insert the new piece
       // assumes the new piece is not being dragged
       else {
         const pieceName = pieceNameOf(p),
-          pieceNode = createEl('piece', pieceName) as cg.PieceNode,
+          pieceNode = createEl("piece", pieceName) as cg.PieceNode,
           pos = key2pos(k);
 
         pieceNode.cgPiece = pieceName;
@@ -153,9 +161,9 @@ export function render(s: State): void {
           pos[0] += anim[2];
           pos[1] += anim[3];
         }
-        translate(pieceNode, posToTranslate(pos, asWhite));
+        translate(pieceNode, posToTranslate(pos, asRed));
 
-        if (s.addPieceZIndex) pieceNode.style.zIndex = posZIndex(pos, asWhite);
+        if (s.addPieceZIndex) pieceNode.style.zIndex = posZIndex(pos, asRed);
 
         boardEl.appendChild(pieceNode);
       }
@@ -168,12 +176,15 @@ export function render(s: State): void {
 }
 
 export function renderResized(s: State): void {
-  const asWhite: boolean = whitePov(s),
+  const asRed: boolean = redPov(s),
     posToTranslate = posToTranslateFromBounds(s.dom.bounds());
-  let el = s.dom.elements.board.firstChild as cg.PieceNode | cg.SquareNode | undefined;
+  let el = s.dom.elements.board.firstChild as
+    | cg.PieceNode
+    | cg.SquareNode
+    | undefined;
   while (el) {
     if ((isPieceNode(el) && !el.cgAnimating) || isSquareNode(el)) {
-      translate(el, posToTranslate(key2pos(el.cgKey), asWhite));
+      translate(el, posToTranslate(key2pos(el.cgKey), asRed));
     }
     el = el.nextSibling as cg.PieceNode | cg.SquareNode | undefined;
   }
@@ -183,27 +194,31 @@ export function updateBounds(s: State): void {
   const bounds = s.dom.elements.wrap.getBoundingClientRect();
   const container = s.dom.elements.container;
   const ratio = 10 / 9; //bounds.height / bounds.width;
-  const width = (Math.floor((bounds.width * window.devicePixelRatio) / 9) * 9) / window.devicePixelRatio;
+  const width =
+    (Math.floor((bounds.width * window.devicePixelRatio) / 9) * 9) /
+    window.devicePixelRatio;
   const height = width * ratio;
-  container.style.width = width + 'px';
-  container.style.height = height + 'px';
+  container.style.width = width + "px";
+  container.style.height = height + "px";
   s.dom.bounds.clear();
 
-  s.addDimensionsCssVarsTo?.style.setProperty('---cg-width', width + 'px');
-  s.addDimensionsCssVarsTo?.style.setProperty('---cg-height', height + 'px');
+  s.addDimensionsCssVarsTo?.style.setProperty("---cg-width", width + "px");
+  s.addDimensionsCssVarsTo?.style.setProperty("---cg-height", height + "px");
 }
 
-const isPieceNode = (el: cg.PieceNode | cg.SquareNode): el is cg.PieceNode => el.tagName === 'PIECE';
-const isSquareNode = (el: cg.PieceNode | cg.SquareNode): el is cg.SquareNode => el.tagName === 'SQUARE';
+const isPieceNode = (el: cg.PieceNode | cg.SquareNode): el is cg.PieceNode =>
+  el.tagName === "PIECE";
+const isSquareNode = (el: cg.PieceNode | cg.SquareNode): el is cg.SquareNode =>
+  el.tagName === "SQUARE";
 
 function removeNodes(s: State, nodes: HTMLElement[]): void {
   for (const node of nodes) s.dom.elements.board.removeChild(node);
 }
 
-function posZIndex(pos: cg.Pos, asWhite: boolean): string {
+function posZIndex(pos: cg.Pos, asRed: boolean): string {
   const minZ = 3;
   const rank = pos[1];
-  const z = asWhite ? minZ + 9 - rank : minZ + rank;
+  const z = asRed ? minZ + 9 - rank : minZ + rank;
 
   return `${z}`;
 }
@@ -214,30 +229,37 @@ function computeSquareClasses(s: State): cg.SquareClasses {
   const squares: cg.SquareClasses = new Map();
   if (s.lastMove && s.highlight.lastMove)
     for (const k of s.lastMove) {
-      addSquare(squares, k, 'last-move');
+      addSquare(squares, k, "last-move");
     }
-  if (s.check && s.highlight.check) addSquare(squares, s.check, 'check');
+  if (s.check && s.highlight.check) addSquare(squares, s.check, "check");
   if (s.selected) {
-    addSquare(squares, s.selected, 'selected');
+    addSquare(squares, s.selected, "selected");
     if (s.movable.showDests) {
       const dests = s.movable.dests?.get(s.selected);
       if (dests)
         for (const k of dests) {
-          addSquare(squares, k, 'move-dest' + (s.pieces.has(k) ? ' oc' : ''));
+          addSquare(squares, k, "move-dest" + (s.pieces.has(k) ? " oc" : ""));
         }
-      const pDests = s.premovable.customDests?.get(s.selected) ?? s.premovable.dests;
+      const pDests =
+        s.premovable.customDests?.get(s.selected) ?? s.premovable.dests;
       if (pDests)
         for (const k of pDests) {
-          addSquare(squares, k, 'premove-dest' + (s.pieces.has(k) ? ' oc' : ''));
+          addSquare(
+            squares,
+            k,
+            "premove-dest" + (s.pieces.has(k) ? " oc" : "")
+          );
         }
     }
   }
   const premove = s.premovable.current;
-  if (premove) for (const k of premove) addSquare(squares, k, 'current-premove');
-  else if (s.predroppable.current) addSquare(squares, s.predroppable.current.key, 'current-premove');
+  if (premove)
+    for (const k of premove) addSquare(squares, k, "current-premove");
+  else if (s.predroppable.current)
+    addSquare(squares, s.predroppable.current.key, "current-premove");
 
   const o = s.exploding;
-  if (o) for (const k of o.keys) addSquare(squares, k, 'exploding' + o.stage);
+  if (o) for (const k of o.keys) addSquare(squares, k, "exploding" + o.stage);
 
   if (s.highlight.custom) {
     s.highlight.custom.forEach((v: string, k: cg.Key) => {
@@ -248,7 +270,11 @@ function computeSquareClasses(s: State): cg.SquareClasses {
   return squares;
 }
 
-function addSquare(squares: cg.SquareClasses, key: cg.Key, klass: string): void {
+function addSquare(
+  squares: cg.SquareClasses,
+  key: cg.Key,
+  klass: string
+): void {
   const classes = squares.get(key);
   if (classes) squares.set(key, `${classes} ${klass}`);
   else squares.set(key, klass);
