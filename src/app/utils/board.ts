@@ -7,7 +7,7 @@ import {
   allPos,
   computeSquareCenter,
 } from "./util.ts";
-import { premove, chariot, elephant, horse } from "./premove.ts";
+import { premove, rook, bishop, knight } from "./premove.ts";
 import * as cg from "./types.ts";
 import { showMoveIndicators } from "./moveIndicator.ts";
 import { getValidMoves } from "./moves";
@@ -404,9 +404,9 @@ export function getSnappedKeyAtDomPos(
   const origPos = key2pos(orig);
   const validSnapPos = allPos.filter(
     (pos2) =>
-      elephant(origPos[0], origPos[1], pos2[0], pos2[1]) ||
-      chariot(origPos[0], origPos[1], pos2[0], pos2[1]) ||
-      horse(origPos[0], origPos[1], pos2[0], pos2[1])
+      bishop(origPos[0], origPos[1], pos2[0], pos2[1]) ||
+      rook(origPos[0], origPos[1], pos2[0], pos2[1]) ||
+      knight(origPos[0], origPos[1], pos2[0], pos2[1])
   );
   const validSnapCenters = validSnapPos.map((pos2) =>
     computeSquareCenter(pos2key(pos2), asRed, bounds)

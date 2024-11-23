@@ -31,7 +31,8 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "src/components/XiangqiBoard.jsx"
+    "src/components/XiangqiBoard.tsx",
+    "src/app/layout.jsx"
   ],
   "exclude": ["node_modules"]
 }

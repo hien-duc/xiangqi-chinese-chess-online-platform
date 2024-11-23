@@ -73,8 +73,8 @@ const GameSchema = new Schema<IGameState>(
     },
     turn: {
       type: String,
-      enum: ["red", "black"], 
-      required: true, 
+      enum: ["red", "black"],
+      required: true,
     },
     premove: {
       type: [String],

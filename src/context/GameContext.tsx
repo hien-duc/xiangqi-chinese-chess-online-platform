@@ -1,19 +1,67 @@
-"use client"
+// "use client"
 
-import React, { createContext, useContext, useState } from 'react';
+// import React, { createContext, useContext, useState, useEffect } from 'react'
+// import { IGameState } from '../lib/db/models/gameState'
 
-const GameContext = createContext(null);
+// interface GameContextType {
+//     gameId: string
+//     setGameId: (id: string) => void
+//     gameData: IGameState
+//     isLoading: boolean
+//     error: string | null
+// }
 
-export const GameProvider = ({ children }) => {
-    const [gameId, setGameId] = useState("55153a8014829a865bbf700d"); // Set initial game ID or fetch it from an API
+// const GameContext = createContext<GameContextType | null>(null)
 
-    return (
-        <GameContext.Provider value={{ gameId, setGameId }}>
-            {children}
-        </GameContext.Provider>
-    );
-};
+// export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
+//     children
+// }) => {
+//     const [gameId, setGameId] = useState("55153a8014829a865bbf700d")
+//     const [gameData, setGameData] = useState<IGameState | null>(null)
+//     const [isLoading, setIsLoading] = useState(false)
+//     const [error, setError] = useState<string | null>(null)
 
-export const useGameContext = () => {
-    return useContext(GameContext);
-};
+//     useEffect(() => {
+//         const fetchGame = async () => {
+//             if (!gameId) return
+
+//             setIsLoading(true)
+//             try {
+//                 const response = await fetch(`/api/game/${gameId}`)
+//                 if (!response.ok) {
+//                     throw new Error('Failed to fetch game')
+//                 }
+//                 const data = await response.json()
+//                 setGameData(data)
+//             } catch (err) {
+//                 setError(err instanceof Error ? err.message : 'An error occurred')
+//             } finally {
+//                 setIsLoading(false)
+//             }
+//         }
+
+//         fetchGame()
+//     }, [gameId])
+
+//     return (
+//         <GameContext.Provider
+//             value={{
+//                 gameId,
+//                 setGameId,
+//                 gameData,
+//                 isLoading,
+//                 error
+//             }}
+//         >
+//             {children}
+//         </GameContext.Provider>
+//     )
+// }
+
+// export const useGameContext = () => {
+//     const context = useContext(GameContext)
+//     if (!context) {
+//         throw new Error('useGameContext must be used within a GameProvider')
+//     }
+//     return context
+// }

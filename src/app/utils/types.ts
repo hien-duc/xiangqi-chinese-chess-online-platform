@@ -137,9 +137,6 @@ export type BrushColor = "green" | "red" | "blue" | "yellow";
 
 export type SquareClasses = Map<Key, string>;
 
-//home made
-// Add to types.ts
-
 export interface MoveIndicator {
   orig: Key;
   dests: Key[];
@@ -147,8 +144,38 @@ export interface MoveIndicator {
   brush: DrawBrush;
 }
 
-// export interface MoveResult {
-//   success: boolean;
-//   gameState?: GameState;
-//   error?: string;
-// }
+// Define types for the config and ground instance
+export interface XiangqigroundConfig {
+  movable: {
+    free: boolean;
+    color: "both" | "red" | "black";
+    showDests: boolean;
+    events: {
+      after: (orig: string, dest: string) => void;
+    };
+  };
+  fen: string;
+  drawable: {
+    enabled: boolean;
+    moveIndicator: {
+      enabled: boolean;
+      showDests: boolean;
+      brushes: {
+        [key: string]: {
+          key: string;
+          color: string;
+          opacity: number;
+          lineWidth: number;
+        };
+      };
+    };
+  };
+  premovable: {
+    enabled: boolean;
+    showDests: boolean;
+    events: {
+      set: (orig: string, dest: string) => void;
+      unset: () => void;
+    };
+  };
+}

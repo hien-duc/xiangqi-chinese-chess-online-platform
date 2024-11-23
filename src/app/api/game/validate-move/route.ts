@@ -2,13 +2,27 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/src/lib/db/db-connect";
 import GameModel from "@/src/lib/db/models/gameState";
 import { getValidMoves } from "@/src/app/utils/moves";
-import { readXiangqi } from "@/src/app/utils/fen";
+import { readXiangqi, write } from "@/src/app/utils/fen";
+import { Piece, Key } from "@/src/app/utils/types";
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
     await connectToDatabase();
     const { id, orig, dest, fen, turn, playerId } = await req.json();
 
+    if (!orig || !dest || !fen) {
+      return NextResponse.json(
+        {
+          error: "Missing required fields",
+          details: {
+            orig: !orig ? "Origin position is required" : null,
+            dest: !dest ? "Destination position is required" : null,
+            fen: !fen ? "FEN string is required" : null,
+          },
+        },
+        { status: 400 }
+      );
+    }
     // Get current game
     const game = await GameModel.findById(id);
     if (!game) {
@@ -31,29 +45,33 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ error: "Not your turn" }, { status: 400 });
     }
 
-    // Validate the move
-    const pieces = readXiangqi(fen);
-    const validMoves = getValidMoves(pieces, orig);
-    const isValidMove = validMoves.includes(dest);
+    // read and get the picked piece
+    const piecesList = readXiangqi(fen);
+    const newPiecesList = new Map<Key, Piece>(piecesList);
+    const pickedPiece = newPiecesList.get(orig);
 
-    // Log the contents of pieces
-    console.log("pieces (map):");
-    pieces.forEach((value, key) => {
-      console.log(`  ${key}: ${JSON.stringify(value)}`);
-    });
+    // update the list
+    newPiecesList.delete(orig);
+    newPiecesList.set(dest, pickedPiece!);
+
+    // Validate the move
+    const newFen = write(newPiecesList);
+    console.log(newFen, " ", fen);
+    // const validMoves = getValidMoves(newPiecesList, orig);
+    // const isValidMove = validMoves.includes(dest);
 
     // Log validMoves
-    console.log("validMoves:", validMoves);
+    // console.log("validMoves:", validMoves);
 
-    if (!isValidMove) {
-      return NextResponse.json({ error: "Invalid move" }, { status: 400 });
-    }
+    // if (!isValidMove) {
+    //   return NextResponse.json({ error: "Invalid move" }, { status: 400 });
+    // }
 
     // Update game state
     const updatedGame = await GameModel.findByIdAndUpdate(
       id,
       {
-        $set: { fen, status: "active" },
+        $set: { fen: newFen, status: "active" },
         $push: { moves: `${orig}-${dest}` },
       },
       { new: true }

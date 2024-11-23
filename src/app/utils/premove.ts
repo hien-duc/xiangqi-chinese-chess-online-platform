@@ -15,17 +15,17 @@ const pawn =
       : y2 === y1 - 1 ||
         (y1 <= 4 && y1 === y2 && (x1 === x2 + 1 || x1 === x2 - 1)));
 
-export const chariot: Mobility = (x1, y1, x2, y2) => {
+export const rook: Mobility = (x1, y1, x2, y2) => {
   return x1 === x2 || y1 === y2;
 };
 
-export const horse: Mobility = (x1, y1, x2, y2) => {
+export const knight: Mobility = (x1, y1, x2, y2) => {
   const xd = diff(x1, x2);
   const yd = diff(y1, y2);
   return (xd === 1 && yd === 2) || (xd === 2 && yd === 1);
 };
 
-export const elephant: Mobility = (x1, y1, x2, y2) => {
+export const bishop: Mobility = (x1, y1, x2, y2) => {
   const xd = diff(x1, x2);
   return xd === diff(y1, y2) && xd === 2 && (y1 <= 4 ? y2 <= 4 : y2 >= 5);
 };
@@ -61,12 +61,12 @@ export function premove(pieces: cg.Pieces, key: cg.Key): cg.Key[] {
     mobility: Mobility =
       r === "pawn"
         ? pawn(piece.color)
-        : r === "horse"
-        ? horse
-        : r === "elephant"
-        ? elephant
-        : r === "chariot" || r === "cannon"
-        ? chariot
+        : r === "knight"
+        ? knight
+        : r === "bishop"
+        ? bishop
+        : r === "rook" || r === "cannon"
+        ? rook
         : r === "advisor"
         ? advisor
         : king;
