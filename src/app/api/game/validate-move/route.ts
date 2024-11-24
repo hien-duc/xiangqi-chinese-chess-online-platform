@@ -56,7 +56,6 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     // Validate the move
     const newFen = write(newPiecesList);
-    console.log(newFen, " ", fen);
     // const validMoves = getValidMoves(newPiecesList, orig);
     // const isValidMove = validMoves.includes(dest);
 
@@ -76,6 +75,10 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       },
       { new: true }
     );
+    console.log("oldFen:", " ", fen);
+    console.log("newFen:", " ", newFen);
+    console.log("-----------------------");
+    console.log("updatedGame: ", updatedGame);
 
     return NextResponse.json({ success: true, game: updatedGame });
   } catch (error) {

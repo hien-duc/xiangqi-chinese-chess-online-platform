@@ -18,8 +18,8 @@ const XiangqiBoard: React.FC<XiangqiBoardProps> = ({ className = "" }) => {
   const boardRef = useRef<HTMLDivElement | null>(null);
   const groundRef = useRef<XiangqigroundInstance | null>(null);
   const lastFenRef = useRef<string | null>(null);
+  const isInitialMount = useRef(true);
 
-  // Create config object outside of effects to maintain consistency
   const config: XiangqigroundConfig = {
     movable: {
       free: true,
@@ -87,15 +87,15 @@ const XiangqiBoard: React.FC<XiangqiBoardProps> = ({ className = "" }) => {
   }, []);
 
   // Update the board when game state changes
-  useEffect(() => {
-    if (groundRef.current?.set && gameState?.fen) {
-      // Only update if FEN has actually changed
-      if (lastFenRef.current != gameState.fen) {
-        lastFenRef.current = gameState.fen;
-        groundRef.current.set({ fen: gameState.fen });
-      }
-    }
-  }, [gameState?.fen]);
+  // useEffect(() => {
+  //   if (!isInitialMount.current && groundRef.current?.set && gameState?.fen) {
+  //     if (lastFenRef.current != gameState.fen) {
+  //       lastFenRef.current = gameState.fen;
+  //       groundRef.current.set({ fen: gameState.fen });
+  //     }
+  //   }
+  //   isInitialMount.current = false;
+  // }, [gameState?.fen]);
 
   return (
     <div

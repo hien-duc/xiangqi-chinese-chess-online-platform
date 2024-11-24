@@ -3,21 +3,12 @@
 import React, {
   createContext,
   useContext,
+  useState,
   useEffect,
   useCallback,
   useRef,
-  useMemo,
-  useReducer,
 } from "react";
 import { IGameState } from "../lib/db/models/gameState";
-
-// Define action types
-type GameAction =
-  | { type: 'SET_GAME_ID'; payload: string }
-  | { type: 'SET_GAME_STATE'; payload: IGameState }
-  | { type: 'SET_LOADING'; payload: boolean }
-  | { type: 'SET_ERROR'; payload: string | null }
-  | { type: 'RESET_STATE' };
 
 interface GameContextType {
   gameId: string;
@@ -28,39 +19,6 @@ interface GameContextType {
   makeMove: (orig: string, dest: string) => Promise<void>;
   refetch: (silent?: boolean) => Promise<void>;
   togglePolling: (shouldPoll: boolean) => void;
-}
-
-interface GameState {
-  gameId: string;
-  gameState: IGameState | null;
-  isLoading: boolean;
-  error: string | null;
-}
-
-// Initial state
-const initialState: GameState = {
-  gameId: "55153a8014829a865bbf700d",
-  gameState: null,
-  isLoading: true,
-  error: null,
-};
-
-// Reducer function
-function gameReducer(state: GameState, action: GameAction): GameState {
-  switch (action.type) {
-    case 'SET_GAME_ID':
-      return { ...state, gameId: action.payload };
-    case 'SET_GAME_STATE':
-      return { ...state, gameState: action.payload };
-    case 'SET_LOADING':
-      return { ...state, isLoading: action.payload };
-    case 'SET_ERROR':
-      return { ...state, error: action.payload };
-    case 'RESET_STATE':
-      return { ...initialState, gameId: state.gameId };
-    default:
-      return state;
-  }
 }
 
 const GameContext = createContext<GameContextType>({
@@ -75,110 +33,142 @@ const GameContext = createContext<GameContextType>({
 });
 
 const POLLING_INTERVAL = 2000;
-const MOVE_THROTTLE = 500;
 
 export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [state, dispatch] = useReducer(gameReducer, initialState);
+  const [gameId, setGameId] = useState("55153a8014829a865bbf700d");
+  const [gameState, setGameState] = useState<IGameState | null>(null);
+  const [isLoading, setIsLoading] = useState(true); // Start with true for initial load only
+  const [error, setError] = useState<string | null>(null);
+  const [lastMoveTimestamp, setLastMoveTimestamp] = useState(0);
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const lastFenRef = useRef<string | null>(null);
   const isMakingMoveRef = useRef(false);
-  const lastMoveTimestampRef = useRef<number>(0);
-  const abortControllerRef = useRef<AbortController | null>(null);
+  const currentGameStateRef = useRef<IGameState | null>(null);
+
+  useEffect(() => {
+    currentGameStateRef.current = gameState;
+  }, [gameState]);
 
   const fetchGameState = useCallback(
     async (silent: boolean = false) => {
-      if (!state.gameId || isMakingMoveRef.current) return;
-
-      // Cancel any ongoing fetch
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
-      abortControllerRef.current = new AbortController();
+      if (!gameId || isMakingMoveRef.current) return;
 
       try {
-        if (!silent) {
-          dispatch({ type: 'SET_LOADING', payload: true });
-        }
-
-        const response = await fetch(`/api/game/${state.gameId}`, {
-          signal: abortControllerRef.current.signal
-        });
-
+        if (!silent) setIsLoading(true);
+        const response = await fetch(`/api/game/${gameId}`);
         if (!response.ok) {
           throw new Error("Failed to fetch game");
         }
-
         const data = await response.json();
         if (!data.game) {
           throw new Error("No game data received");
         }
+        const shouldUpdate =
+          !currentGameStateRef.current ||
+          lastFenRef.current !== data.game.fen ||
+          currentGameStateRef.current.moves.length !== data.game.moves.length ||
+          currentGameStateRef.current.status !== data.game.status;
 
-        // Only update state if FEN has changed
-        if (lastFenRef.current !== data.game.fen) {
+        if (shouldUpdate) {
+          console.log("Updating game state from fetch:", data.game);
+
+          setGameState(prevState => {
+            if (!prevState) return data.game;
+
+            return {
+              ...prevState,
+              fen: data.game.fen,
+              moves: data.game.moves,
+              turn: data.game.turn,
+              status: data.game.status,
+              winner: data.game.winner,
+              gameOver: data.game.gameOver,
+              check: data.game.check,
+              lastMove: data.game.lastMove
+            };
+          });
+
           lastFenRef.current = data.game.fen;
-          dispatch({ type: 'SET_GAME_STATE', payload: data.game });
-          dispatch({ type: 'SET_ERROR', payload: null });
+          setError(null);
         }
       } catch (err) {
-        if (err instanceof Error && err.name === 'AbortError') {
-          return; // Ignore aborted requests
-        }
-        const errorMessage = err instanceof Error ? err.message : "An error occurred";
-        dispatch({ type: 'SET_ERROR', payload: errorMessage });
-        if (!state.gameState) {
-          dispatch({ type: 'SET_GAME_STATE', payload: null });
-        }
+        const errorMessage =
+          err instanceof Error ? err.message : "An error occurred";
+        setError(errorMessage);
+        if (!gameState) setGameState(null);
       } finally {
-        if (!silent) {
-          dispatch({ type: 'SET_LOADING', payload: false });
-        }
+        if (!silent) setIsLoading(false);
       }
     },
-    [state.gameId, state.gameState]
+    [gameId]
   );
 
   const makeMove = useCallback(
     async (orig: string, dest: string) => {
       const now = Date.now();
-      if (now - lastMoveTimestampRef.current < MOVE_THROTTLE || !state.gameState) return;
-
+      if (now - lastMoveTimestamp < 500 || !gameState) return;
       isMakingMoveRef.current = true;
-      try {
-        const playerId = state.gameState.turn === "red"
-          ? state.gameState.players.red.id
-          : state.gameState.players.black.id;
 
+      try {
+        const playerId = gameState.turn == "red" ? gameState.players.red.id : gameState.players.black.id;
         const res = await fetch("/api/game/validate-move", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            id: state.gameId,
+            id: gameId,
             orig,
             dest,
-            fen: state.gameState.fen,
-            turn: state.gameState.turn,
-            playerId,
+            fen: gameState.fen,
+            turn: gameState.turn,
+            playerId: playerId,
           }),
         });
+        const newState = await res.json();
+        console.log("Received state from server:", newState);
 
         if (!res.ok) {
           throw new Error("Move validation failed");
         }
 
-        const newState = await res.json();
-        dispatch({ type: 'SET_GAME_STATE', payload: newState.game });
-        lastFenRef.current = newState.game.fen;
-        lastMoveTimestampRef.current = now;
+        if (newState.success && newState.game) {
+          // Log the current state before update
+          console.log("Current state before update:", gameState);
+
+          setGameState(prevState => {
+            if (!prevState) return newState.game;
+
+            const updatedState = {
+              ...prevState,
+              fen: newState.game.fen,
+              moves: newState.game.moves,
+              turn: newState.game.turn,  // Use the turn from server
+              lastMove: [orig, dest],
+              status: newState.game.status,
+              winner: newState.game.winner,
+              gameOver: newState.game.gameOver,
+              check: newState.game.check,
+            };
+
+            // Log the state we're about to set
+            console.log("Setting new state:", gameState);
+            lastFenRef.current = newState.game.fen;
+            setLastMoveTimestamp(now);
+            return updatedState;
+          });
+        }
+
+
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : "Failed to make move";
-        dispatch({ type: 'SET_ERROR', payload: errorMessage });
+        const errorMessage =
+          err instanceof Error ? err.message : "Failed to make move";
+        setError(errorMessage);
       } finally {
         isMakingMoveRef.current = false;
       }
     },
-    [state.gameId, state.gameState]
+    [gameId, gameState, lastMoveTimestamp]
   );
 
   const togglePolling = useCallback(
@@ -196,51 +186,31 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
     [fetchGameState]
   );
 
-  // Initialize polling
   useEffect(() => {
     fetchGameState();
-    togglePolling(true);
+    pollingIntervalRef.current = setInterval(() => {
+      fetchGameState(true);
+    }, POLLING_INTERVAL);
 
-    return () => {
-      togglePolling(false);
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
-    };
-  }, [fetchGameState, togglePolling]);
-
-  // Cleanup on unmount
-  useEffect(() => {
     return () => {
       if (pollingIntervalRef.current) {
         clearInterval(pollingIntervalRef.current);
       }
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
     };
-  }, []);
+  }, [fetchGameState]);
 
-  const setGameId = useCallback((id: string) => {
-    dispatch({ type: 'SET_GAME_ID', payload: id });
-  }, []);
+  const value = {
+    gameId,
+    setGameId,
+    gameState,
+    isLoading,
+    error,
+    makeMove,
+    refetch: fetchGameState,
+    togglePolling,
+  };
 
-  const contextValue = useMemo(
-    () => ({
-      ...state,
-      setGameId,
-      makeMove,
-      refetch: fetchGameState,
-      togglePolling,
-    }),
-    [state, setGameId, makeMove, fetchGameState, togglePolling]
-  );
-
-  return (
-    <GameContext.Provider value={contextValue}>
-      {children}
-    </GameContext.Provider>
-  );
+  return <GameContext.Provider value={value}>{children}</GameContext.Provider>;
 };
 
 export const useGameContext = () => {
