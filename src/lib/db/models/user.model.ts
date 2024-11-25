@@ -1,72 +1,29 @@
-import mongoose, { Schema, model } from "mongoose";
-// import { connectToDatabase } from "../db-connect";
+// models/User.ts
+import mongoose, { Schema, Document } from "mongoose";
 
-// Define the User interface for TypeScript
-export interface IUser {
+export interface IUser extends Document {
+  name: string;
   email: string;
-  hashedPassword: string;
-  name?: string;
-  //image?: string
-  createdAt?: Date;
-  updatedAt?: Date;
+  hashedPassword?: string;
+  image?: string | null;
+  emailVerified?: Date | null;
+  isProfileComplete: boolean;
 }
 
-// Create the schema with type safety
-const userSchema = new Schema<IUser>(
+const UserSchema = new Schema(
   {
-    email: {
-      type: String,
-      required: true,
-      unique: true,
-      lowercase: true, // Convert email to lowercase
-      trim: true, // Remove whitespace
-    },
-    hashedPassword: {
-      type: String,
-      required: true,
-    },
-    name: {
-      type: String,
-      trim: true,
-    },
-    //image: String,
+    name: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
+    hashedPassword: String,
+    image: { type: String, default: null },
+    emailVerified: { type: Date, default: null },
+    isProfileComplete: { type: Boolean, default: false },
   },
   {
-    timestamps: true, // Automatically add createdAt and updatedAt fields
+    timestamps: true,
   }
 );
 
-// Add any pre-save middleware if needed
-userSchema.pre("save", function (next) {
-  // You can add custom logic here
-  // For example, transforming data before saving
-  next();
-});
-
-// Export the model with type safety
-
-export default mongoose.models.User || model("User", userSchema);
-
-// Add example usage for better understanding:
-// Example usage:
-// async function createUser(userData: Partial<IUser>) {
-//   try {
-//     await connectToDatabase();
-//     const user = await User.create(userData);
-//     return user;
-//   } catch (error) {
-//     console.error("Error creating user:", error);
-//     throw error;
-//   }
-// }
-
-// async function findUserByEmail(email: string) {
-//   try {
-//     await connectToDatabase();
-//     const user = await User.findOne({ email: email.toLowerCase() });
-//     return user;
-//   } catch (error) {
-//     console.error("Error finding user:", error);
-//     throw error;
-//   }
-// }
+// Check if the model is already defined to prevent OverwriteModelError
+export default mongoose.models.User ||
+  mongoose.model<IUser>("User", UserSchema);

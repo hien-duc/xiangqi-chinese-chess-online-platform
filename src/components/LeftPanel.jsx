@@ -1,40 +1,86 @@
 import React, { useState } from "react";
+import { useGameContext } from "../hooks/useGameState";
 import styles from "../styles/LeftPanel.module.css";
 
 const LeftPanel = () => {
+  const { gameState } = useGameContext();
   const [activeView, setActiveView] = useState("view");
+
+  const renderGameInfo = () => (
+    <div className={styles.gameInfo}>
+      <div className={styles.playerContainer}>
+        <div className={styles.playerInfo}>
+          <span className={styles.playerLabel}>Red Player</span>
+          <span className={styles.playerName}>
+            {gameState.players.red.name}
+            {gameState.players.red.isGuest && " (Guest)"}
+          </span>
+        </div>
+        <div className={`${styles.playerInfo} ${styles.textRight}`}>
+          <span className={styles.playerLabel}>Black Player</span>
+          <span className={styles.playerName}>
+            {gameState.players.black.name}
+            {gameState.players.black.isGuest && " (Guest)"}
+          </span>
+        </div>
+      </div>
+
+      <div className={styles.statusContainer}>
+        <div className={styles.statusItem}>
+          <span className={styles.statusLabel}>Status</span>
+          <span className={styles.statusBadge} data-status={gameState.status}>
+            {gameState.status}
+          </span>
+        </div>
+        <div className={styles.statusItem}>
+          <span className={styles.statusLabel}>Current Turn</span>
+          <span className={styles.turnBadge} data-turn={gameState.turn}>
+            {gameState.turn}
+          </span>
+        </div>
+        <div className={styles.statusItem}>
+          <span className={styles.statusLabel}>Moves Made</span>
+          <span className={styles.movesCount}>{gameState.moves.length}</span>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderCreateMode = () => (
+    <div className={styles.createMode}>
+      <h3>Create Mode</h3>
+      <div className={styles.createContent}>
+        <p>Setup your custom game configuration here</p>
+        <p className={styles.comingSoon}>Feature coming soon...</p>
+      </div>
+    </div>
+  );
+
+  const renderChat = () => (
+    <div className={styles.chatSection}>
+      <h3>Chat</h3>
+      <div className={styles.chatContainer}>
+        {gameState.chat.messages?.map((msg, index) => (
+          <div key={index} className={styles.chatMessage}>
+            <span className={styles.messageSender}>{msg.userId}:</span>
+            <span className={styles.messageContent}>{msg.message}</span>
+            <span className={styles.messageTime}>
+              {new Date(msg.timestamp).toLocaleTimeString()}
+            </span>
+          </div>
+        )) || <p className={styles.noMessages}>No messages yet</p>}
+      </div>
+    </div>
+  );
 
   const renderPanel = () => {
     switch (activeView) {
       case "view":
-        return (
-          <div className={styles.panelContent}>
-            <h3>Game Information</h3>
-            <div>
-              <p>Current Side: </p>
-              <p>Pieces Captured:</p>
-            </div>
-          </div>
-        );
+        return renderGameInfo();
       case "create":
-        return (
-          <div className={styles.panelContent}>
-            <h3>Create Mode</h3>
-            <div>
-              <p>Setup your custom game configuration here</p>
-              <p>Feature coming soon...</p>
-            </div>
-          </div>
-        );
+        return renderCreateMode();
       case "chat":
-        return (
-          <div className={styles.panelContent}>
-            <h3>Chat</h3>
-            <div className={styles.chatContainer}>
-              <p>Chat messages will appear here...</p>
-            </div>
-          </div>
-        );
+        return renderChat();
       default:
         return null;
     }
@@ -42,13 +88,12 @@ const LeftPanel = () => {
 
   return (
     <div className={styles.leftPanel}>
-      {/* Turn indicator */}
-      <div className={styles.turnIndicator}>RedTurn</div>
+      <div className={styles.turnIndicator} data-turn={gameState.turn}>
+        {gameState.turn}'s Turn
+      </div>
 
-      {/* Content panel */}
       <div className={styles.contentPanel}>{renderPanel()}</div>
 
-      {/* Navigation buttons */}
       <div className={styles.buttonContainer}>
         <button
           className={`${styles.navButton} ${

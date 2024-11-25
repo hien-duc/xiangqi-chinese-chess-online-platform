@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from "react";
 import { Xiangqiground } from "@/src/app/utils/xiangqiground";
 import { useGameContext } from "@/src/hooks/useGameState";
 import { XiangqigroundConfig } from "../app/utils/types";
+import { Config } from "../app/utils/config";
 
 interface XiangqiBoardProps {
   className?: string;
@@ -17,10 +18,10 @@ const XiangqiBoard: React.FC<XiangqiBoardProps> = ({ className = "" }) => {
   const { gameState, makeMove } = useGameContext();
   const boardRef = useRef<HTMLDivElement | null>(null);
   const groundRef = useRef<XiangqigroundInstance | null>(null);
-  const lastFenRef = useRef<string | null>(null);
-  const isInitialMount = useRef(true);
+  // const lastFenRef = useRef<string | null>(null);
+  // const isInitialMount = useRef(true);
 
-  const config: XiangqigroundConfig = {
+  const config: Config = {
     movable: {
       free: true,
       color: "both",
@@ -86,7 +87,7 @@ const XiangqiBoard: React.FC<XiangqiBoardProps> = ({ className = "" }) => {
     };
   }, []);
 
-  // Update the board when game state changes
+  //Update the board when game state changes
   // useEffect(() => {
   //   if (!isInitialMount.current && groundRef.current?.set && gameState?.fen) {
   //     if (lastFenRef.current != gameState.fen) {

@@ -1,6 +1,8 @@
-import mongoose, { Schema, Document, model } from "mongoose";
+import mongoose, { Schema, Document } from "mongoose";
+import { IUser } from "../models/user.model";
 
 export interface IPlayer extends Document {
+  userId: IUser["_id"]; // Reference to User
   name: string;
   rating: number;
   gamesPlayed: number;
@@ -11,6 +13,7 @@ export interface IPlayer extends Document {
 
 const PlayerSchema = new Schema(
   {
+    userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     name: { type: String, required: true },
     rating: { type: Number, default: 1200 },
     gamesPlayed: { type: Number, default: 0 },
@@ -23,4 +26,5 @@ const PlayerSchema = new Schema(
   }
 );
 
-export default mongoose.models.Player || model<IPlayer>("Player", PlayerSchema);
+export default mongoose.models.Player ||
+  mongoose.model<IPlayer>("Player", PlayerSchema);

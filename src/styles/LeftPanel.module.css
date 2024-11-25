@@ -1,71 +1,237 @@
+/* LeftPanel.module.css */
 .leftPanel {
-  width: 250px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  width: 300px;
+  height: 100%;
+  background-color: #ffffff;
+  border-right: 1px solid #e5e7eb;
+  box-shadow: 2px 0 4px rgba(0, 0, 0, 0.05);
 }
 
 .turnIndicator {
-  background-color: #40a02b;
-  color: white;
   padding: 12px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   text-align: center;
   font-weight: 600;
   font-size: 1.1em;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.turnIndicator[data-turn="red"] {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.turnIndicator[data-turn="black"] {
+  background-color: #1f2937;
+  color: #ffffff;
 }
 
 .contentPanel {
-  height: 450px;
-  background-color: #fffbf2;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.panelContent {
-  padding: 16px;
-  color: #181926;
-}
-
-.panelContent h3 {
-  margin: 0 0 12px 0;
-  font-size: 1.1em;
-  font-weight: 600;
-}
-
-.chatContainer {
-  background-color:#fffbf2;
-  padding: 8px;
-  border-radius: 4px;
-  height: 200px;
+  flex: 1;
   overflow-y: auto;
+  padding: 16px;
 }
 
-.buttonContainer {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+/* Game Info View */
+.gameInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.playerContainer {
+  display: flex;
+  justify-content: space-between;
+  background-color: #f3f4f6;
+  padding: 16px;
+  border-radius: 8px;
+}
+
+.playerInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.playerLabel {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.playerName {
+  font-weight: 500;
+}
+
+.textRight {
+  text-align: right;
+}
+
+.statusContainer {
+  display: flex;
+  flex-direction: column;
   gap: 8px;
 }
 
-.navButton {
-  padding: 8px;
+.statusItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
   border-radius: 6px;
-  border: 0px solid black;
-  background-color: #40a02b;
+}
+
+.statusLabel {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.badge {
+  padding: 4px 8px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.statusBadge {
+  composes: badge;
+}
+
+.statusBadge[data-status="waiting"] {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.statusBadge[data-status="active"] {
+  background-color: #dcfce7;
+  color: #166534;
+}
+
+.statusBadge[data-status="completed"] {
+  background-color: #e0e7ff;
+  color: #3730a3;
+}
+
+.turnBadge {
+  composes: badge;
+}
+
+.turnBadge[data-turn="red"] {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.turnBadge[data-turn="black"] {
+  background-color: #1f2937;
+  color: #ffffff;
+}
+
+.movesCount {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* Create Mode */
+.createMode {
+  padding: 16px;
+}
+
+.createContent {
+  margin-top: 12px;
+  text-align: center;
+  color: #6b7280;
+}
+
+.comingSoon {
+  font-style: italic;
+  margin-top: 8px;
+}
+
+/* Chat Section */
+.chatSection {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.chatContainer {
+  flex: 1;
+  overflow-y: auto;
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.chatMessage {
+  padding: 8px;
+  background-color: #f3f4f6;
+  border-radius: 6px;
+}
+
+.messageSender {
+  font-weight: 500;
+  margin-right: 8px;
+}
+
+.messageContent {
+  color: #374151;
+}
+
+.messageTime {
+  float: right;
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.noMessages {
+  text-align: center;
+  color: #6b7280;
+  font-style: italic;
+}
+
+/* Navigation Buttons */
+.buttonContainer {
+  display: flex;
+  border-top: 1px solid #e5e7eb;
+  background-color: #f9fafb;
+}
+
+.navButton {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  background: none;
+  font-weight: 500;
+  color: #6b7280;
   cursor: pointer;
-  color: white;
-  transition: background-color 0.2s;
+  transition: all 0.2s;
 }
 
 .navButton:hover {
-  border: 1px solid #40a02b;
-  color: white;
+  background-color: #f3f4f6;
+  color: #374151;
 }
 
 .navButton.active {
-  background-color: #fffbf2;
-  border: 2px solid #fffbf2;;
-  color: black;
+  background-color: #ffffff;
+  color: #1f2937;
+  border-top: 2px solid #2563eb;
+  margin-top: -1px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .leftPanel {
+    width: 100%;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .contentPanel {
+    max-height: 400px;
+  }
 }
