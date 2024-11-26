@@ -20,39 +20,38 @@ const XiangqiBoard: React.FC<XiangqiBoardProps> = ({ className = "" }) => {
   const groundRef = useRef<XiangqigroundInstance | null>(null);
   const isInitialMount = useRef(true);
 
-  const config: Config = {
-    orientation: "black",
-    turnColor: "black",
-    movable: {
-      free: false,
-      color: "both",
-      showDests: true,
-      events: {
-        after: (orig: string, dest: string) => {
-          makeMove(orig, dest);
-        },
-      },
-    },
-    fen: gameState?.fen || DEFAULT_FEN,
-    drawable: {
-      enabled: true,
-    },
-    premovable: {
-      enabled: true,
-      showDests: true,
-      events: {
-        set: (orig: string, dest: string) => {
-          console.log(`Premove set from ${orig} to ${dest}`);
-        },
-        unset: () => {
-          console.log("Premove unset");
-        },
-      },
-    },
-  };
-
   // Initialize the board
   useEffect(() => {
+    const config: Config = {
+      orientation: "red",
+      turnColor: gameState?.turn,
+      movable: {
+        free: false,
+        color: "both",
+        showDests: true,
+        events: {
+          after: (orig: string, dest: string) => {
+            makeMove(orig, dest);
+          },
+        },
+      },
+      fen: gameState?.fen || DEFAULT_FEN,
+      drawable: {
+        enabled: true,
+      },
+      premovable: {
+        enabled: true,
+        showDests: true,
+        events: {
+          set: (orig: string, dest: string) => {
+            console.log(`Premove set from ${orig} to ${dest}`);
+          },
+          unset: () => {
+            console.log("Premove unset");
+          },
+        },
+      },
+    };
     if (boardRef.current && !groundRef.current) {
       groundRef.current = Xiangqiground(boardRef.current, config);
     }
@@ -62,7 +61,7 @@ const XiangqiBoard: React.FC<XiangqiBoardProps> = ({ className = "" }) => {
         groundRef.current = null;
       }
     };
-  }, []);
+  }, [gameState?.fen, makeMove]);
 
   // Update the board when game state changes
   useEffect(() => {

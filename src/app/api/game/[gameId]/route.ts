@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/src/lib/db/db-connect";
-import GameModel, { IGameState } from "@/src/lib/db/models/gameState";
+import GameModel from "@/src/lib/db/models/gameState";
 
 export async function GET(
   req: NextRequest,
@@ -8,10 +8,12 @@ export async function GET(
 ) {
   try {
     await connectToDatabase();
-    const { gameId } = params;
+
+    // Properly await and destructure the gameId from params
+    const gameId = (await params).gameId;
 
     // Validate gameId format (assuming MongoDB ObjectId)
-    if (!gameId.match(/^[0-9a-fA-F]{24}$/)) {
+    if (!/^[0-9a-fA-F]{24}$/.test(gameId)) {
       return NextResponse.json(
         { error: "Invalid game ID format" },
         { status: 400 }
@@ -26,7 +28,7 @@ export async function GET(
     }
 
     // Return the game data
-    return NextResponse.json({ game });
+    return NextResponse.json({ game: game.toObject() });
   } catch (error) {
     console.error("Error fetching game:", error);
     return NextResponse.json(

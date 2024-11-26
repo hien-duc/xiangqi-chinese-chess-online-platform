@@ -88,18 +88,38 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const updatedGame = await GameModel.findByIdAndUpdate(
       id,
       {
+<<<<<<< Updated upstream
         $set: {
           fen: newFen,
           status: isInCheckmate ? "completed" : "active",
           winner: isInCheckmate ? turn : undefined,
           check: isInCheck ? nextTurn : undefined,
+=======
+        $set: { 
+          fen: newFen,
+          turn: turn === 'red' ? 'black' : 'red',
+          lastMove: [orig, dest]
+>>>>>>> Stashed changes
         },
         $push: { moves: `${orig}-${dest}` },
       },
       { new: true }
     );
 
-    return NextResponse.json({ success: true, game: updatedGame });
+    if (!updatedGame) {
+      return NextResponse.json(
+        { error: "Failed to update game state" },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({ 
+      success: true, 
+      game: {
+        ...updatedGame.toObject(),
+        lastMove: [orig, dest]
+      }
+    });
   } catch (error) {
     console.error("Error handling move:", error);
     return NextResponse.json(
