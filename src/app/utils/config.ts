@@ -1,4 +1,4 @@
-import { HeadlessState } from "./state.ts";
+import { HeadlessState, State } from "./state.ts";
 import { setCheck, setSelected } from "./board.ts";
 import { read as fenRead } from "./fen.ts";
 import { DrawShape, DrawBrushes } from "./draw.ts";
@@ -105,7 +105,7 @@ export function applyAnimation(state: HeadlessState, config: Config): void {
   }
 }
 
-export function configure(state: HeadlessState, config: Config): void {
+export function configure(state: State, config: Config): void {
   // don't merge destinations and autoShapes. Just override.
   if (config.movable?.dests) state.movable.dests = undefined;
   if (config.drawable?.autoShapes) state.drawable.autoShapes = [];

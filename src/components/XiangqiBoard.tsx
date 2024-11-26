@@ -10,7 +10,7 @@ interface XiangqiBoardProps {
 
 interface XiangqigroundInstance {
   destroy?: () => void;
-  set?: (config: Partial<XiangqigroundConfig>) => void;
+  set?: (config: Partial<Config>) => void;
 }
 const DEFAULT_FEN = "rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR";
 
@@ -18,12 +18,13 @@ const XiangqiBoard: React.FC<XiangqiBoardProps> = ({ className = "" }) => {
   const { gameState, makeMove } = useGameContext();
   const boardRef = useRef<HTMLDivElement | null>(null);
   const groundRef = useRef<XiangqigroundInstance | null>(null);
-  // const lastFenRef = useRef<string | null>(null);
-  // const isInitialMount = useRef(true);
+  const isInitialMount = useRef(true);
 
   const config: Config = {
+    orientation: "black",
+    turnColor: "black",
     movable: {
-      free: true,
+      free: false,
       color: "both",
       showDests: true,
       events: {
@@ -35,30 +36,6 @@ const XiangqiBoard: React.FC<XiangqiBoardProps> = ({ className = "" }) => {
     fen: gameState?.fen || DEFAULT_FEN,
     drawable: {
       enabled: true,
-      moveIndicator: {
-        enabled: true,
-        showDests: true,
-        brushes: {
-          normal: {
-            key: "normal",
-            color: "#15781B",
-            opacity: 0.5,
-            lineWidth: 2,
-          },
-          capture: {
-            key: "capture",
-            color: "#882020",
-            opacity: 0.7,
-            lineWidth: 2,
-          },
-          check: {
-            key: "check",
-            color: "#E89B0C",
-            opacity: 0.8,
-            lineWidth: 2,
-          },
-        },
-      },
     },
     premovable: {
       enabled: true,
@@ -87,16 +64,13 @@ const XiangqiBoard: React.FC<XiangqiBoardProps> = ({ className = "" }) => {
     };
   }, []);
 
-  //Update the board when game state changes
-  // useEffect(() => {
-  //   if (!isInitialMount.current && groundRef.current?.set && gameState?.fen) {
-  //     if (lastFenRef.current != gameState.fen) {
-  //       lastFenRef.current = gameState.fen;
-  //       groundRef.current.set({ fen: gameState.fen });
-  //     }
-  //   }
-  //   isInitialMount.current = false;
-  // }, [gameState?.fen]);
+  // Update the board when game state changes
+  useEffect(() => {
+    if (!isInitialMount.current && groundRef.current?.set && gameState?.fen) {
+      groundRef.current.set({ fen: gameState.fen });
+    }
+    isInitialMount.current = false;
+  }, [gameState?.fen]);
 
   return (
     <div

@@ -70,9 +70,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
           lastFenRef.current !== data.game.fen ||
           currentGameStateRef.current.moves.length !== data.game.moves.length ||
           currentGameStateRef.current.status !== data.game.status;
-
         if (shouldUpdate) {
-          console.log("Updating game state from fetch:", data.game);
+          console.log("Updating game state from fetch:", data.game.fen);
 
           setGameState(prevState => {
             if (!prevState) return data.game;
@@ -102,16 +101,16 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
         if (!silent) setIsLoading(false);
       }
     },
-    [gameId]
+    [gameId, gameState]
   );
 
   const makeMove = useCallback(
     async (orig: string, dest: string) => {
-      const now = Date.now();
-      if (now - lastMoveTimestamp < 500 || !gameState) return;
+      if (!gameState) return;
       isMakingMoveRef.current = true;
 
       try {
+        // console.log("FEN PUT IN CALL API: ", gameState.fen)
         const playerId = gameState.turn == "red" ? gameState.players.red.id : gameState.players.black.id;
         const res = await fetch("/api/game/validate-move", {
           method: "POST",
@@ -126,7 +125,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
           }),
         });
         const newState = await res.json();
-        console.log("Received state from server:", newState);
 
         if (!res.ok) {
           throw new Error("Move validation failed");
@@ -134,30 +132,34 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
 
         if (newState.success && newState.game) {
           // Log the current state before update
-          console.log("Current state before update:", gameState);
+          console.log("Current state before update:", gameState.fen);
 
           setGameState(prevState => {
-            if (!prevState) return newState.game;
-
-            const updatedState = {
+            // If no previous state, initialize with the new game state
+            if (!prevState) {
+              lastFenRef.current = newState.game.fen;
+              return {
+                ...newState.game,
+                lastMove: [orig, dest],
+              };
+            }
+          
+            // Merge the existing state with the new game state
+            const updatedState: IGameState = {
               ...prevState,
-              fen: newState.game.fen,
-              moves: newState.game.moves,
-              turn: newState.game.turn,  // Use the turn from server
+              ...newState.game,
               lastMove: [orig, dest],
-              status: newState.game.status,
-              winner: newState.game.winner,
-              gameOver: newState.game.gameOver,
-              check: newState.game.check,
+              // Preserve any client-specific properties not in newState.game
+              premove: prevState.premove,
             };
-
-            // Log the state we're about to set
-            console.log("Setting new state:", gameState);
+          
+            // Update the last FEN reference
             lastFenRef.current = newState.game.fen;
-            setLastMoveTimestamp(now);
+          
             return updatedState;
           });
         }
+        console.log("Setting new state:", gameState.fen);
 
 
       } catch (err) {
@@ -168,7 +170,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
         isMakingMoveRef.current = false;
       }
     },
-    [gameId, gameState, lastMoveTimestamp]
+    [gameId, gameState]
   );
 
   const togglePolling = useCallback(
@@ -208,6 +210,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
     makeMove,
     refetch: fetchGameState,
     togglePolling,
+    lastFenRef,
   };
 
   return <GameContext.Provider value={value}>{children}</GameContext.Provider>;
