@@ -51,86 +51,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
     currentGameStateRef.current = gameState;
   }, [gameState]);
 
-  const fetchGameState = useCallback(
-    async (silent: boolean = false) => {
-      if (!gameId || isMakingMoveRef.current) return;
-
-      try {
-        if (!silent) setIsLoading(true);
-        const response = await fetch(`/api/game/${gameId}`);
-        if (!response.ok) {
-          throw new Error("Failed to fetch game");
-        }
-        const data = await response.json();
-        if (!data.game) {
-          throw new Error("No game data received");
-        }
-
-        // Don't update if we're in the middle of a move or if the state is too recent
-        const timeSinceLastMove = Date.now() - lastMoveTimestamp;
-        if (timeSinceLastMove < 2000) {
-          console.log("Skipping update - too soon after move");
-          return;
-        }
-
-        const shouldUpdate =
-          !currentGameStateRef.current ||
-          (lastFenRef.current !== data.game.fen &&
-            timeSinceLastMove >= 2000);
-
-        if (shouldUpdate) {
-          console.log("Game State Update [Fetch]:", {
-            currentFen: lastFenRef.current,
-            newFen: data.game.fen,
-            timeSinceLastMove,
-            currentMoves: currentGameStateRef.current?.moves.length,
-            newMoves: data.game.moves.length
-          });
-
-          setGameState(prevState => {
-            if (!prevState) {
-              console.log("Initial game state set:", data.game.fen);
-              return data.game;
-            }
-
-            // Only update if the new state is actually different
-            if (prevState.fen === data.game.fen) {
-              return prevState;
-            }
-
-            console.log("Updating existing game state:", {
-              from: prevState.fen,
-              to: data.game.fen
-            });
-
-            return {
-              ...prevState,
-              fen: data.game.fen,
-              moves: data.game.moves,
-              turn: data.game.turn,
-              status: data.game.status,
-              winner: data.game.winner,
-              gameOver: data.game.gameOver,
-              check: data.game.check,
-              lastMove: data.game.lastMove
-            };
-          });
-
-          lastFenRef.current = data.game.fen;
-          setError(null);
-        }
-      } catch (err) {
-        const errorMessage =
-          err instanceof Error ? err.message : "An error occurred";
-        setError(errorMessage);
-        if (!gameState) setGameState(null);
-      } finally {
-        if (!silent) setIsLoading(false);
-      }
-    },
-    [gameId, gameState]
-  );
-
   const makeMove = useCallback(
     async (orig: string, dest: string) => {
       if (!gameState || isMakingMoveRef.current) return;
@@ -138,7 +58,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
       isMakingMoveRef.current = true;
       setError(null);
 
-      const moveStartTime = Date.now();
       try {
         // First validate the move
         const validateResponse = await fetch("/api/game/validate-move", {
@@ -169,15 +88,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
         // Update local state with the validated move
         setGameState(prevState => {
           if (!prevState) return null;
-
-          console.log("Game State Update [Move]:", {
-            prevFen: prevState.fen,
-            newFen: responseData.game.fen,
-            prevTurn: prevState.turn,
-            newTurn: responseData.game.turn,
-            lastMove: responseData.game.lastMove,
-            moveTime: Date.now() - moveStartTime
-          });
 
           const newState = {
             ...prevState,

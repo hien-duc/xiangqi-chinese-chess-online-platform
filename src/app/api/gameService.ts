@@ -4,27 +4,7 @@ import GameModel, { IGameState } from "@/src/lib/db/models/gameState";
 import GuestModel from "@/src/lib/db/models/guest.model";
 import { GameState } from "@/src/app/utils/types";
 
-export async function updateGameState(
-  gameId: string,
-  state: Partial<GameState>
-): Promise<IGame | null> {
-  await connectToDatabase();
-
-  const update: any = {
-    $set: {
-      fen: state.fen,
-      status: state.gameOver ? "completed" : "active",
-    },
-  };
-
-  if (state.lastMove) {
-    update.$push = { moves: state.lastMove.join("-") };
-  }
-
-  return GameModel.findByIdAndUpdate(gameId, update, { new: true });
-}
-
-export async function createGuestGame(): Promise<IGame> {
+export async function createGuestGame(): Promise<IGameState> {
   const guestId = `guest_${nanoid(8)}`;
 
   return createGame({
@@ -37,7 +17,7 @@ export async function createGame(playerInfo: {
   id: string;
   isGuest: boolean;
   name: string;
-}): Promise<IGame> {
+}): Promise<IGameState> {
   await connectToDatabase();
 
   const game = await GameModel.create({
@@ -69,7 +49,7 @@ export async function joinGame(
     isGuest: boolean;
     name: string;
   }
-): Promise<IGame | null> {
+): Promise<IGameState | null> {
   await connectToDatabase();
 
   const game = await GameModel.findById(gameId);

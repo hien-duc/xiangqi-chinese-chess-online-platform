@@ -1,7 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { Xiangqiground } from "@/src/app/utils/xiangqiground";
 import { useGameContext } from "@/src/hooks/useGameState";
-import { XiangqigroundConfig } from "../app/utils/types";
 import { Config } from "../app/utils/config";
 
 interface XiangqiBoardProps {
@@ -27,7 +26,7 @@ const XiangqiBoard: React.FC<XiangqiBoardProps> = ({ className = "" }) => {
       turnColor: gameState?.turn,
       movable: {
         free: false,
-        color: "red",  
+        color: "both",
         showDests: true,
         events: {
           after: (orig: string, dest: string) => {

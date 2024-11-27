@@ -7,7 +7,6 @@ export interface IUser extends Document {
   hashedPassword?: string;
   image?: string | null;
   emailVerified?: Date | null;
-  isProfileComplete: boolean;
 }
 
 const UserSchema = new Schema(
@@ -17,7 +16,6 @@ const UserSchema = new Schema(
     hashedPassword: String,
     image: { type: String, default: null },
     emailVerified: { type: Date, default: null },
-    isProfileComplete: { type: Boolean, default: false },
   },
   {
     timestamps: true,

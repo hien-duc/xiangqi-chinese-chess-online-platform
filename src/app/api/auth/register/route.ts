@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { connectToDatabase } from "@/src/lib/db/db-connect";
 import User from "@/src/lib/db/models/user.model";
+import { createPlayerProfile } from "@/src/lib/db/models/player.model";
 
 const registerSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -19,8 +20,6 @@ export async function POST(request: Request) {
     // Parse and validate the request body
     const body = await request.json();
     const { name, email, password } = registerSchema.parse(body);
-
-    // Connect to database
     await connectToDatabase();
 
     // Check if user already exists
@@ -36,17 +35,21 @@ export async function POST(request: Request) {
     const hashedPassword = await bcrypt.hash(password, 12);
 
     // Create user
-    await User.create({
+    const newUser = await User.create({
       name,
       email,
       hashedPassword,
-      isProfileComplete: false,
       emailVerified: null,
       image: null,
     });
 
+    // Create player profile
+    await createPlayerProfile(newUser._id.toString(), name);
+
     return NextResponse.json(
-      { message: "User registered successfully" },
+      {
+        message: "User registered successfully",
+      },
       { status: 201 }
     );
   } catch (error) {
