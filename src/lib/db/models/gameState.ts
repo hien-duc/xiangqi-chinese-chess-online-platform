@@ -32,13 +32,16 @@ const GameSchema = new Schema<IGameState>(
         id: { type: String, required: true },
         isGuest: { type: Boolean, default: true },
         name: { type: String, required: true },
+        orientation : {type: String, require: true}
       },
       black: {
         id: { type: String, required: true },
         isGuest: { type: Boolean, default: true },
         name: { type: String, required: true },
+        orientation : {type: String, require: true}
       },
     },
+    
     fen: {
       type: String,
       default:
