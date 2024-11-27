@@ -27,7 +27,7 @@ const XiangqiBoard: React.FC<XiangqiBoardProps> = ({ className = "" }) => {
       turnColor: gameState?.turn,
       movable: {
         free: false,
-        color: "both",
+        color: "red",  
         showDests: true,
         events: {
           after: (orig: string, dest: string) => {

@@ -65,8 +65,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
         if (!data.game) {
           throw new Error("No game data received");
         }
-<<<<<<< Updated upstream
-=======
 
         // Don't update if we're in the middle of a move or if the state is too recent
         const timeSinceLastMove = Date.now() - lastMoveTimestamp;
@@ -78,7 +76,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
         const shouldUpdate =
           !currentGameStateRef.current ||
           (lastFenRef.current !== data.game.fen &&
-          timeSinceLastMove >= 2000);
+            timeSinceLastMove >= 2000);
 
         if (shouldUpdate) {
           console.log("Game State Update [Fetch]:", {
@@ -88,15 +86,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
             currentMoves: currentGameStateRef.current?.moves.length,
             newMoves: data.game.moves.length
           });
->>>>>>> Stashed changes
 
-        // Only update if the new state is different
-        const newFen = data.game.fen;
-        if (lastFenRef.current !== newFen) {
           setGameState(prevState => {
-<<<<<<< Updated upstream
-            if (!prevState) return data.game;
-=======
             if (!prevState) {
               console.log("Initial game state set:", data.game.fen);
               return data.game;
@@ -111,56 +102,46 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
               from: prevState.fen,
               to: data.game.fen
             });
-            
->>>>>>> Stashed changes
+
             return {
               ...prevState,
-              ...data.game,
-              lastMove: data.game.lastMove || prevState.lastMove,
-              premove: prevState.premove
+              fen: data.game.fen,
+              moves: data.game.moves,
+              turn: data.game.turn,
+              status: data.game.status,
+              winner: data.game.winner,
+              gameOver: data.game.gameOver,
+              check: data.game.check,
+              lastMove: data.game.lastMove
             };
           });
-          lastFenRef.current = newFen;
+
+          lastFenRef.current = data.game.fen;
+          setError(null);
         }
-        setError(null);
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : "An error occurred";
+        const errorMessage =
+          err instanceof Error ? err.message : "An error occurred";
         setError(errorMessage);
         if (!gameState) setGameState(null);
       } finally {
         if (!silent) setIsLoading(false);
       }
     },
-    [gameId]
+    [gameId, gameState]
   );
 
   const makeMove = useCallback(
     async (orig: string, dest: string) => {
-<<<<<<< Updated upstream
-      if (!gameState) return;
-=======
       if (!gameState || isMakingMoveRef.current) return;
->>>>>>> Stashed changes
 
       isMakingMoveRef.current = true;
       setError(null);
 
       const moveStartTime = Date.now();
       try {
-<<<<<<< Updated upstream
-        // Set making move flag and stop polling
-        isMakingMoveRef.current = true;
-        if (pollingIntervalRef.current) {
-          clearInterval(pollingIntervalRef.current);
-          pollingIntervalRef.current = null;
-        }
-
-        const playerId = gameState.turn === "red" ? gameState.players.red.id : gameState.players.black.id;
-        const res = await fetch("/api/game/validate-move", {
-=======
         // First validate the move
         const validateResponse = await fetch("/api/game/validate-move", {
->>>>>>> Stashed changes
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -175,34 +156,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
           }),
         });
 
-<<<<<<< Updated upstream
-        const data = await res.json();
-        if (!res.ok) {
-          throw new Error(data.error || "Move validation failed");
-        }
-
-        if (data.success && data.game) {
-          // Optimistically update the state first
-          setGameState(prevState => {
-            if (!prevState) return data.game;
-            const updatedState = {
-              ...prevState,
-              ...data.game,
-              lastMove: [orig, dest],
-              premove: prevState.premove,
-            };
-            return updatedState;
-          });
-
-          // Update the lastFenRef after state is updated
-          lastFenRef.current = data.game.fen;
-        }
-      } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : "Failed to make move";
-        setError(errorMessage);
-        // Refresh the game state to ensure consistency
-        await fetchGameState(true);
-=======
         const responseData = await validateResponse.json();
 
         if (!validateResponse.ok) {
@@ -216,7 +169,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
         // Update local state with the validated move
         setGameState(prevState => {
           if (!prevState) return null;
-          
+
           console.log("Game State Update [Move]:", {
             prevFen: prevState.fen,
             newFen: responseData.game.fen,
@@ -238,7 +191,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
           // Update refs immediately to prevent race conditions
           lastFenRef.current = responseData.game.fen;
           currentGameStateRef.current = newState;
-          
+
           return newState;
         });
 
@@ -250,20 +203,13 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
         if (err instanceof Error) {
           console.error("Move error:", err);
         }
->>>>>>> Stashed changes
       } finally {
         // Small delay before allowing new moves
         await new Promise(resolve => setTimeout(resolve, 100));
         isMakingMoveRef.current = false;
-        // Resume polling with a clean interval
-        if (!pollingIntervalRef.current) {
-          pollingIntervalRef.current = setInterval(() => {
-            fetchGameState(true);
-          }, POLLING_INTERVAL);
-        }
       }
     },
-    [gameId, gameState, fetchGameState]
+    [gameId, gameState]
   );
 
   const refetch = useCallback(

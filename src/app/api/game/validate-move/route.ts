@@ -3,7 +3,6 @@ import { connectToDatabase } from "@/src/lib/db/db-connect";
 import GameModel from "@/src/lib/db/models/gameState";
 import { readXiangqi, write } from "@/src/app/utils/fen";
 import { getValidMoves } from "@/src/app/utils/moves";
-import { isLegalMove, isCheckmate, wouldBeInCheck } from "@/src/app/utils/chess-rules";
 import { Key, Piece } from "@/src/app/utils/types";
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
@@ -65,7 +64,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     // Get valid moves and check if the move is valid
     const validMoves = getValidMoves(newPiecesList, orig);
-    if (!isLegalMove(newPiecesList, orig, dest)) {
+    if (!validMoves.includes(dest)) {
       return NextResponse.json({ error: "Invalid move" }, { status: 400 });
     }
 
@@ -74,32 +73,14 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     newPiecesList.set(dest, pickedPiece);
     const newFen = write(newPiecesList);
 
-    // Check for checkmate
-    const nextTurn = turn === "red" ? "black" : "red";
-    const isInCheckmate = isCheckmate(newPiecesList, nextTurn);
-    const isInCheck = wouldBeInCheck(
-      newPiecesList,
-      dest,
-      dest,
-      nextTurn
-    );
-
     // Update the game state in the database
     const updatedGame = await GameModel.findByIdAndUpdate(
       id,
       {
-<<<<<<< Updated upstream
-        $set: {
-          fen: newFen,
-          status: isInCheckmate ? "completed" : "active",
-          winner: isInCheckmate ? turn : undefined,
-          check: isInCheck ? nextTurn : undefined,
-=======
         $set: { 
           fen: newFen,
           turn: turn === 'red' ? 'black' : 'red',
           lastMove: [orig, dest]
->>>>>>> Stashed changes
         },
         $push: { moves: `${orig}-${dest}` },
       },
