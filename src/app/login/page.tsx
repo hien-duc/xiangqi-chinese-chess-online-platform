@@ -1,4 +1,4 @@
-import { auth, signIn } from "@/auth";
+import { auth, signIn } from "auth";
 import { redirect } from "next/navigation";
 import { Github, Mail } from "lucide-react";
 import "../../styles/login.css";
@@ -14,8 +14,10 @@ export default async function LoginPage(props: {
 }) {
   const session = await auth();
   const searchParams = await props.searchParams;
+
+  // Redirect authenticated users
   if (session?.user) {
-    redirect("/");
+    redirect(searchParams?.callbackUrl || "/");
   }
 
   async function handleCredentialsLogin(formData: FormData) {
@@ -32,17 +34,31 @@ export default async function LoginPage(props: {
         password: rawData.password,
       });
 
-      await signIn("credentials", {
+      const result = await signIn("credentials", {
         email: validatedData.email,
         password: validatedData.password,
-        redirectTo: "/",
+        redirect: false,
       });
+
+      if (!result?.ok) {
+        throw new Error(result?.error || "Failed to sign in");
+      }
+
+      // Successful login
+      redirect(searchParams?.callbackUrl || "/");
     } catch (error) {
       if (error instanceof Error) {
-        redirect(
-          `/login?message=Invalid email or password. Please check again.`
-        );
+        const errorMessage = error.message === "NEXT_REDIRECT" 
+          ? "Invalid credentials"
+          : error.message;
+          
+        const params = new URLSearchParams({
+          message: errorMessage,
+          email: rawData.email as string,
+        });
+        redirect(`/login?${params.toString()}`);
       }
+      throw error;
     }
   }
 
@@ -56,7 +72,9 @@ export default async function LoginPage(props: {
             <h1>Xiangqi</h1>
             <p>Chinese Chess Online</p>
             {searchParams?.message && (
-              <div className="error-message">{searchParams.message}</div>
+              <div className="error-message" role="alert">
+                {searchParams.message}
+              </div>
             )}
           </div>
 
@@ -70,6 +88,8 @@ export default async function LoginPage(props: {
                   type="email"
                   className="gapLabel"
                   required
+                  defaultValue={searchParams?.email || ""}
+                  autoComplete="email"
                 />
               </label>
               <label>
@@ -81,6 +101,7 @@ export default async function LoginPage(props: {
                   required
                   minLength={8}
                   maxLength={32}
+                  autoComplete="current-password"
                 />
               </label>
               <button type="submit" className="credentials-button">
@@ -88,11 +109,17 @@ export default async function LoginPage(props: {
               </button>
             </form>
 
+            <div className="divider">
+              <span>or</span>
+            </div>
+
             {/* Github login */}
             <form
               action={async () => {
                 "use server";
-                await signIn("github", { redirectTo: "/" });
+                await signIn("github", { 
+                  redirectTo: searchParams?.callbackUrl || "/" 
+                });
               }}
             >
               <button type="submit" className="github-button">
@@ -101,11 +128,13 @@ export default async function LoginPage(props: {
               </button>
             </form>
 
-            {/* Google Sign In */}
+            {/* Google login */}
             <form
               action={async () => {
                 "use server";
-                await signIn("google", { redirectTo: "/" });
+                await signIn("google", { 
+                  redirectTo: searchParams?.callbackUrl || "/" 
+                });
               }}
             >
               <button type="submit" className="google-button">
@@ -118,25 +147,13 @@ export default async function LoginPage(props: {
           <div className="register-link">
             <p>
               Don't have an account?{" "}
-              <Link href="/register" className="create-account-link">
-                Create one
+              <Link href="/register" className="register-link">
+                Register here
               </Link>
             </p>
           </div>
-
-          <div className="features">
-            <div className="feature">
-              <h3>Play Online</h3>
-              <p>Challenge players worldwide</p>
-            </div>
-            <div className="feature">
-              <h3>Track Progress</h3>
-              <p>Save games & analyze</p>
-            </div>
-          </div>
         </div>
       </div>
-      <footer> 2024 Xiangqi Online. All rights reserved.</footer>
     </div>
   );
 }

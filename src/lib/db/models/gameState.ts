@@ -1,28 +1,29 @@
 import mongoose, { Schema, model, Document } from "mongoose";
 
+interface IPlayer {
+  id: string;
+  isGuest: boolean;
+  name: string;
+  orientation: string;
+}
+
 export interface IGameState extends Document {
   id: string;
   players: {
-    red: { id: string; isGuest: boolean; name: string };
-    black: { id: string; isGuest: boolean; name: string };
+    red: IPlayer;
+    black: IPlayer;
   };
   fen: string;
   moves: string[];
   status: "waiting" | "active" | "completed";
   winner?: string;
-  chat: {
-    enabled: boolean;
-    messages?: { userId: string; message: string; timestamp: Date }[];
-  };
-  createdAt: Date;
-  updatedAt: Date;
-
-  // Client-specific properties
   lastMove?: [string, string];
-  turn: "red" | "black"; // Updated for consistency
+  turn: "red" | "black"; 
   premove?: [string, string];
   check?: string;
   gameOver?: boolean;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const GameSchema = new Schema<IGameState>(
@@ -32,16 +33,15 @@ const GameSchema = new Schema<IGameState>(
         id: { type: String, required: true },
         isGuest: { type: Boolean, default: true },
         name: { type: String, required: true },
-        orientation : {type: String, require: true}
+        orientation: { type: String, required: true }
       },
       black: {
         id: { type: String, required: true },
         isGuest: { type: Boolean, default: true },
         name: { type: String, required: true },
-        orientation : {type: String, require: true}
+        orientation: { type: String, required: true }
       },
     },
-    
     fen: {
       type: String,
       default:
@@ -59,16 +59,6 @@ const GameSchema = new Schema<IGameState>(
     winner: {
       type: String,
       default: null,
-    },
-    chat: {
-      enabled: { type: Boolean, default: false },
-      messages: [
-        {
-          userId: { type: String, required: true },
-          message: { type: String, required: true, maxlength: 500 },
-          timestamp: { type: Date, default: Date.now },
-        },
-      ],
     },
     lastMove: {
       type: [String],
@@ -93,11 +83,10 @@ const GameSchema = new Schema<IGameState>(
     },
   },
   {
-    timestamps: true, // Auto-add `createdAt` and `updatedAt`
+    timestamps: true, 
   }
 );
 
-// Indexes for optimized queries
 GameSchema.index({ status: 1 });
 GameSchema.index({ "players.red.id": 1 });
 GameSchema.index({ "players.black.id": 1 });

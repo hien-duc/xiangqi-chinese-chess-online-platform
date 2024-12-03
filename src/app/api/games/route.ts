@@ -1,6 +1,6 @@
-import { NextResponse } from 'next/server';
-import { connectToDatabase } from '@/src/lib/db/db-connect';
-import GameModel from '@/src/lib/db/models/gameState';
+import { NextResponse } from "next/server";
+import { connectToDatabase } from "@/lib/db/db-connect";
+import GameModel from "@/lib/db/models/gameState";
 
 // GET /api/games - Get all games
 export async function GET() {
@@ -9,9 +9,9 @@ export async function GET() {
     const games = await GameModel.find().sort({ createdAt: -1 });
     return NextResponse.json({ games });
   } catch (error) {
-    console.error('Error fetching games:', error);
+    console.error("Error fetching games:", error);
     return NextResponse.json(
-      { error: 'Failed to fetch games' },
+      { error: "Failed to fetch games" },
       { status: 500 }
     );
   }
@@ -25,10 +25,11 @@ export async function POST(request: Request) {
 
     const gameData = {
       players: {
-        red: side === 'red' ? playerInfo : { id: '', isGuest: true, name: '' },
-        black: side === 'black' ? playerInfo : { id: '', isGuest: true, name: '' },
+        red: side === "red" ? playerInfo : { id: "", isGuest: true, name: "" },
+        black:
+          side === "black" ? playerInfo : { id: "", isGuest: true, name: "" },
       },
-      status: 'waiting',
+      status: "waiting",
       chat: {
         enabled: !playerInfo.isGuest,
       },
@@ -37,9 +38,9 @@ export async function POST(request: Request) {
     const game = await GameModel.create(gameData);
     return NextResponse.json(game);
   } catch (error) {
-    console.error('Error creating game:', error);
+    console.error("Error creating game:", error);
     return NextResponse.json(
-      { error: 'Failed to create game' },
+      { error: "Failed to create game" },
       { status: 500 }
     );
   }

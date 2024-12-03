@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
-import { Xiangqiground } from "@/src/app/utils/xiangqiground";
-import { useGameContext } from "@/src/hooks/useGameState";
-import { Config } from "../app/utils/config";
+import { Xiangqiground } from "@/utils/xiangqiground";
+import { useGameContext } from "@/hooks/useGameState";
+import { Config } from "@/utils/config";
 
 interface XiangqiBoardProps {
   className?: string;

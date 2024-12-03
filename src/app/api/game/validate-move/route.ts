@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectToDatabase } from "@/src/lib/db/db-connect";
-import GameModel from "@/src/lib/db/models/gameState";
-import { readXiangqi, write } from "@/src/app/utils/fen";
-import { getValidMoves } from "@/src/app/utils/moves";
-import { Key, Piece } from "@/src/app/utils/types";
+import { connectToDatabase } from "@/lib/db/db-connect";
+import GameModel from "@/lib/db/models/gameState";
+import { readXiangqi, write } from "@/utils/fen";
+import { getValidMoves } from "@/utils/moves";
+import { Key, Piece } from "@/utils/types";
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
   try {

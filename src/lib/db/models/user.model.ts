@@ -1,27 +1,44 @@
 // models/User.ts
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Model } from 'mongoose';
 
-export interface IUser extends Document {
-  name: string;
+export interface IUser extends mongoose.Document {
   email: string;
-  hashedPassword?: string;
-  image?: string | null;
-  emailVerified?: Date | null;
+  name: string;
+  hashedPassword: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
-const UserSchema = new Schema(
+const userSchema = new mongoose.Schema<IUser>(
   {
-    name: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
-    hashedPassword: String,
-    image: { type: String, default: null },
-    emailVerified: { type: Date, default: null },
+    email: {
+      type: String,
+      required: [true, 'Please provide an email'],
+      unique: true,
+    },
+    name: {
+      type: String,
+      required: [true, 'Please provide a name'],
+    },
+    hashedPassword: {
+      type: String,
+      required: [true, 'Please provide a password'],
+    },
   },
   {
     timestamps: true,
   }
 );
 
-// Check if the model is already defined to prevent OverwriteModelError
-export default mongoose.models.User ||
-  mongoose.model<IUser>("User", UserSchema);
+// Export model
+let User: Model<IUser>;
+
+try {
+  // Try to get the existing model
+  User = mongoose.model<IUser>('User');
+} catch {
+  // If the model doesn't exist, create it
+  User = mongoose.model<IUser>('User', userSchema);
+}
+
+export default User;

@@ -1,0 +1,60 @@
+{
+  "messages": [
+    {
+      "gameId": "game123",
+      "userId": "user1",
+      "userName": "Alice",
+      "message": "Good game! Let's start!",
+      "timestamp": "2024-01-10T08:00:00.000Z"
+    },
+    {
+      "gameId": "game123",
+      "userId": "user2",
+      "userName": "Bob",
+      "message": "Yes, good luck!",
+      "timestamp": "2024-01-10T08:01:00.000Z"
+    },
+    {
+      "gameId": "game123",
+      "userId": "user1",
+      "userName": "Alice",
+      "message": "Nice move!",
+      "timestamp": "2024-01-10T08:05:00.000Z"
+    },
+    {
+      "gameId": "game123",
+      "userId": "user2",
+      "userName": "Bob",
+      "message": "Thanks! You too!",
+      "timestamp": "2024-01-10T08:06:00.000Z"
+    },
+    {
+      "gameId": "game456",
+      "userId": "user3",
+      "userName": "Charlie",
+      "message": "Hello! Ready to play?",
+      "timestamp": "2024-01-10T09:00:00.000Z"
+    },
+    {
+      "gameId": "game456",
+      "userId": "user4",
+      "userName": "David",
+      "message": "Yes, let's begin!",
+      "timestamp": "2024-01-10T09:01:00.000Z"
+    },
+    {
+      "gameId": "game456",
+      "userId": "user3",
+      "userName": "Charlie",
+      "message": "Great strategy!",
+      "timestamp": "2024-01-10T09:10:00.000Z"
+    },
+    {
+      "gameId": "game456",
+      "userId": "user4",
+      "userName": "David",
+      "message": "You're playing well too!",
+      "timestamp": "2024-01-10T09:11:00.000Z"
+    }
+  ]
+}

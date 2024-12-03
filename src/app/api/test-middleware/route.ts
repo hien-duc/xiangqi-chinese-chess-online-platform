@@ -1,7 +1,7 @@
-import { connectToDatabase } from "@/src/lib/db/db-connect";
+import { connectToDatabase } from "@/lib/db/db-connect";
 import mongoose from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
-import GameModel from "@/src/lib/db/models/gameState";
+import GameModel from "@/lib/db/models/gameState";
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
   try {

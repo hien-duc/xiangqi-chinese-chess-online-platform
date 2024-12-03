@@ -1,12 +1,12 @@
 "use client";
-import styles from "../styles/Page.module.css";
+import styles from "../styles/page.module.css";
 import LeftPanel from "../components/LeftPanel";
 import RightPanel from "../components/RightPanel";
 import XiangqiBoard from "../components/XiangqiBoard";
 import "../styles/xiangqiground.css";
 import "./globals.css";
 import { useGameContext } from "../hooks/useGameState";
-import { ProtectedRoute } from "@/src/components/protected-route";
+import { ProtectedRoute } from "@/components/protected-route";
 
 export default function Home() {
   return (

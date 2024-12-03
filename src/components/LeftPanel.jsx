@@ -1,14 +1,21 @@
 import React, { useState, useEffect } from "react";
-import { useGameContext } from "../hooks/useGameState";
-import styles from "../styles/leftPanel.module.css";
+import { useGameContext } from "@/hooks/useGameState";
+import { useChat } from "@/context/ChatContext";
+import { useSession } from "next-auth/react";
+import styles from "../styles/leftpanel.module.css";
 
 const LeftPanel = () => {
   const { gameState } = useGameContext();
-  const [activeView, setActiveView] = useState("view");
+  const { data: session } = useSession();
+  const { getGameMessages, addMessage, isLoading, error } = useChat();
   const [message, setMessage] = useState("");
+  const [activeView, setActiveView] = useState("view");
   const [games, setGames] = useState([]);
   const [selectedSide, setSelectedSide] = useState(null);
   const [showSideSelection, setShowSideSelection] = useState(false);
+
+  // Get messages for current game
+  const messages = gameState ? getGameMessages(gameState.id) : [];
 
   // Fetch available games
   useEffect(() => {
@@ -84,29 +91,18 @@ const LeftPanel = () => {
   };
 
   const handleSendMessage = async () => {
-    if (!message.trim()) return;
+    if (!message.trim() || !gameState || !session?.user) return;
 
     try {
-      const response = await fetch(`/api/game/${gameState.id}/chat`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userId: gameState.players.red.id, // TODO: Get actual current user ID
-          message: message.trim()
-        }),
+      await addMessage({
+        gameId: gameState.id,
+        userId: session.user.id,
+        userName: session.user.name || 'Anonymous',
+        message: message.trim()
       });
-
-      if (!response.ok) {
-        const error = await response.json();
-        console.error('Error sending message:', error);
-        return;
-      }
-
-      setMessage('');
-    } catch (error) {
-      console.error('Error sending message:', error);
+      setMessage("");
+    } catch (err) {
+      console.error('Failed to send message:', err);
     }
   };
 
@@ -121,11 +117,13 @@ const LeftPanel = () => {
           </span>
         </div>
         <div className={`${styles.playerInfo} ${styles.textRight}`}>
-          <span className={styles.playerLabel}>Black Player</span>
-          <span className={styles.playerName}>
-            {gameState.players.black.name}
-            {gameState.players.black.isGuest && " (Guest)"}
-          </span>
+          <div className={styles.playerInfo}>
+            <span className={styles.playerLabel}>Black Player</span>
+            <span className={styles.playerName}>
+              {gameState.players.black.name}
+              {gameState.players.black.isGuest && " (Guest)"}
+            </span>
+          </div>
         </div>
       </div>
 
@@ -228,15 +226,31 @@ const LeftPanel = () => {
       <h3>Chat</h3>
       <div className={styles.chatContainer}>
         <div className={styles.messagesContainer}>
-          {gameState.chat.messages?.map((msg, index) => (
-            <div key={index} className={styles.chatMessage}>
-              <span className={styles.messageSender}>{msg.userId}:</span>
-              <span className={styles.messageContent}>{msg.message}</span>
-              <span className={styles.messageTime}>
-                {new Date(msg.timestamp).toLocaleTimeString()}
-              </span>
+          {error && (
+            <div className={styles.errorMessage}>
+              Error loading messages: {error}
             </div>
-          )) || <p className={styles.noMessages}>No messages yet</p>}
+          )}
+          {isLoading && messages.length === 0 ? (
+            <div className={styles.loadingMessage}>Loading messages...</div>
+          ) : messages.length > 0 ? (
+            messages.map((msg, index) => (
+              <div 
+                key={`${msg.userId}-${msg.timestamp}-${index}`} 
+                className={`${styles.chatMessage} ${
+                  msg.userId === session?.user?.id ? styles.ownMessage : ''
+                }`}
+              >
+                <span className={styles.messageSender}>{msg.userName}:</span>
+                <span className={styles.messageContent}>{msg.message}</span>
+                <span className={styles.messageTime}>
+                  {new Date(msg.timestamp).toLocaleTimeString()}
+                </span>
+              </div>
+            ))
+          ) : (
+            <p className={styles.noMessages}>No messages yet</p>
+          )}
         </div>
         <div className={styles.inputContainer}>
           <input
@@ -250,12 +264,14 @@ const LeftPanel = () => {
                 handleSendMessage();
               }
             }}
+            disabled={!session || isLoading}
           />
           <button 
             className={styles.sendButton}
             onClick={handleSendMessage}
+            disabled={!session || isLoading}
           >
-            Send
+            {isLoading ? 'Sending...' : 'Send'}
           </button>
         </div>
       </div>

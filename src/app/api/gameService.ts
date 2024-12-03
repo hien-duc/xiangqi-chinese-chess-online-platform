@@ -1,8 +1,9 @@
 import { nanoid } from "nanoid";
-import { connectToDatabase } from "@/src/lib/db/db-connect";
-import GameModel, { IGameState } from "@/src/lib/db/models/gameState";
-import GuestModel from "@/src/lib/db/models/guest.model";
-import { GameState } from "@/src/app/utils/types";
+// import { ObjectId } from "mongodb";
+import { connectToDatabase } from "@/lib/db/db-connect";
+import GameModel, { IGameState } from "@/lib/db/models/gameState";
+import GuestModel from "@/lib/db/models/guest.model";
+// import { GameState } from "@/utils/types";
 
 export async function createGuestGame(): Promise<IGameState> {
   const guestId = `guest_${nanoid(8)}`;

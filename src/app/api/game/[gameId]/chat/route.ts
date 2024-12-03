@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectToDatabase } from "@/src/lib/db/db-connect";
-import GameModel from "@/src/lib/db/models/gameState";
+import { connectToDatabase } from "@/lib/db/db-connect";
+import GameModel from "@/lib/db/models/gameState";
 
 export async function POST(
   req: NextRequest,
