@@ -1,0 +1,87 @@
+.gameContainer {
+  display: grid;
+  grid-template-columns: 250px 1fr 250px;
+  gap: 2rem;
+  padding: 2rem;
+  min-height: 100vh;
+  background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0));
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.leftPanel, .rightPanel {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 1.5rem;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.boardContainer {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.playerInfo {
+  text-align: center;
+  color: #fff;
+}
+
+.playerInfo h3 {
+  margin-bottom: 0.5rem;
+  font-size: 1.2rem;
+}
+
+.playerInfo p {
+  opacity: 0.8;
+}
+
+.loading, .error {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  font-size: 1.5rem;
+  color: #fff;
+}
+
+.spectatorBoard {
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+.spectatorBadge {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 0.9rem;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+@media (max-width: 1200px) {
+  .gameContainer {
+    grid-template-columns: 200px 1fr 200px;
+    gap: 1rem;
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .gameContainer {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr auto;
+  }
+  
+  .leftPanel, .rightPanel {
+    padding: 1rem;
+  }
+}

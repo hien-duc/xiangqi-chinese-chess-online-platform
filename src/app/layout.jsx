@@ -1,7 +1,8 @@
-import { AuthProvider } from "@/src/components/auth-provider"
-import { Navbar } from "@/src/components/navbar"
-import { GameProvider } from "../hooks/useGameState"
-import "./globals.css"
+import { AuthProvider } from "@/components/auth-provider";
+import { Navbar } from "@/components/navbar";
+import { GameProvider } from "../hooks/useGameState";
+import "./globals.css";
+import { ChatProvider } from "@/context/ChatContext";
 
 export default function RootLayout({ children }) {
   return (
@@ -9,11 +10,11 @@ export default function RootLayout({ children }) {
       <body>
         <AuthProvider>
           <Navbar />
-          <GameProvider>
-            {children}
-          </GameProvider>
+          <ChatProvider>
+            <GameProvider>{children}</GameProvider>
+          </ChatProvider>
         </AuthProvider>
       </body>
     </html>
-  )
+  );
 }

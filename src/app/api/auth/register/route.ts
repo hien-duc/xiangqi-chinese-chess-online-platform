@@ -2,9 +2,9 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
-import { connectToDatabase } from "@/src/lib/db/db-connect";
-import User from "@/src/lib/db/models/user.model";
-import { createPlayerProfile } from "@/src/lib/db/models/player.model";
+import { connectToDatabase } from "@/lib/db/db-connect";
+import User from "@/lib/db/models/user.model";
+import { createPlayerProfile } from "@/lib/db/models/player.model";
 
 const registerSchema = z.object({
   name: z.string().min(1, "Name is required"),

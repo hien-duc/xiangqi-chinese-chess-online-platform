@@ -11,7 +11,7 @@ const LeftPanel = () => {
   const [message, setMessage] = useState("");
   const [activeView, setActiveView] = useState("view");
   const [games, setGames] = useState([]);
-  const [selectedSide, setSelectedSide] = useState(null);
+  // const [selectedSide, setSelectedSide] = useState(null);
   const [showSideSelection, setShowSideSelection] = useState(false);
 
   // Get messages for current game
@@ -45,11 +45,10 @@ const LeftPanel = () => {
         },
         body: JSON.stringify({
           side,
-          // TODO: Get actual user info
           playerInfo: {
-            id: 'user123',
-            isGuest: false,
-            name: 'User123'
+            id: session?.user?.id || 'guest',
+            isGuest: !session?.user,
+            name: session?.user?.name || 'Guest'
           }
         }),
       });
@@ -72,11 +71,10 @@ const LeftPanel = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          // TODO: Get actual user info
           playerInfo: {
-            id: 'user123',
-            isGuest: false,
-            name: 'User123'
+            id: session?.user?.id || 'guest',
+            isGuest: !session?.user,
+            name: session?.user?.name || 'Guest'
           }
         }),
       });

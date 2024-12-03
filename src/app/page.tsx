@@ -1,37 +1,21 @@
 "use client";
-import styles from "../styles/page.module.css";
-import LeftPanel from "../components/LeftPanel";
-import RightPanel from "../components/RightPanel";
-import XiangqiBoard from "../components/XiangqiBoard";
-import "../styles/xiangqiground.css";
-import "./globals.css";
-import { useGameContext } from "../hooks/useGameState";
-import { ProtectedRoute } from "@/components/protected-route";
+import Link from "next/link";
+import styles from "./page.module.css";
 
 export default function Home() {
   return (
-    <ProtectedRoute>
-      <GameContent />
-    </ProtectedRoute>
-  );
-}
-
-function GameContent() {
-  const { isLoading, error, gameState } = useGameContext();
-
-  // Only show loading on initial load
-  if (isLoading && !gameState) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
-
-  return (
-    <main className="p-8">
-      <div className={styles["container"]}>
-        <div className={styles["game-container"]}>
-          <LeftPanel />
-          <XiangqiBoard />
-          <RightPanel />
+    <div className={styles.container}>
+      <div className={styles.heroSection}>
+        <h1 className={styles.title}>Play Chinese Chess For Free</h1>
+        <div className={styles.buttonGroup}>
+          <Link href="/lobby" className={styles.playButton}>
+            Play Now
+          </Link>
+          <Link href="/register" className={styles.signUpButton}>
+            Sign Up
+          </Link>
         </div>
       </div>
-    </main>
+    </div>
   );
 }

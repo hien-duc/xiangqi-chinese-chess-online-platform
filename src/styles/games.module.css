@@ -1,0 +1,123 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.title {
+  text-align: center;
+  margin-bottom: 2rem;
+  color: #2d3748;
+  font-size: 2.5rem;
+}
+
+.gamesList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.gameCard {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
+}
+
+.gameCard:hover {
+  transform: translateY(-2px);
+}
+
+.gameInfo {
+  margin-bottom: 1rem;
+}
+
+.players {
+  margin-bottom: 1rem;
+}
+
+.player {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.side {
+  font-weight: 600;
+  width: 60px;
+}
+
+.name {
+  color: #4a5568;
+}
+
+.status {
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.waiting {
+  color: #d69e2e;
+}
+
+.active {
+  color: #38a169;
+}
+
+.completed {
+  color: #4a5568;
+}
+
+.created {
+  font-size: 0.875rem;
+  color: #718096;
+}
+
+.actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.button {
+  flex: 1;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.button:hover {
+  transform: translateY(-1px);
+}
+
+.redSide {
+  background-color: #fc8181;
+  color: white;
+}
+
+.redSide:hover {
+  background-color: #f56565;
+}
+
+.blackSide {
+  background-color: #2d3748;
+  color: white;
+}
+
+.blackSide:hover {
+  background-color: #1a202c;
+}
+
+.spectate {
+  background-color: #4299e1;
+  color: white;
+}
+
+.spectate:hover {
+  background-color: #3182ce;
+}
