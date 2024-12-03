@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "baseUrl": "./",
+    "baseUrl": ".",
     "allowImportingTsExtensions": true,
     "target": "ES2017",
     "lib": ["dom", "dom.iterable", "esnext"],
@@ -22,8 +22,13 @@
     ],
     "typeRoots": ["./types", "./node_modules/@types"],
     "paths": {
-      // "@/*": ["./src/*"],
-      "@/*": ["./*"]
+      "@/*": ["./src/*"],
+      "@components/*": ["./src/components/*"],
+      "@hooks/*": ["./src/hooks/*"],
+      "@lib/*": ["./src/lib/*"],
+      "@styles/*": ["./src/styles/*"],
+      "@types/*": ["./src/types/*"],
+      "@utils/*": ["./src/utils/*"]
     }
   },
   "include": [

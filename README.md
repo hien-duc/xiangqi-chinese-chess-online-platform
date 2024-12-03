@@ -1,119 +1,64 @@
-# Xiangqi Game Backend API
+# Xiangqi (Chinese Chess)
 
-Express.js REST API server for Xiangqi (Chinese Chess) game platform.
-
-## Architecture
-
-```mermaid
-graph TD
-    subgraph Client
-        WebUI[Web Interface]
-        Engine[Chess Engine]
-        Interpreter[UCCI Interpreter]
-    end
-    subgraph Server
-        API[Express.js API]
-        GameLogic[Game Logic]
-        UCCIHandler[UCCI Protocol Handler]
-    end
-    subgraph Database
-        Users[(Users)]
-        Games[(Games)]
-        Moves[(Moves)]
-        GameStates[(Game States)]
-    end
-    WebUI -->|HTTP/REST| API
-    Engine -->|UCCI| Interpreter
-    Interpreter -->|HTTP/REST| API
-    API --> GameLogic
-    GameLogic --> UCCIHandler
-    API --> Users
-    API --> Games
-    API --> Moves
-    API --> GameStates
-```
-### System Flow
-1. **Express.js API (Server Entry Point)**
-   - Handles HTTP requests from clients
-   - Routes game operations and moves
-   - Manages user sessions and authentication
-
-2. **Game Logic**
-   - Validates moves according to Xiangqi rules
-   - Manages game states and turn flow
-   - Coordinates with UCCI handler for AI moves
-
-3. **UCCI Handler**
-   - Translates game moves to UCCI protocol
-   - Interfaces with Chinese Chess engines
-   - Processes engine responses back to game format
-
-4. **Database Layer**
-   - Stores user information and game states
-   - Tracks move history and game progression
-   - Maintains player statistics and rankings
+A modern implementation of Chinese Chess using Next.js and TypeScript.
 
 ## Tech Stack
 
-- **Runtime**: Node.js
-- **Framework**: Express.js
+- **Framework**: Next.js 15
+- **Language**: TypeScript
+- **Authentication**: NextAuth.js
 - **Database**: MongoDB
-- **Authentication**: JWT
-
-## Core Features
-
-### Game Engine
-- Game state management
-- Move validation
-- Check/checkmate detection
-- Game history tracking
-
-### Authentication
-- User registration/login
-- JWT authentication
-- Profile management
-
-### Game Management
-- Create/join games
-- Spectator mode
-- Turn-based gameplay
-- Move validation
-- Game state persistence
-- Basic AI opponent for practice
-
-## Key API Endpoints:
-
-### Game Management
-```
-POST /api/games/create           // Create new game
-POST /api/games/join/:gameId     // Join existing game
-GET  /api/games/:gameId         // Get game state
-POST /api/games/:gameId/move    // Make a move
-```
-
-### UCCI Integration
-```
-POST /api/ucci/position         // Send position to engine
-POST /api/ucci/analyze         // Request position analysis
-GET  /api/ucci/bestmove        // Get engine's best move
-```
-
-### User Management
-```
-POST /api/auth/register        // Register new user
-POST /api/auth/login          // Login user
-GET  /api/users/profile       // Get user profile
-GET  /api/users/stats         // Get user statistics
-```
-
-## Related Repositories
-
-This project is part of the Xiangqi (Chinese Chess) application:
-
-- Frontend Repository: [xiangqi-frontend](https://github.com/NCongMinh/xiangqi-frontend)
-- Backend Repository: [xiangqi-backend](https://github.com/hien-duc/xiangqi-backend)
+- **Styling**: CSS Modules
 
 ## Project Structure
 
-- **Frontend**: Next.js application serving the user interface
-- **Backend**: Express.js REST API handling game logic and data
+```
+src/
+├── app/          # Next.js app router pages and layouts
+├── components/   # Reusable UI components
+├── hooks/        # Custom React hooks
+├── lib/          # Utility functions and configurations
+├── styles/       # CSS modules and global styles
+└── types/        # TypeScript type definitions
+```
+
+## Getting Started
+
+1. Clone the repository
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Set up your environment variables:
+   ```
+   Copy .env.example to .env.local and fill in your values
+   ```
+4. Run the development server:
+   ```bash
+   npm run dev
+   ```
+
+## Development
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm start` - Start production server
+- `npm run lint` - Run ESLint
+
+## Environment Variables
+
+The following environment variables are required:
+
+- `MONGODB_URI` - MongoDB connection string
+- `NEXTAUTH_SECRET` - NextAuth.js secret
+- `NEXTAUTH_URL` - NextAuth.js URL
+
+## Contributing
+
+1. Create a new branch for your feature
+2. Make your changes
+3. Submit a pull request
+
+## License
+
+This project is licensed under the MIT License.

@@ -2,7 +2,7 @@
 
 import { useSession, signIn, signOut } from "next-auth/react"
 import Link from "next/link"
-import styles from "../styles/Navbar.module.css"
+import styles from "../styles/navbar.module.css"
 
 export function Navbar() {
   const { data: session, status } = useSession()
@@ -16,7 +16,7 @@ export function Navbar() {
               <span className={styles.logoText}>Xiangqi</span>
             </Link>
           </div>
-          
+
           <div className={styles.authSection}>
             {status === "loading" ? (
               <span>Loading...</span>

@@ -1,10 +1,114 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useGameContext } from "../hooks/useGameState";
-import styles from "../styles/LeftPanel.module.css";
+import styles from "../styles/leftPanel.module.css";
 
 const LeftPanel = () => {
   const { gameState } = useGameContext();
   const [activeView, setActiveView] = useState("view");
+  const [message, setMessage] = useState("");
+  const [games, setGames] = useState([]);
+  const [selectedSide, setSelectedSide] = useState(null);
+  const [showSideSelection, setShowSideSelection] = useState(false);
+
+  // Fetch available games
+  useEffect(() => {
+    if (activeView === "create") {
+      fetchGames();
+    }
+  }, [activeView]);
+
+  const fetchGames = async () => {
+    try {
+      const response = await fetch('/api/games');
+      if (response.ok) {
+        const data = await response.json();
+        setGames(data.games);
+      }
+    } catch (error) {
+      console.error('Error fetching games:', error);
+    }
+  };
+
+  const handleCreateGame = async (side) => {
+    try {
+      const response = await fetch('/api/games', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          side,
+          // TODO: Get actual user info
+          playerInfo: {
+            id: 'user123',
+            isGuest: false,
+            name: 'User123'
+          }
+        }),
+      });
+
+      if (response.ok) {
+        const game = await response.json();
+        await fetchGames();
+        setShowSideSelection(false);
+      }
+    } catch (error) {
+      console.error('Error creating game:', error);
+    }
+  };
+
+  const handleJoinGame = async (gameId) => {
+    try {
+      const response = await fetch(`/api/game/${gameId}/join`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          // TODO: Get actual user info
+          playerInfo: {
+            id: 'user123',
+            isGuest: false,
+            name: 'User123'
+          }
+        }),
+      });
+
+      if (response.ok) {
+        const game = await response.json();
+        // TODO: Handle game joined
+      }
+    } catch (error) {
+      console.error('Error joining game:', error);
+    }
+  };
+
+  const handleSendMessage = async () => {
+    if (!message.trim()) return;
+
+    try {
+      const response = await fetch(`/api/game/${gameState.id}/chat`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: gameState.players.red.id, // TODO: Get actual current user ID
+          message: message.trim()
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        console.error('Error sending message:', error);
+        return;
+      }
+
+      setMessage('');
+    } catch (error) {
+      console.error('Error sending message:', error);
+    }
+  };
 
   const renderGameInfo = () => (
     <div className={styles.gameInfo}>
@@ -48,11 +152,74 @@ const LeftPanel = () => {
 
   const renderCreateMode = () => (
     <div className={styles.createMode}>
-      <h3>Create Mode</h3>
-      <div className={styles.createContent}>
-        <p>Setup your custom game configuration here</p>
-        <p className={styles.comingSoon}>Feature coming soon...</p>
+      <h3>Games</h3>
+      <div className={styles.gamesList}>
+        {games.map(game => (
+          <div key={game._id} className={styles.gameItem}>
+            <div className={styles.gameInfo}>
+              <span className={styles.playerName}>{game.players.red.name}</span>
+              <span className={styles.vs}>vs</span>
+              <span className={styles.playerName}>
+                {game.players.black.name || 'Waiting...'}
+              </span>
+            </div>
+            <div className={styles.gameStatus}>
+              <span className={styles.statusBadge} data-status={game.status}>
+                {game.status}
+              </span>
+              {game.status === 'waiting' && (
+                <button 
+                  className={styles.joinButton}
+                  onClick={() => handleJoinGame(game._id)}
+                >
+                  Join
+                </button>
+              )}
+              {game.status === 'active' && (
+                <button 
+                  className={styles.spectateButton}
+                  onClick={() => {/* TODO: Handle spectate */}}
+                >
+                  Spectate
+                </button>
+              )}
+            </div>
+          </div>
+        ))}
       </div>
+      
+      {showSideSelection ? (
+        <div className={styles.sideSelection}>
+          <h4>Choose your side</h4>
+          <div className={styles.sideButtons}>
+            <button 
+              className={`${styles.sideButton} ${styles.redSide}`}
+              onClick={() => handleCreateGame('red')}
+            >
+              Red Side
+            </button>
+            <button 
+              className={`${styles.sideButton} ${styles.blackSide}`}
+              onClick={() => handleCreateGame('black')}
+            >
+              Black Side
+            </button>
+          </div>
+          <button 
+            className={styles.cancelButton}
+            onClick={() => setShowSideSelection(false)}
+          >
+            Cancel
+          </button>
+        </div>
+      ) : (
+        <button 
+          className={styles.createButton}
+          onClick={() => setShowSideSelection(true)}
+        >
+          Create New Game
+        </button>
+      )}
     </div>
   );
 
@@ -60,15 +227,37 @@ const LeftPanel = () => {
     <div className={styles.chatSection}>
       <h3>Chat</h3>
       <div className={styles.chatContainer}>
-        {gameState.chat.messages?.map((msg, index) => (
-          <div key={index} className={styles.chatMessage}>
-            <span className={styles.messageSender}>{msg.userId}:</span>
-            <span className={styles.messageContent}>{msg.message}</span>
-            <span className={styles.messageTime}>
-              {new Date(msg.timestamp).toLocaleTimeString()}
-            </span>
-          </div>
-        )) || <p className={styles.noMessages}>No messages yet</p>}
+        <div className={styles.messagesContainer}>
+          {gameState.chat.messages?.map((msg, index) => (
+            <div key={index} className={styles.chatMessage}>
+              <span className={styles.messageSender}>{msg.userId}:</span>
+              <span className={styles.messageContent}>{msg.message}</span>
+              <span className={styles.messageTime}>
+                {new Date(msg.timestamp).toLocaleTimeString()}
+              </span>
+            </div>
+          )) || <p className={styles.noMessages}>No messages yet</p>}
+        </div>
+        <div className={styles.inputContainer}>
+          <input
+            type="text"
+            placeholder="Type a message..."
+            className={styles.chatInput}
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter') {
+                handleSendMessage();
+              }
+            }}
+          />
+          <button 
+            className={styles.sendButton}
+            onClick={handleSendMessage}
+          >
+            Send
+          </button>
+        </div>
       </div>
     </div>
   );
