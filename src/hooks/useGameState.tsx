@@ -124,6 +124,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const refetch = useCallback(
     async (silent: boolean = false) => {
+      if (!gameId) return;
+
       const timeSinceLastMove = Date.now() - lastMoveTimestamp;
       if (timeSinceLastMove < 1000 || isMakingMoveRef.current) {
         return;
@@ -148,24 +150,21 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
           throw new Error("No game data received");
         }
 
-        // Only update if the state has actually changed
-        if (data.game.fen !== lastFenRef.current) {
-          setGameState(prevState => {
-            if (!prevState) return data.game;
-            return {
-              ...prevState,
-              fen: data.game.fen,
-              moves: data.game.moves,
-              turn: data.game.turn,
-              status: data.game.status,
-              winner: data.game.winner,
-              gameOver: data.game.gameOver,
-              check: data.game.check,
-              lastMove: data.game.lastMove
-            };
-          });
-          lastFenRef.current = data.game.fen;
-        }
+        // Update state if any field has changed
+        setGameState(prevState => {
+          if (!prevState) return data.game;
+          
+          // Check if any field has changed
+          const hasChanged = 
+            prevState.fen !== data.game.fen ||
+            prevState.status !== data.game.status ||
+            prevState.turn !== data.game.turn ||
+            prevState.players.red.id !== data.game.players.red.id ||
+            prevState.players.black.id !== data.game.players.black.id ||
+            JSON.stringify(prevState.moves) !== JSON.stringify(data.game.moves);
+
+          return hasChanged ? data.game : prevState;
+        });
       } catch (err) {
         if (!silent) {
           const errorMessage = err instanceof Error ? err.message : "Failed to fetch game state";

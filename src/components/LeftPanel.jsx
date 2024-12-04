@@ -4,6 +4,8 @@ import { useChat } from "@/context/ChatContext";
 import { useSession } from "next-auth/react";
 import styles from "../styles/leftpanel.module.css";
 
+const POLLING_INTERVAL = 2000; // 2 seconds
+
 const LeftPanel = () => {
   const { gameState } = useGameContext();
   const { data: session } = useSession();
@@ -21,6 +23,9 @@ const LeftPanel = () => {
   useEffect(() => {
     if (activeView === "create") {
       fetchGames();
+      // Set up polling for game updates
+      const intervalId = setInterval(fetchGames, POLLING_INTERVAL);
+      return () => clearInterval(intervalId);
     }
   }, [activeView]);
 
