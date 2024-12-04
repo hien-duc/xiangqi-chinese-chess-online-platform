@@ -1,0 +1,41 @@
+{
+  "id": "55153a8014829a865bbf700d",
+  "fen": "rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR",
+  "moves": [],
+  "status": "active",
+  "turn": "red",
+  "players": {
+    "red": {
+      "id": "1",
+      "isGuest": false,
+      "name": "Alice"
+    },
+    "black": {
+      "id": "2",
+      "isGuest": true,
+      "name": "GuestPlayer"
+    }
+  },
+  "chat": {
+    "enabled": true,
+    "messages": [
+      {
+        "userId": "1",
+        "message": "Good luck!",
+        "timestamp": "2024-01-22T10:00:00.000Z",
+        "_id": "67453f61d8cfc3996d04ece9"
+      },
+      {
+        "userId": "2",
+        "message": "Thanks, you too!",
+        "timestamp": "2024-01-22T10:01:00.000Z",
+        "_id": "67453f61d8cfc3996d04ecea"
+      }
+    ]
+  },
+  "createdAt": "2024-01-22T05:07:21.599Z",
+  "updatedAt": "2024-01-22T05:07:21.599Z",
+  "gameOver": false,
+  "lastMove": null,
+  "winner": null
+}

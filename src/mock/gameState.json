@@ -1,0 +1,60 @@
+{
+  "games": [
+    {
+      "id": "game123",
+      "players": {
+        "red": {
+          "id": "user1",
+          "isGuest": false,
+          "name": "Alice",
+          "orientation": "red"
+        },
+        "black": {
+          "id": "user2",
+          "isGuest": false,
+          "name": "Bob",
+          "orientation": "black"
+        }
+      },
+      "fen": "rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w - - 0 1",
+      "moves": ["h2e2", "h7e7"],
+      "status": "active",
+      "winner": null,
+      "lastMove": ["h7", "e7"],
+      "turn": "red",
+      "premove": null,
+      "check": null,
+      "gameOver": false,
+      "createdAt": "2024-01-10T08:00:00.000Z",
+      "updatedAt": "2024-01-10T08:06:00.000Z"
+    },
+    {
+      "id": "game456",
+      "players": {
+        "red": {
+          "id": "user3",
+          "isGuest": false,
+          "name": "Charlie",
+          "orientation": "red"
+        },
+        "black": {
+          "id": "user4",
+          "isGuest": true,
+          "name": "David",
+          "orientation": "black"
+        }
+      },
+      "fen": "rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w - - 0 1",
+      "moves": [],
+      "status": "waiting",
+      "winner": null,
+      "lastMove": null,
+      "turn": "red",
+      "premove": null,
+      "check": null,
+      "gameOver": false,
+      "createdAt": "2024-01-10T09:00:00.000Z",
+      "updatedAt": "2024-01-10T09:00:00.000Z"
+    }
+  ]
+}
