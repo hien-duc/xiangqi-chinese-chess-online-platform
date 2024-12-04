@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useGameContext } from "@/hooks/useGameState";
 import { useChat } from "@/context/ChatContext";
 import { useSession } from "next-auth/react";
+import { useGameStore } from "@/stores/gameStore";
 import styles from "../styles/leftpanel.module.css";
 
 const POLLING_INTERVAL = 2000; // 2 seconds
@@ -12,14 +13,14 @@ const LeftPanel = () => {
   const { getGameMessages, addMessage, isLoading, error } = useChat();
   const [message, setMessage] = useState("");
   const [activeView, setActiveView] = useState("view");
-  const [games, setGames] = useState([]);
-  // const [selectedSide, setSelectedSide] = useState(null);
   const [showSideSelection, setShowSideSelection] = useState(false);
+  
+  const { games, fetchGames } = useGameStore();
 
   // Get messages for current game
   const messages = gameState ? getGameMessages(gameState.id) : [];
 
-  // Fetch available games
+  // Fetch available games when view changes to create
   useEffect(() => {
     if (activeView === "create") {
       fetchGames();
@@ -27,19 +28,7 @@ const LeftPanel = () => {
       const intervalId = setInterval(fetchGames, POLLING_INTERVAL);
       return () => clearInterval(intervalId);
     }
-  }, [activeView]);
-
-  const fetchGames = async () => {
-    try {
-      const response = await fetch('/api/games');
-      if (response.ok) {
-        const data = await response.json();
-        setGames(data.games);
-      }
-    } catch (error) {
-      console.error('Error fetching games:', error);
-    }
-  };
+  }, [activeView, fetchGames]);
 
   const handleCreateGame = async (side) => {
     try {

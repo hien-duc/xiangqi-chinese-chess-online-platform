@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import styles from "@/styles/games.module.css";
 import NewGameModal from "@/components/NewGameModal";
+import { useGameStore } from "@/stores/gameStore";
 
 interface Player {
   id: string;
@@ -66,6 +67,7 @@ export default function GamesPage() {
       const data = await response.json();
 
       if (response.ok && data.success) {
+        useGameStore.getState().updateGame(gameId, data.game);
         router.push(`/games/${gameId}`);
       } else {
         console.error("Failed to join game:", data.error || "Unknown error");
