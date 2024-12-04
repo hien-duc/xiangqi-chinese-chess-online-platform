@@ -18,7 +18,7 @@ export interface IGameState extends Document {
   status: "waiting" | "active" | "completed";
   winner?: string;
   lastMove?: [string, string];
-  turn: "red" | "black"; 
+  turn: "red" | "black";
   premove?: [string, string];
   check?: string;
   gameOver?: boolean;
@@ -33,13 +33,13 @@ const GameSchema = new Schema<IGameState>(
         id: { type: String, required: true },
         isGuest: { type: Boolean, default: true },
         name: { type: String, required: true },
-        orientation: { type: String, required: true }
+        orientation: { type: String, required: true },
       },
       black: {
         id: { type: String, required: true },
         isGuest: { type: Boolean, default: true },
         name: { type: String, required: true },
-        orientation: { type: String, required: true }
+        orientation: { type: String, required: true },
       },
     },
     fen: {
@@ -83,7 +83,7 @@ const GameSchema = new Schema<IGameState>(
     },
   },
   {
-    timestamps: true, 
+    timestamps: true,
   }
 );
 

@@ -6,6 +6,7 @@ type Mobility = (x1: number, y1: number, x2: number, y2: number) => boolean;
 function isBlocked(pieces: cg.Pieces, x: number, y: number): boolean {
   return pieces.has(util.pos2key([Math.floor(x), Math.floor(y)]));
 }
+
 // Pawn (soldier) movement
 function pawn(color: cg.Color): Mobility {
   return (x1, y1, x2, y2) => {
@@ -58,19 +59,76 @@ function elephant(
   return !isBlocked(pieces, x1 + dx / 2, y1 + dy / 2);
 }
 
-// Horse movement
-function horse(x1: number, y1: number, x2: number, y2: number): boolean {
+// Bishop movement
+function bishop(
+  x1: number,
+  y1: number,
+  x2: number,
+  y2: number,
+  pieces: cg.Pieces
+): boolean {
   const dx = Math.abs(x2 - x1);
   const dy = Math.abs(y2 - y1);
-  return (dx === 1 && dy === 2) || (dx === 2 && dy === 1);
+
+  // Basic L-shape movement check
+  if (!((dx === 1 && dy === 2) || (dx === 2 && dy === 1))) return false;
+
+  // Check for blocking piece (蹩马腿)
+  const blockX = dx === 2 ? x1 + (x2 > x1 ? 1 : -1) : x1;
+  const blockY = dy === 2 ? y1 + (y2 > y1 ? 1 : -1) : y1;
+
+  return !isBlocked(pieces, blockX, blockY);
 }
 
-// Chariot movement
-function chariot(x1: number, y1: number, x2: number, y2: number): boolean {
-  return x1 === x2 || y1 === y2;
+// Knight (马) movement
+function knight(
+  pieces: cg.Pieces,
+  x1: number,
+  y1: number,
+  x2: number,
+  y2: number
+): boolean {
+  const dx = Math.abs(x2 - x1);
+  const dy = Math.abs(y2 - y1);
+
+  // Basic L-shape movement check
+  if (!((dx === 1 && dy === 2) || (dx === 2 && dy === 1))) return false;
+
+  // Check for blocking piece (蹩马腿)
+  const blockX = dx === 2 ? x1 + (x2 > x1 ? 1 : -1) : x1;
+  const blockY = dy === 2 ? y1 + (y2 > y1 ? 1 : -1) : y1;
+
+  return !isBlocked(pieces, blockX, blockY);
 }
 
-// Cannon movement (similar to chariot but can jump over one piece to capture)
+// Rook (车) movement
+function rook(
+  pieces: cg.Pieces,
+  x1: number,
+  y1: number,
+  x2: number,
+  y2: number
+): boolean {
+  if (x1 !== x2 && y1 !== y2) return false;
+
+  // Check for pieces blocking the path
+  if (x1 === x2) {
+    const minY = Math.min(y1, y2);
+    const maxY = Math.max(y1, y2);
+    for (let y = minY + 1; y < maxY; y++) {
+      if (isBlocked(pieces, x1, y)) return false;
+    }
+  } else {
+    const minX = Math.min(x1, x2);
+    const maxX = Math.max(x1, x2);
+    for (let x = minX + 1; x < maxX; x++) {
+      if (isBlocked(pieces, x, y1)) return false;
+    }
+  }
+  return true;
+}
+
+// Cannon movement (similar to bishop but can jump over one piece to capture)
 function cannon(
   pieces: cg.Pieces,
   x1: number,
@@ -96,6 +154,42 @@ function cannon(
   return pieceAtDest ? piecesInBetween === 1 : piecesInBetween === 0;
 }
 
+// King (general) movement
+function king(
+  pieces: cg.Pieces,
+  x1: number,
+  y1: number,
+  x2: number,
+  y2: number,
+  color: cg.Color
+): boolean {
+  // Check if move is orthogonal and only one step
+  if (
+    !(
+      (Math.abs(x2 - x1) === 1 && y2 === y1) ||
+      (x1 === x2 && Math.abs(y2 - y1) === 1)
+    )
+  ) {
+    return false;
+  }
+
+  // Check palace boundaries (3x3 grid)
+  const inPalace = (x: number, y: number, color: cg.Color) => {
+    // Files are 0-based: 3,4,5 correspond to 'd','e','f'
+    const validX = x >= 3 && x <= 5;
+    
+    // For black (top): y should be 7-9
+    // For red (bottom): y should be 0-2
+    // Note: The coordinate system is flipped for red player
+    const validY = color === 'red' ? (y >= 0 && y <= 2) : (y >= 7 && y <= 9);
+    
+    return validX && validY;
+  };
+
+  // Check both start and end positions
+  return inPalace(x1, y1, color) && inPalace(x2, y2, color);
+}
+
 export function getValidMoves(pieces: cg.Pieces, key: cg.Key): cg.Key[] {
   const piece = pieces.get(key);
   if (!piece) return [];
@@ -106,12 +200,14 @@ export function getValidMoves(pieces: cg.Pieces, key: cg.Key): cg.Key[] {
       ? pawn(piece.color)
       : piece.role === "advisor"
       ? advisor
-      : piece.role === "elephant"
+      : piece.role === "bishop"
       ? (x1, y1, x2, y2) => elephant(pieces, x1, y1, x2, y2)
-      : piece.role === "horse"
-      ? horse
+      : piece.role === "knight"
+      ? (x1, y1, x2, y2) => knight(pieces, x1, y1, x2, y2)
+      : piece.role === "king"
+      ? (x1, y1, x2, y2) => king(pieces, x1, y1, x2, y2, piece.color)
       : piece.role === "rook"
-      ? chariot
+      ? (x1, y1, x2, y2) => rook(pieces, x1, y1, x2, y2)
       : piece.role === "cannon"
       ? (x1, y1, x2, y2) => cannon(pieces, x1, y1, x2, y2)
       : (x1, y1, x2, y2) => false;

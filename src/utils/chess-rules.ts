@@ -1,6 +1,7 @@
 import * as util from "./util";
 import * as cg from "./types";
 import { getValidMoves } from "./moves";
+import { readXiangqi } from "./fen";
 
 // Check if a move would put the moving side's general in check
 export function wouldBeInCheck(
@@ -42,7 +43,49 @@ export function wouldBeInCheck(
 }
 
 // Check if the current position is checkmate
-export function isCheckmate(pieces: cg.Pieces, color: cg.Color): boolean {
+export function isCheckmate(pieces: cg.Pieces, color: cg.Color): boolean;
+export function isCheckmate(fen: string): boolean;
+export function isCheckmate(arg1: string | cg.Pieces, arg2?: cg.Color): boolean {
+  if (typeof arg1 === 'string') {
+    // Parse FEN string to get pieces and turn
+    const pieces = readXiangqi(arg1);
+    // Get turn color from FEN (after the space)
+    const [_, turn] = arg1.split(' ');
+    const color = turn === 'w' ? 'red' : 'black';
+    return isCheckmateCore(pieces, color);
+  }
+  return isCheckmateCore(arg1, arg2!);
+}
+
+// Core checkmate detection logic
+function isCheckmateCore(pieces: cg.Pieces, color: cg.Color): boolean {
+  // First check if we're in check
+  let generalPos: cg.Key | undefined;
+  for (const [key, p] of pieces.entries()) {
+    if (p.role === "king" && p.color === color) {
+      generalPos = key;
+      break;
+    }
+  }
+  
+  // If no general found, technically it's checkmate
+  if (!generalPos) return true;
+
+  // Check if the general is in check
+  let isInCheck = false;
+  for (const [key, p] of pieces.entries()) {
+    if (p.color !== color) {
+      const moves = getValidMoves(pieces, key);
+      if (moves.includes(generalPos)) {
+        isInCheck = true;
+        break;
+      }
+    }
+  }
+
+  // If we're not in check, it's not checkmate
+  if (!isInCheck) return false;
+
   // For each piece of the current color
   for (const [from, piece] of pieces.entries()) {
     if (piece.color === color) {
@@ -51,15 +94,30 @@ export function isCheckmate(pieces: cg.Pieces, color: cg.Color): boolean {
       
       // For each possible move
       for (const to of moves) {
-        // If making this move would get us out of check
-        if (!wouldBeInCheck(pieces, from, to, color)) {
-          return false;
+        // Try the move and see if it gets us out of check
+        const newPieces = new Map(pieces);
+        const capturedPiece = newPieces.get(to);
+        newPieces.delete(from);
+        newPieces.set(to, piece);
+        
+        // After making the move, are we still in check?
+        if (!wouldBeInCheck(newPieces, from, to, color)) {
+          // Restore the captured piece before returning
+          if (capturedPiece) {
+            newPieces.set(to, capturedPiece);
+          }
+          return false; // Found a legal move that gets us out of check
+        }
+        
+        // Restore the captured piece for next iteration
+        if (capturedPiece) {
+          newPieces.set(to, capturedPiece);
         }
       }
     }
   }
   
-  // If we haven't found any legal moves, it's checkmate
+  // If we haven't found any legal moves and we're in check, it's checkmate
   return true;
 }
 

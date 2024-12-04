@@ -6,7 +6,9 @@ import GameModel from "@/lib/db/models/gameState";
 export async function GET() {
   try {
     await connectToDatabase();
-    const games = await GameModel.find().sort({ createdAt: -1 });
+    const games = await GameModel.find({
+      status: { $ne: "completed" },
+    }).sort({ createdAt: -1 });
     return NextResponse.json({ games });
   } catch (error) {
     console.error("Error fetching games:", error);
