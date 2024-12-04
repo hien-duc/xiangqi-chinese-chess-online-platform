@@ -4,52 +4,65 @@ import { useEffect } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import XiangqiBoard from "@/components/XiangqiBoard";
 import { useGameContext } from "@/hooks/useGameState";
-import styles from "@/styles/game.module.css";
+import styles from "@/styles/page.module.css";
+import LeftPanel from "@/components/LeftPanel";
+import RightPanel from "@/components/RightPanel";
+import "@/styles/xiangqiground.css";
+import "@/app/globals.css";
 
 export default function GamePage() {
   const params = useParams();
   const searchParams = useSearchParams();
-  const { setGameId, gameState, isLoading, refetch } = useGameContext();
+  const { setGameId, gameState, isLoading, error } = useGameContext();
   const gameId = params.gameId as string;
   const isSpectator = searchParams.get("spectate") === "true";
 
   useEffect(() => {
     if (gameId) {
       setGameId(gameId);
-      refetch();
     }
-  }, [gameId, setGameId, refetch]);
+  }, [gameId, setGameId]);
 
-  if (isLoading) {
-    return <div className={styles.loading}>Loading game...</div>;
+  if (isLoading && !gameState && !error) {
+    return (
+      <div className={styles.loading}>
+        <p>Loading game...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className={styles.error}>
+        <p>{error}</p>
+      </div>
+    );
   }
 
   if (!gameState) {
-    return <div className={styles.error}>Game not found</div>;
+    return (
+      <div className={styles.error}>
+        <p>Game not found</p>
+      </div>
+    );
   }
 
   return (
-    <div className={styles.gameContainer}>
-      <div className={styles.leftPanel}>
-        <div className={styles.playerInfo}>
-          <h3>Red Player</h3>
-          <p>{gameState.players.red.name || "Waiting..."}</p>
+    <main className="p-8">
+      <div className={styles.container}>
+        <div className={styles["game-container"]}>
+          <LeftPanel />
+          <div className={styles.boardContainer}>
+            <XiangqiBoard
+              className={isSpectator ? styles.spectatorBoard : ""}
+            />
+            {isSpectator && (
+              <div className={styles.spectatorBadge}>Spectator Mode</div>
+            )}
+          </div>
+          <RightPanel />
         </div>
       </div>
-
-      <div className={styles.boardContainer}>
-        <XiangqiBoard className={isSpectator ? styles.spectatorBoard : ""} />
-        {isSpectator && (
-          <div className={styles.spectatorBadge}>Spectator Mode</div>
-        )}
-      </div>
-
-      <div className={styles.rightPanel}>
-        <div className={styles.playerInfo}>
-          <h3>Black Player</h3>
-          <p>{gameState.players.black.name || "Waiting..."}</p>
-        </div>
-      </div>
-    </div>
+    </main>
   );
 }

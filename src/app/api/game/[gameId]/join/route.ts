@@ -7,7 +7,7 @@ export async function POST(
   { params }: { params: { gameId: string } }
 ) {
   try {
-    const { playerInfo } = await request.json();
+    const { playerInfo, side } = await request.json();
     const { gameId } = params;
 
     await connectToDatabase();
@@ -27,16 +27,30 @@ export async function POST(
       );
     }
 
-    // Determine which side to join
-    const side = game.players.red.id ? 'black' : 'red';
-    game.players[side] = playerInfo;
-    game.status = 'active';
+    // Check if the requested side is available
+    if (game.players[side].id !== 'waiting') {
+      return NextResponse.json(
+        { error: 'Selected side is not available' },
+        { status: 400 }
+      );
+    }
 
-    // Enable chat only if both players are registered users
-    game.chat.enabled = !game.players.red.isGuest && !game.players.black.isGuest;
+    // Update the player info for the selected side
+    game.players[side] = {
+      ...playerInfo,
+      orientation: side
+    };
+
+    // If both sides are filled, set the game to active
+    if (game.players.red.id !== 'waiting' && game.players.black.id !== 'waiting') {
+      game.status = 'active';
+    }
 
     await game.save();
-    return NextResponse.json(game);
+    return NextResponse.json({ 
+      success: true,
+      game: game.toObject() 
+    });
   } catch (error) {
     console.error('Error joining game:', error);
     return NextResponse.json(

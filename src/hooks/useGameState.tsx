@@ -37,7 +37,7 @@ const POLLING_INTERVAL = 2000;
 export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [gameId, setGameId] = useState("55153a8014829a865bbf700d");
+  const [gameId, setGameId] = useState("");
   const [gameState, setGameState] = useState<IGameState | null>(null);
   const [isLoading, setIsLoading] = useState(true); // Start with true for initial load only
   const [error, setError] = useState<string | null>(null);
@@ -132,13 +132,17 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
       try {
         if (!silent) setIsLoading(true);
         const response = await fetch(`/api/game/${gameId}`);
+        const data = await response.json();
 
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || "Failed to fetch game state");
+        if (response.status === 404) {
+          setGameState(null);
+          setError("Game not found");
+          return;
         }
 
-        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.error || "Failed to fetch game state");
+        }
 
         if (!data.game) {
           throw new Error("No game data received");
@@ -176,6 +180,9 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 
   useEffect(() => {
+    // Don't start polling if there's no gameId
+    if (!gameId) return;
+
     const startPolling = () => {
       if (pollingIntervalRef.current) return;
 
@@ -195,7 +202,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
 
     startPolling();
     return () => stopPolling();
-  }, [refetch]);
+  }, [refetch, gameId]);
 
   const value = {
     gameId,

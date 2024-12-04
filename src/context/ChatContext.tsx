@@ -19,7 +19,7 @@ interface ChatMessage {
 interface ChatContextType {
   messages: ChatMessage[];
   addMessage: (message: Omit<ChatMessage, "timestamp">) => Promise<void>;
-  getGameMessages: (gameId: string) => ChatMessage[];
+  getGameMessages: (gameId: string | null) => ChatMessage[];
   clearGameMessages: (gameId: string) => void;
   isLoading: boolean;
   error: string | null;
@@ -115,7 +115,11 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const getGameMessages = (gameId: string) => {
+  const getGameMessages = (gameId: string | null) => {
+    if (!gameId) {
+      return [];
+    }
+    
     if (currentGameId !== gameId) {
       setCurrentGameId(gameId);
       setLastTimestamp(null);

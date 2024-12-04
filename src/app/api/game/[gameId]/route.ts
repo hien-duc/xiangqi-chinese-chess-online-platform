@@ -9,19 +9,10 @@ export async function GET(
   try {
     await connectToDatabase();
 
-    // Properly await and destructure the gameId from params
     const gameId = (await params).gameId;
 
-    // Validate gameId format (assuming MongoDB ObjectId)
-    if (!/^[0-9a-fA-F]{24}$/.test(gameId)) {
-      return NextResponse.json(
-        { error: "Invalid game ID format" },
-        { status: 400 }
-      );
-    }
-
-    // Fetch game from database
-    const game = await GameModel.findById(gameId);
+    // Fetch game from database without strict format validation
+    const game = await GameModel.findById(gameId).catch(() => null);
 
     if (!game) {
       return NextResponse.json({ error: "Game not found" }, { status: 404 });
