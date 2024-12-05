@@ -24,24 +24,21 @@ interface Game {
 }
 
 export default function GamesPage() {
-  const [games, setGames] = useState<Game[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const router = useRouter();
   const { data: session } = useSession();
 
-  useEffect(() => {
-    fetchGames();
-  }, []);
+  const { games, isLoading, error, startPolling, stopPolling } = useGameStore();
 
-  const fetchGames = async () => {
-    try {
-      const response = await fetch("/api/games");
-      const data = await response.json();
-      setGames(data.games);
-    } catch (error) {
-      console.error("Error fetching games:", error);
-    }
-  };
+  useEffect(() => {
+    // Start polling when component mounts
+    startPolling();
+
+    // Stop polling when component unmounts
+    return () => {
+      stopPolling();
+    };
+  }, [startPolling, stopPolling]);
 
   const handleJoinGame = async (gameId: string, side: "red" | "black") => {
     try {
@@ -132,63 +129,76 @@ export default function GamesPage() {
         onSelectSide={handleCreateGame}
       />
       <div className={styles.gamesList}>
-        {games.map((game) => (
-          <div key={game._id} className={styles.gameCard}>
-            <div className={styles.gameInfo}>
-              <div className={styles.players}>
-                <div className={styles.player}>
-                  <span className={styles.side}>Red:</span>
-                  <span className={styles.name}>
-                    {game.players.red.name || "Waiting..."}
-                  </span>
-                </div>
-                <div className={styles.player}>
-                  <span className={styles.side}>Black:</span>
-                  <span className={styles.name}>
-                    {game.players.black.name || "Waiting..."}
-                  </span>
-                </div>
-              </div>
-              <div className={styles.status}>
-                Status:{" "}
-                <span className={styles[game.status]}>{game.status}</span>
-              </div>
-              <div className={styles.created}>
-                Created: {new Date(game.createdAt).toLocaleString()}
-              </div>
-            </div>
-            <div className={styles.actions}>
-              {game.status === "waiting" && (
-                <>
-                  {game.players.red.id == "waiting" && (
-                    <button
-                      onClick={() => handleJoinGame(game._id, "red")}
-                      className={`${styles.button} ${styles.redSide}`}
-                    >
-                      Join as Red
-                    </button>
-                  )}
-                  {game.players.black.id == "waiting" && (
-                    <button
-                      onClick={() => handleJoinGame(game._id, "black")}
-                      className={`${styles.button} ${styles.blackSide}`}
-                    >
-                      Join as Black
-                    </button>
-                  )}
-                </>
-              )}
-              {game.status === "active" && (
-                <button
-                  onClick={() => handleSpectate(game._id)}
-                  className={`${styles.button} ${styles.spectate}`}
-                >
-                  Spectate
-                </button>
-              )}
-            </div>
+        {isLoading ? (
+          <div>Loading...</div>
+        ) : error ? (
+          <div>
+            Error:{" "}
+            {typeof error === "string" ? error : (error as Error).message}
           </div>
-        ))}
+        ) : (
+          games.map((game) => (
+            <div key={game._id as React.Key} className={styles.gameCard}>
+              <div className={styles.gameInfo}>
+                <div className={styles.players}>
+                  <div className={styles.player}>
+                    <span className={styles.side}>Red:</span>
+                    <span className={styles.name}>
+                      {game.players.red.name || "Waiting..."}
+                    </span>
+                  </div>
+                  <div className={styles.player}>
+                    <span className={styles.side}>Black:</span>
+                    <span className={styles.name}>
+                      {game.players.black.name || "Waiting..."}
+                    </span>
+                  </div>
+                </div>
+                <div className={styles.status}>
+                  Status:{" "}
+                  <span className={styles[game.status]}>{game.status}</span>
+                </div>
+                <div className={styles.created}>
+                  Created: {new Date(game.createdAt).toLocaleString()}
+                </div>
+              </div>
+              <div className={styles.actions}>
+                {game.status === "waiting" && (
+                  <>
+                    {game.players.red.id == "waiting" && (
+                      <button
+                        onClick={() =>
+                          handleJoinGame(game._id as string, "red")
+                        }
+                        className={`${styles.button} ${styles.redSide}`}
+                      >
+                        Join as Red
+                      </button>
+                    )}
+                    {game.players.black.id == "waiting" && (
+                      <button
+                        onClick={() =>
+                          handleJoinGame(game._id as string, "black")
+                        }
+                        className={`${styles.button} ${styles.blackSide}`}
+                      >
+                        Join as Black
+                      </button>
+                    )}
+                  </>
+                )}
+                {game.status === "active" && (
+                  <button
+                    onClick={() => handleSpectate(game._id as string)}
+                    className={`${styles.button} ${styles.spectate}`}
+                  >
+                    Spectate
+                  </button>
+                )}
+              </div>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );

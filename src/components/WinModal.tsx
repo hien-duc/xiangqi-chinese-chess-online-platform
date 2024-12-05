@@ -35,7 +35,10 @@ const WinModal: React.FC<WinModalProps> = ({
       });
 
       if (!completeResponse.ok) {
-        console.error("Failed to complete game:", await completeResponse.text());
+        console.error(
+          "Failed to complete game:",
+          await completeResponse.text()
+        );
       }
 
       // Delete the completed game from active games list
