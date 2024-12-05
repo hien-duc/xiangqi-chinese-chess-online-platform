@@ -22,6 +22,15 @@ export interface IGameState extends Document {
   premove?: [string, string];
   check?: string;
   gameOver?: boolean;
+  chat: {
+    enabled: boolean;
+    messages: Array<{
+      userId: string;
+      userName: string;
+      message: string;
+      timestamp: Date;
+    }>;
+  };
   createdAt: Date;
   updatedAt: Date;
 }
@@ -81,6 +90,17 @@ const GameSchema = new Schema<IGameState>(
       type: Boolean,
       default: false,
     },
+    chat: {
+      enabled: { type: Boolean, default: true },
+      messages: [
+        {
+          userId: { type: String, required: true },
+          userName: { type: String, required: true },
+          message: { type: String, required: true, maxlength: 500 },
+          timestamp: { type: Date, default: Date.now },
+        },
+      ],
+    },
   },
   {
     timestamps: true,
@@ -91,5 +111,6 @@ GameSchema.index({ status: 1 });
 GameSchema.index({ "players.red.id": 1 });
 GameSchema.index({ "players.black.id": 1 });
 GameSchema.index({ createdAt: 1 });
+GameSchema.index({ "chat.messages.timestamp": 1 });
 
 export default mongoose.models.Game || model<IGameState>("Game", GameSchema);

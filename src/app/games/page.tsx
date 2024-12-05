@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import styles from "@/styles/games.module.css";
 import NewGameModal from "@/components/NewGameModal";
 import { useGameStore } from "@/stores/gameStore";
+import { joinGame, createGame, spectateGame } from "@/actions/gameActions";
 
 interface Player {
   id: string;
@@ -28,7 +29,7 @@ export default function GamesPage() {
   const router = useRouter();
   const { data: session } = useSession();
 
-  const { games, isLoading, error, startPolling, stopPolling } = useGameStore();
+  const { games, isLoading, error, startPolling, stopPolling, handleDisconnect } = useGameStore();
 
   useEffect(() => {
     // Start polling when component mounts
@@ -40,74 +41,41 @@ export default function GamesPage() {
     };
   }, [startPolling, stopPolling]);
 
-  const handleJoinGame = async (gameId: string, side: "red" | "black") => {
-    try {
-      const playerInfo = {
-        id:
-          session?.user?.id ||
-          "guest-" + Math.random().toString(36).substr(2, 9),
-        isGuest: !session?.user,
-        name: session?.user?.name || "Guest Player",
-      };
+  useEffect(() => {
+    // Cleanup function that runs when component unmounts
+    return () => {
+      if (session?.user?.id) {
+        // Find any games the user is part of
+        const userGames = games.filter(
+          game =>
+            game.players.red.id === session.user.id ||
+            game.players.black.id === session.user.id
+        );
 
-      const response = await fetch(`/api/game/${gameId}/join`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          playerInfo,
-          side,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok && data.success) {
-        useGameStore.getState().updateGame(gameId, data.game);
-        router.push(`/games/${gameId}`);
-      } else {
-        console.error("Failed to join game:", data.error || "Unknown error");
+        // Handle disconnection for each game
+        userGames.forEach(game => {
+          handleDisconnect(game._id, session.user.id);
+        });
       }
-    } catch (error) {
-      console.error("Error joining game:", error);
+    };
+  }, [session, games, handleDisconnect]);
+
+  const handleJoinGame = async (gameId: string, side: "red" | "black") => {
+    const result = await joinGame(gameId, side, session);
+    if (result.success) {
+        router.push(`/games/${gameId}`);
     }
   };
 
   const handleSpectate = (gameId: string) => {
-    router.push(`/games/${gameId}?spectate=true`);
+    const spectateUrl = spectateGame(gameId);
+    router.push(spectateUrl);
   };
 
   const handleCreateGame = async (side: "red" | "black") => {
-    try {
-      const playerInfo = {
-        id:
-          session?.user?.id ||
-          "guest-" + Math.random().toString(36).substr(2, 9),
-        isGuest: !session?.user,
-        name: session?.user?.name || "Guest Player",
-      };
-
-      const response = await fetch("/api/game/create", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          playerInfo,
-          side,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok && data.success && data.gameId) {
-        router.push(`/games/${data.gameId}`);
-      } else {
-        console.error("Failed to create game:", data.error || "Unknown error");
-      }
-    } catch (error) {
-      console.error("Error creating game:", error);
+    const result = await createGame(side, session);
+    if (result.success && result.gameId) {
+      router.push(`/games/${result.gameId}`);
     }
     setIsModalOpen(false);
   };

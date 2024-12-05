@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useGameContext } from "@/hooks/useGameState";
-import { useChat } from "@/context/ChatContext";
 import { useSession } from "next-auth/react";
 import { useGameStore } from "@/stores/gameStore";
+import { createGame, joinGame } from "@/actions/gameActions";
 import styles from "../styles/leftpanel.module.css";
 
 const POLLING_INTERVAL = 2000; // 2 seconds
@@ -10,91 +10,63 @@ const POLLING_INTERVAL = 2000; // 2 seconds
 const LeftPanel = () => {
   const { gameState } = useGameContext();
   const { data: session } = useSession();
-  const { getGameMessages, addMessage, isLoading, error } = useChat();
   const [message, setMessage] = useState("");
   const [activeView, setActiveView] = useState("view");
   const [showSideSelection, setShowSideSelection] = useState(false);
-  
-  const { games, fetchGames } = useGameStore();
 
-  // Get messages for current game
-  const messages = gameState ? getGameMessages(gameState.id) : [];
+  const { 
+    games, 
+    fetchGames, 
+    currentGame,
+    setCurrentGame,
+    sendChatMessage,
+    chatLoading,
+    chatError 
+  } = useGameStore();
+
+  // Set current game when gameState changes
+  useEffect(() => {
+    if (gameState) {
+      setCurrentGame(gameState);
+    }
+  }, [gameState, setCurrentGame]);
 
   // Fetch available games when view changes to create
   useEffect(() => {
     if (activeView === "create") {
       fetchGames();
-      // Set up polling for game updates
-      const intervalId = setInterval(fetchGames, POLLING_INTERVAL);
-      return () => clearInterval(intervalId);
     }
   }, [activeView, fetchGames]);
 
-  const handleCreateGame = async (side) => {
-    try {
-      const response = await fetch('/api/games', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          side,
-          playerInfo: {
-            id: session?.user?.id || 'guest',
-            isGuest: !session?.user,
-            name: session?.user?.name || 'Guest'
-          }
-        }),
-      });
-
-      if (response.ok) {
-        const game = await response.json();
-        await fetchGames();
-        setShowSideSelection(false);
-      }
-    } catch (error) {
-      console.error('Error creating game:', error);
-    }
-  };
-
-  const handleJoinGame = async (gameId) => {
-    try {
-      const response = await fetch(`/api/game/${gameId}/join`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          playerInfo: {
-            id: session?.user?.id || 'guest',
-            isGuest: !session?.user,
-            name: session?.user?.name || 'Guest'
-          }
-        }),
-      });
-
-      if (response.ok) {
-        const game = await response.json();
-        // TODO: Handle game joined
-      }
-    } catch (error) {
-      console.error('Error joining game:', error);
-    }
-  };
-
   const handleSendMessage = async () => {
-    if (!message.trim() || !gameState || !session?.user) return;
+    if (!message.trim() || !session || !gameState) return;
 
     try {
-      await addMessage({
-        gameId: gameState.id,
+      await sendChatMessage(gameState.id, {
         userId: session.user.id,
-        userName: session.user.name || 'Anonymous',
-        message: message.trim()
+        userName: session.user.name || "Anonymous",
+        message: message.trim(),
       });
       setMessage("");
     } catch (err) {
-      console.error('Failed to send message:', err);
+      console.error("Failed to send message:", err);
+    }
+  };
+
+  const handleCreateGame = async (side) => {
+    const result = await createGame(side, session);
+    if (result.success && result.gameId) {
+      await fetchGames();
+      setShowSideSelection(false);
+    }
+  };
+
+  const handleJoinGame = async (gameId, game) => {
+    // Determine which side is available
+    const availableSide = game.players.red.id === "waiting" ? "red" : "black";
+    const result = await joinGame(gameId, availableSide, session);
+    if (result.success) {
+      await fetchGames();
     }
   };
 
@@ -144,31 +116,35 @@ const LeftPanel = () => {
     <div className={styles.createMode}>
       <h3>Games</h3>
       <div className={styles.gamesList}>
-        {games.map(game => (
+        {games.map((game) => (
           <div key={game._id} className={styles.gameItem}>
             <div className={styles.gameInfo}>
-              <span className={styles.playerName}>{game.players.red.name}</span>
+              <span className={styles.playerName}>
+                {game.players.red.name || "Waiting..."}
+              </span>
               <span className={styles.vs}>vs</span>
               <span className={styles.playerName}>
-                {game.players.black.name || 'Waiting...'}
+                {game.players.black.name || "Waiting..."}
               </span>
             </div>
             <div className={styles.gameStatus}>
               <span className={styles.statusBadge} data-status={game.status}>
                 {game.status}
               </span>
-              {game.status === 'waiting' && (
-                <button 
+              {game.status === "waiting" && (
+                <button
                   className={styles.joinButton}
-                  onClick={() => handleJoinGame(game._id)}
+                  onClick={() => handleJoinGame(game._id, game)}
                 >
-                  Join
+                  Join as {game.players.red.id === "waiting" ? "Red" : "Black"}
                 </button>
               )}
-              {game.status === 'active' && (
-                <button 
+              {game.status === "active" && (
+                <button
                   className={styles.spectateButton}
-                  onClick={() => {/* TODO: Handle spectate */}}
+                  onClick={() => {
+                    /* TODO: Handle spectate */
+                  }}
                 >
                   Spectate
                 </button>
@@ -177,25 +153,25 @@ const LeftPanel = () => {
           </div>
         ))}
       </div>
-      
+
       {showSideSelection ? (
         <div className={styles.sideSelection}>
           <h4>Choose your side</h4>
           <div className={styles.sideButtons}>
-            <button 
+            <button
               className={`${styles.sideButton} ${styles.redSide}`}
-              onClick={() => handleCreateGame('red')}
+              onClick={() => handleCreateGame("red")}
             >
               Red Side
             </button>
-            <button 
+            <button
               className={`${styles.sideButton} ${styles.blackSide}`}
-              onClick={() => handleCreateGame('black')}
+              onClick={() => handleCreateGame("black")}
             >
               Black Side
             </button>
           </div>
-          <button 
+          <button
             className={styles.cancelButton}
             onClick={() => setShowSideSelection(false)}
           >
@@ -203,7 +179,7 @@ const LeftPanel = () => {
           </button>
         </div>
       ) : (
-        <button 
+        <button
           className={styles.createButton}
           onClick={() => setShowSideSelection(true)}
         >
@@ -218,19 +194,17 @@ const LeftPanel = () => {
       <h3>Chat</h3>
       <div className={styles.chatContainer}>
         <div className={styles.messagesContainer}>
-          {error && (
+          {chatError && (
             <div className={styles.errorMessage}>
-              Error loading messages: {error}
+              Error: {chatError}
             </div>
           )}
-          {isLoading && messages.length === 0 ? (
-            <div className={styles.loadingMessage}>Loading messages...</div>
-          ) : messages.length > 0 ? (
-            messages.map((msg, index) => (
-              <div 
-                key={`${msg.userId}-${msg.timestamp}-${index}`} 
+          {currentGame?.chat?.messages?.length > 0 ? (
+            currentGame.chat.messages.map((msg, index) => (
+              <div
+                key={`${msg.userId}-${msg.timestamp}-${index}`}
                 className={`${styles.chatMessage} ${
-                  msg.userId === session?.user?.id ? styles.ownMessage : ''
+                  msg.userId === session?.user?.id ? styles.ownMessage : ""
                 }`}
               >
                 <span className={styles.messageSender}>{msg.userName}:</span>
@@ -248,22 +222,21 @@ const LeftPanel = () => {
           <input
             type="text"
             placeholder="Type a message..."
-            className={styles.chatInput}
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyPress={(e) => {
-              if (e.key === 'Enter') {
+              if (e.key === "Enter") {
                 handleSendMessage();
               }
             }}
-            disabled={!session || isLoading}
+            disabled={!session || chatLoading}
           />
-          <button 
+          <button
             className={styles.sendButton}
             onClick={handleSendMessage}
-            disabled={!session || isLoading}
+            disabled={!session || chatLoading}
           >
-            {isLoading ? 'Sending...' : 'Send'}
+            {chatLoading ? "Sending..." : "Send"}
           </button>
         </div>
       </div>

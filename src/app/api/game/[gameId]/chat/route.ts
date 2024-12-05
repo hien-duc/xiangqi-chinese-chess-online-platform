@@ -1,66 +1,91 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { connectToDatabase } from "@/lib/db/db-connect";
-import GameModel from "@/lib/db/models/gameState";
+import GameState from "@/lib/db/models/gameState";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
+
+const chatMessageSchema = z.object({
+  userId: z.string(),
+  userName: z.string(),
+  message: z.string().max(500),
+});
 
 export async function POST(
   req: NextRequest,
   { params }: { params: { gameId: string } }
 ) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { gameId } = params;
+    const body = await req.json();
+
+    const validatedMessage = chatMessageSchema.parse(body);
+
     await connectToDatabase();
 
-    const gameId = (await params).gameId;
-
-    // Validate gameId format
-    if (!/^[0-9a-fA-F]{24}$/.test(gameId)) {
-      return NextResponse.json(
-        { error: "Invalid game ID format" },
-        { status: 400 }
-      );
-    }
-
-    // Parse request body
-    const { userId, message } = await req.json();
-
-    // Validate required fields
-    if (!userId || !message) {
-      return NextResponse.json(
-        { error: "userId and message are required" },
-        { status: 400 }
-      );
-    }
-
-    // Find game and validate chat is enabled
-    const game = await GameModel.findById(gameId);
+    const game = await GameState.findById(gameId);
     if (!game) {
       return NextResponse.json({ error: "Game not found" }, { status: 404 });
     }
 
-    if (!game.chat.enabled) {
+    // Add message to game chat
+    game.chat.messages.push({
+      ...validatedMessage,
+      timestamp: new Date(),
+    });
+
+    await game.save();
+
+    return NextResponse.json({
+      success: true,
+      message: "Message sent successfully",
+    });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: "Chat is disabled for this game" },
-        { status: 403 }
+        { error: "Invalid message format" },
+        { status: 400 }
       );
     }
 
-    // Add new message
-    const newMessage = {
-      userId,
-      message,
-      timestamp: new Date(),
-    };
-
-    game.chat.messages = game.chat.messages || [];
-    game.chat.messages.push(newMessage);
-
-    // Save updated game
-    await game.save();
-
-    return NextResponse.json({ message: newMessage });
-  } catch (error) {
-    console.error("Error adding chat message:", error);
     return NextResponse.json(
-      { error: "Failed to add chat message" },
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function GET(
+  req: NextRequest,
+  { params }: { params: { gameId: string } }
+) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { gameId } = await params;
+
+    await connectToDatabase();
+
+    const game = await GameState.findById(gameId);
+    if (!game) {
+      return NextResponse.json({ error: "Game not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({
+      success: true,
+      messages: game.chat.messages,
+    });
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Internal server error" },
       { status: 500 }
     );
   }

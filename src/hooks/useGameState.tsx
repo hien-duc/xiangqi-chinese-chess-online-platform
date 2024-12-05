@@ -8,6 +8,7 @@ import React, {
   useCallback,
   useRef,
 } from "react";
+import { usePathname } from "next/navigation";
 import { IGameState } from "../lib/db/models/gameState";
 import WinModal from "../components/WinModal";
 import { isCheckmate } from "../utils/chess-rules";
@@ -45,9 +46,10 @@ export const GameProvider: React.FC<GameProviderProps> = ({
   children,
   gameId,
 }) => {
+  const pathname = usePathname();
   const [gameIdState, setGameId] = useState(gameId);
   const [gameState, setGameState] = useState<IGameState | null>(null);
-  const [isLoading, setIsLoading] = useState(true); // Start with true for initial load only
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lastMoveTimestamp, setLastMoveTimestamp] = useState(0);
   const [showWinModal, setShowWinModal] = useState(false);
@@ -56,6 +58,85 @@ export const GameProvider: React.FC<GameProviderProps> = ({
   const lastFenRef = useRef<string | null>(null);
   const isMakingMoveRef = useRef(false);
   const currentGameStateRef = useRef<IGameState | null>(null);
+  const isMountedRef = useRef(true);
+  // Allow fetching on both game pages and during game creation
+  const isValidGameContext =
+    pathname?.startsWith("/games/") || pathname === "/games";
+
+  const stopPolling = useCallback(() => {
+    if (pollingIntervalRef.current) {
+      clearInterval(pollingIntervalRef.current);
+      pollingIntervalRef.current = null;
+    }
+  }, []);
+
+  // Clear everything when leaving valid game contexts
+  useEffect(() => {
+    if (!isValidGameContext) {
+      stopPolling();
+      setGameState(null);
+      setError(null);
+      setIsLoading(false);
+      isMountedRef.current = false;
+    } else {
+      isMountedRef.current = true;
+    }
+  }, [isValidGameContext, stopPolling]);
+
+  const refetch = useCallback(
+    async (silent: boolean = false) => {
+      if (!gameIdState || !isMountedRef.current) {
+        return;
+      }
+
+      const timeSinceLastMove = Date.now() - lastMoveTimestamp;
+      if (timeSinceLastMove < 1000 || isMakingMoveRef.current) {
+        return;
+      }
+
+      try {
+        if (!silent && isMountedRef.current) setIsLoading(true);
+        const response = await fetch(`/api/game/${gameIdState}`);
+
+        if (!isMountedRef.current) return;
+
+        const data = await response.json();
+
+        if (!isMountedRef.current) return;
+
+        if (response.status === 404) {
+          setGameState(null);
+          setError("Game not found");
+          return;
+        }
+
+        if (!response.ok) {
+          throw new Error(data.error || "Failed to fetch game state");
+        }
+
+        if (!data.game) {
+          throw new Error("No game data received");
+        }
+
+        if (isMountedRef.current) {
+          setGameState(data.game);
+          setError(null);
+          lastFenRef.current = data.game.fen;
+        }
+      } catch (err) {
+        if (isMountedRef.current) {
+          const errorMessage =
+            err instanceof Error ? err.message : "Failed to fetch game state";
+          setError(errorMessage);
+        }
+      } finally {
+        if (isMountedRef.current) {
+          setIsLoading(false);
+        }
+      }
+    },
+    [gameIdState, lastMoveTimestamp]
+  );
 
   useEffect(() => {
     currentGameStateRef.current = gameState;
@@ -173,100 +254,52 @@ export const GameProvider: React.FC<GameProviderProps> = ({
     [gameIdState, gameState]
   );
 
-  const refetch = useCallback(
-    async (silent: boolean = false) => {
-      if (!gameIdState) return;
-
-      const timeSinceLastMove = Date.now() - lastMoveTimestamp;
-      if (timeSinceLastMove < 1000 || isMakingMoveRef.current) {
-        return;
-      }
-
-      try {
-        if (!silent) setIsLoading(true);
-        const response = await fetch(`/api/game/${gameIdState}`);
-        const data = await response.json();
-
-        if (response.status === 404) {
-          setGameState(null);
-          setError("Game not found");
-          return;
-        }
-
-        if (!response.ok) {
-          throw new Error(data.error || "Failed to fetch game state");
-        }
-
-        if (!data.game) {
-          throw new Error("No game data received");
-        }
-
-        // Update state if any field has changed
-        setGameState((prevState) => {
-          if (!prevState) return data.game;
-
-          // Check if any field has changed
-          const hasChanged =
-            prevState.fen !== data.game.fen ||
-            prevState.status !== data.game.status ||
-            prevState.turn !== data.game.turn ||
-            prevState.players.red.id !== data.game.players.red.id ||
-            prevState.players.black.id !== data.game.players.black.id ||
-            JSON.stringify(prevState.moves) !== JSON.stringify(data.game.moves);
-
-          return hasChanged ? data.game : prevState;
-        });
-      } catch (err) {
-        if (!silent) {
-          const errorMessage =
-            err instanceof Error ? err.message : "Failed to fetch game state";
-          setError(errorMessage);
-          console.error("Fetch error:", err);
-        }
-      } finally {
-        if (!silent) setIsLoading(false);
-      }
-    },
-    [gameIdState, lastMoveTimestamp]
-  );
-
-  const togglePolling = useCallback((shouldPoll: boolean) => {
-    if (shouldPoll) {
-      // Start polling if not already polling
-      if (!pollingIntervalRef.current) {
-        pollingIntervalRef.current = setInterval(() => {
-          refetch(true);
-        }, POLLING_INTERVAL);
-      }
-    } else {
-      // Stop polling if currently polling
-      if (pollingIntervalRef.current) {
-        clearInterval(pollingIntervalRef.current);
-        pollingIntervalRef.current = null;
-      }
-    }
-  }, [refetch]);
-
-  // Clean up polling interval on unmount
   useEffect(() => {
-    return () => {
-      if (pollingIntervalRef.current) {
-        clearInterval(pollingIntervalRef.current);
-        pollingIntervalRef.current = null;
-      }
-    };
-  }, []);
+    if (!isValidGameContext) return;
 
-  // Start polling when gameId changes
-  useEffect(() => {
+    isMountedRef.current = true;
+
     if (gameIdState) {
       refetch();
-      togglePolling(true);
-    } else {
-      togglePolling(false);
+
+      // Only start polling if we're on a game page (not during creation)
+      if (pathname?.startsWith("/game/")) {
+        pollingIntervalRef.current = setInterval(() => {
+          if (isMountedRef.current) {
+            refetch(true);
+          }
+        }, POLLING_INTERVAL);
+      }
     }
-    return () => togglePolling(false);
-  }, [gameIdState, togglePolling]);
+
+    return () => {
+      isMountedRef.current = false;
+      stopPolling();
+      setGameState(null);
+      setError(null);
+      setIsLoading(false);
+    };
+  }, [gameIdState, refetch, isValidGameContext, pathname, stopPolling]);
+
+  const togglePolling = useCallback(
+    (shouldPoll: boolean) => {
+      if (shouldPoll) {
+        // Start polling if not already polling
+        if (!pollingIntervalRef.current) {
+          pollingIntervalRef.current = setInterval(() => {
+            refetch(true);
+          }, POLLING_INTERVAL);
+        }
+      } else {
+        // Stop polling if currently polling
+        if (pollingIntervalRef.current) {
+          clearInterval(pollingIntervalRef.current);
+          pollingIntervalRef.current = null;
+        }
+      }
+    },
+    [refetch]
+  );
 
   const value = {
     gameId: gameIdState,

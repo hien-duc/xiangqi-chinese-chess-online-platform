@@ -4,8 +4,11 @@ import { IGameState } from "@/lib/db/models/gameState";
 
 interface GameStore {
   games: IGameState[];
+  currentGame: IGameState | null;
   isLoading: boolean;
   error: string | null;
+  chatLoading: boolean;
+  chatError: string | null;
   lastFetched: number | null;
   setGames: (games: IGameState[]) => void;
   updateGame: (gameId: string, updatedGame: IGameState) => void;
@@ -13,6 +16,9 @@ interface GameStore {
   fetchGames: () => Promise<void>;
   startPolling: () => void;
   stopPolling: () => void;
+  handleDisconnect: (gameId: string, playerId: string) => Promise<void>;
+  setCurrentGame: (game: IGameState) => void;
+  sendChatMessage: (gameId: string, message: { userId: string; userName: string; message: string }) => Promise<void>;
 }
 
 export const useGameStore = create<GameStore>()(
@@ -22,8 +28,11 @@ export const useGameStore = create<GameStore>()(
 
       return {
         games: [],
+        currentGame: null,
         isLoading: false,
         error: null,
+        chatLoading: false,
+        chatError: null,
         lastFetched: null,
         setGames: (games) => set({ games }),
         updateGame: (gameId, updatedGame) =>
@@ -83,11 +92,89 @@ export const useGameStore = create<GameStore>()(
             pollInterval = null;
           }
         },
+        handleDisconnect: async (gameId: string, playerId: string) => {
+          try {
+            // First check if the game exists in our local state
+            const game = get().games.find(g => g._id === gameId);
+            if (!game) {
+              return; // Game doesn't exist, no need to handle disconnection
+            }
+
+            // Only handle disconnection if the player is actually in the game
+            const isPlayerInGame = 
+              game.players.red.id === playerId || 
+              game.players.black.id === playerId;
+
+            if (!isPlayerInGame) {
+              return; // Player is not in this game
+            }
+
+            const response = await fetch("/api/game/disconnect", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ gameId, playerId }),
+            });
+
+            if (!response.ok) {
+              throw new Error("Failed to handle disconnection");
+            }
+
+            // Remove the game from the local state
+            set((state) => ({
+              games: state.games.filter((g) => g._id !== gameId),
+            }));
+
+          } catch (error) {
+            console.error("Error handling disconnection:", error);
+            set({ error: "Failed to handle disconnection" });
+          }
+        },
+        setCurrentGame: (game) => {
+          set({ currentGame: game });
+        },
+        sendChatMessage: async (gameId, message) => {
+          set({ chatLoading: true, chatError: null });
+          try {
+            const response = await fetch(`/api/game/${gameId}/chat`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(message),
+            });
+
+            if (!response.ok) {
+              throw new Error('Failed to send message');
+            }
+
+            const data = await response.json();
+            
+            // Update the current game with new chat message
+            const currentGame = get().currentGame;
+            if (currentGame && currentGame._id === gameId) {
+              set({
+                currentGame: {
+                  ...currentGame,
+                  chat: {
+                    ...currentGame.chat,
+                    messages: [...currentGame.chat.messages, { ...message, timestamp: new Date() }]
+                  }
+                }
+              });
+            }
+
+            set({ chatLoading: false });
+          } catch (error) {
+            set({ chatError: 'Failed to send message', chatLoading: false });
+          }
+        },
       };
     },
     {
       name: "game-store",
-      partialize: (state) => ({ games: state.games }), // Only persist games array
+      partialize: (state) => ({
+        games: state.games,
+      }),
     }
   )
 );

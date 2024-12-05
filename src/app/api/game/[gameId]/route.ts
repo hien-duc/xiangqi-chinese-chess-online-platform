@@ -35,7 +35,7 @@ export async function PATCH(
 ) {
   try {
     await connectToDatabase();
-    const { gameId } = params;
+    const { gameId } = await params;
     const updateData = await request.json();
 
     // Find and update the game
@@ -66,7 +66,7 @@ export async function DELETE(
 ) {
   try {
     await connectToDatabase();
-    const { gameId } = params;
+    const { gameId } = await params;
 
     const game = await GameModel.findById(gameId);
     if (!game) {
@@ -93,7 +93,7 @@ export async function POST(
 ) {
   try {
     await connectToDatabase();
-    const { gameId } = params;
+    const { gameId } = await params;
     const { playerId } = await request.json();
 
     const game = await GameModel.findById(gameId);
@@ -102,11 +102,11 @@ export async function POST(
     }
 
     // If player disconnects during active game, they forfeit
-    if (game.status === 'active') {
-      const playerColor = game.players.red.id === playerId ? 'red' : 'black';
-      const winningColor = playerColor === 'red' ? 'Black' : 'Red';
+    if (game.status === "active") {
+      const playerColor = game.players.red.id === playerId ? "red" : "black";
+      const winningColor = playerColor === "red" ? "Black" : "Red";
 
-      game.status = 'completed';
+      game.status = "completed";
       game.gameOver = true;
       game.winner = winningColor;
       game.forfeitedBy = playerColor;
@@ -114,7 +114,7 @@ export async function POST(
       await game.remove(); // This will trigger the pre-remove hook to update stats
     }
     // If in waiting state, just remove the game
-    else if (game.status === 'waiting') {
+    else if (game.status === "waiting") {
       await game.remove();
     }
 
