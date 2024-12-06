@@ -3,9 +3,7 @@ import { useGameContext } from "@/hooks/useGameState";
 import { useSession } from "next-auth/react";
 import { useGameStore } from "@/stores/gameStore";
 import { createGame, joinGame } from "@/actions/gameActions";
-import styles from "../styles/leftpanel.module.css";
-
-const POLLING_INTERVAL = 2000; // 2 seconds
+import styles from "@/styles/leftpanel.module.css";
 
 const LeftPanel = () => {
   const { gameState } = useGameContext();
@@ -14,14 +12,14 @@ const LeftPanel = () => {
   const [activeView, setActiveView] = useState("view");
   const [showSideSelection, setShowSideSelection] = useState(false);
 
-  const { 
-    games, 
-    fetchGames, 
+  const {
+    games,
+    fetchGames,
     currentGame,
     setCurrentGame,
     sendChatMessage,
     chatLoading,
-    chatError 
+    chatError,
   } = useGameStore();
 
   // Set current game when gameState changes
@@ -195,9 +193,7 @@ const LeftPanel = () => {
       <div className={styles.chatContainer}>
         <div className={styles.messagesContainer}>
           {chatError && (
-            <div className={styles.errorMessage}>
-              Error: {chatError}
-            </div>
+            <div className={styles.errorMessage}>Error: {chatError}</div>
           )}
           {currentGame?.chat?.messages?.length > 0 ? (
             currentGame.chat.messages.map((msg, index) => (

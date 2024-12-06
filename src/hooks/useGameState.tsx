@@ -263,7 +263,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({
       refetch();
 
       // Only start polling if we're on a game page (not during creation)
-      if (pathname?.startsWith("/game/")) {
+      if (pathname?.startsWith("/games/")) {
         pollingIntervalRef.current = setInterval(() => {
           if (isMountedRef.current) {
             refetch(true);

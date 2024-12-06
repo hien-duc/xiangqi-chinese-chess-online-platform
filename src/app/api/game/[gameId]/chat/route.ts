@@ -4,12 +4,7 @@ import { connectToDatabase } from "@/lib/db/db-connect";
 import GameState from "@/lib/db/models/gameState";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
-
-const chatMessageSchema = z.object({
-  userId: z.string(),
-  userName: z.string(),
-  message: z.string().max(500),
-});
+import { chatMessageSchema } from "@/lib/zod";
 
 export async function POST(
   req: NextRequest,
