@@ -1,6 +1,6 @@
 import { HeadlessState, State } from "./state.ts";
 import { setCheck, setSelected } from "./board.ts";
-import { read as fenRead } from "./fen.ts";
+import { readXiangqi as fenRead } from "./fen.ts";
 import { DrawShape, DrawBrushes } from "./draw.ts";
 import * as cg from "./types.ts";
 

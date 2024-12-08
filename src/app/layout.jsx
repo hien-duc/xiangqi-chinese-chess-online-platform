@@ -2,7 +2,7 @@
 
 import { AuthProvider } from "@/components/auth-provider";
 import { Navbar } from "@/components/navbar";
-import { GameProvider } from "../hooks/useGameState";
+import { GameProvider } from "@/hooks/useGameState";
 import "./globals.css";
 import { useEffect } from "react";
 import { startGameCleanupTask } from "@/utils/scheduledTasks";

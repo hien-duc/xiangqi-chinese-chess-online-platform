@@ -8,24 +8,9 @@ import NewGameModal from "@/components/NewGameModal";
 import { useGameStore } from "@/stores/gameStore";
 import { joinGame, createGame, spectateGame } from "@/actions/gameActions";
 
-interface Player {
-  id: string;
-  isGuest: boolean;
-  name: string;
-}
-
-interface Game {
-  _id: string;
-  players: {
-    red: Player;
-    black: Player;
-  };
-  status: "waiting" | "active" | "completed";
-  createdAt: string;
-}
-
 export default function GamesPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
   const router = useRouter();
   const { data: session } = useSession();
 
@@ -34,12 +19,17 @@ export default function GamesPage() {
   useEffect(() => {
     // Start polling when component mounts
     startPolling();
+    
+    // Set initial load to false after first fetch, regardless of games count
+    if (!isLoading && isInitialLoad) {
+      setIsInitialLoad(false);
+    }
 
     // Stop polling when component unmounts
     return () => {
       stopPolling();
     };
-  }, [startPolling, stopPolling]);
+  }, [startPolling, stopPolling, isLoading, isInitialLoad]);
 
   useEffect(() => {
     // Cleanup function that runs when component unmounts
@@ -87,6 +77,7 @@ export default function GamesPage() {
         <button
           className={styles.newGameButton}
           onClick={() => setIsModalOpen(true)}
+          disabled={isLoading || isInitialLoad}
         >
           New Game
         </button>
@@ -97,12 +88,23 @@ export default function GamesPage() {
         onSelectSide={handleCreateGame}
       />
       <div className={styles.gamesList}>
-        {isLoading ? (
-          <div>Loading...</div>
+        {isInitialLoad ? (
+          <div className={styles.loadingContainer}>
+            <div className={styles.loadingSpinner}></div>
+            <p>Loading games...</p>
+          </div>
+        ) : isLoading ? (
+          <div className={styles.loadingOverlay}>
+            <div className={styles.loadingSpinner}></div>
+          </div>
         ) : error ? (
-          <div>
+          <div className={styles.error}>
             Error:{" "}
             {typeof error === "string" ? error : (error as Error).message}
+          </div>
+        ) : games.length === 0 ? (
+          <div className={styles.noGames}>
+            <p>No games available. Create a new game to get started!</p>
           </div>
         ) : (
           games.map((game) => (
