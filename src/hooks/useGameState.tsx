@@ -11,10 +11,7 @@ import React, {
 import { usePathname } from "next/navigation";
 import { IGameState } from "../lib/db/models/gameState";
 import WinModal from "../components/WinModal";
-// import { isCheckmate } from "../utils/chess-rules";
-import { readXiangqi, write } from "../utils/fen";
-import * as cg from "../utils/types";
-import { Key } from "../utils/types";
+import { isCheckmate } from "../utils/chess-rules";
 
 interface GameContextType {
   gameId: string;
@@ -22,8 +19,7 @@ interface GameContextType {
   gameState: IGameState | null;
   isLoading: boolean;
   error: string | null;
-  hasInitialLoad: boolean;
-  makeMove: (orig: cg.Key, dest: cg.Key) => Promise<void>;
+  makeMove: (orig: string, dest: string) => Promise<void>;
   refetch: (silent?: boolean) => Promise<void>;
   togglePolling: (shouldPoll: boolean) => void;
 }
@@ -34,7 +30,6 @@ const GameContext = createContext<GameContextType>({
   gameState: null,
   isLoading: false,
   error: null,
-  hasInitialLoad: false,
   makeMove: async () => {},
   refetch: async () => {},
   togglePolling: () => {},
@@ -52,12 +47,11 @@ export const GameProvider: React.FC<GameProviderProps> = ({
   gameId,
 }) => {
   const pathname = usePathname();
-  const [hasInitialLoad, setHasInitialLoad] = useState(false);
   const [gameIdState, setGameId] = useState(gameId);
   const [gameState, setGameState] = useState<IGameState | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  // const [lastMoveTimestamp, setLastMoveTimestamp] = useState(0);
+  const [lastMoveTimestamp, setLastMoveTimestamp] = useState(0);
   const [showWinModal, setShowWinModal] = useState(false);
   const [winner, setWinner] = useState<string>("");
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -65,7 +59,6 @@ export const GameProvider: React.FC<GameProviderProps> = ({
   const isMakingMoveRef = useRef(false);
   const currentGameStateRef = useRef<IGameState | null>(null);
   const isMountedRef = useRef(true);
-  const pendingRefetchRef = useRef<boolean>(false);
   // Allow fetching on both game pages and during game creation
   const isValidGameContext =
     pathname?.startsWith("/games/") || pathname === "/games";
@@ -93,73 +86,56 @@ export const GameProvider: React.FC<GameProviderProps> = ({
   const refetch = useCallback(
     async (silent: boolean = false) => {
       if (!gameIdState || !isMountedRef.current) {
-        setIsLoading(false);
         return;
       }
 
-      // If there's already a pending refetch, mark it for retry
-      if (isMakingMoveRef.current) {
-        pendingRefetchRef.current = true;
+      const timeSinceLastMove = Date.now() - lastMoveTimestamp;
+      if (timeSinceLastMove < 1000 || isMakingMoveRef.current) {
         return;
       }
 
       try {
-        if (!silent) setIsLoading(true);
+        if (!silent && isMountedRef.current) setIsLoading(true);
         const response = await fetch(`/api/game/${gameIdState}`);
 
-        if (!isMountedRef.current) {
-          setIsLoading(false);
-          return;
-        }
+        if (!isMountedRef.current) return;
 
         const data = await response.json();
 
-        if (!isMountedRef.current) {
-          setIsLoading(false);
-          return;
-        }
+        if (!isMountedRef.current) return;
 
         if (response.status === 404) {
-          setIsLoading(false);
-          // Only show "Game not found" after initial load
-          if (hasInitialLoad) {
-            setGameState(null);
-            setError("Game not found");
-          }
+          setGameState(null);
+          setError("Game not found");
           return;
         }
 
         if (!response.ok) {
-          setIsLoading(false);
           throw new Error(data.error || "Failed to fetch game state");
         }
 
         if (!data.game) {
-          setIsLoading(false);
           throw new Error("No game data received");
         }
 
-        setIsLoading(false);
-        setGameState(data.game);
-        setError(null);
-        lastFenRef.current = data.game.fen;
-        setHasInitialLoad(true);
+        if (isMountedRef.current) {
+          setGameState(data.game);
+          setError(null);
+          lastFenRef.current = data.game.fen;
+        }
       } catch (err) {
-        // Only show errors after initial load
-        if (hasInitialLoad) {
+        if (isMountedRef.current) {
           const errorMessage =
             err instanceof Error ? err.message : "Failed to fetch game state";
           setError(errorMessage);
         }
       } finally {
-        // If there was a pending refetch, execute it now
-        if (pendingRefetchRef.current && isMountedRef.current) {
-          pendingRefetchRef.current = false;
-          setTimeout(() => refetch(silent), 100); // Add small delay between refetches
+        if (isMountedRef.current) {
+          setIsLoading(false);
         }
       }
     },
-    [gameIdState, hasInitialLoad]
+    [gameIdState, lastMoveTimestamp]
   );
 
   useEffect(() => {
@@ -167,87 +143,129 @@ export const GameProvider: React.FC<GameProviderProps> = ({
   }, [gameState]);
 
   const makeMove = useCallback(
-    async (orig: cg.Key, dest: cg.Key) => {
+    async (orig: string, dest: string) => {
       if (!gameState || isMakingMoveRef.current) return;
 
       isMakingMoveRef.current = true;
-      const previousState = currentGameStateRef.current;
+      setError(null);
 
       try {
-        // Optimistically update the UI
-        const pieces = gameState ? readXiangqi(gameState.fen) : null;
-        if (pieces) {
-          const piece = pieces.get(orig);
-          if (piece) {
-            pieces.delete(orig);
-            pieces.set(dest, piece);
-            const newFen = write(pieces);
-            setGameState((prev) => {
-              if (!prev) return null;
-              const updatedState = { ...prev };
-              updatedState.fen = newFen;
-              updatedState.lastMove = [orig, dest];
-              return updatedState as IGameState;
-            });
-          }
-        }
-
-        const response = await fetch("/api/game/validate-move", {
+        // First validate the move
+        const validateResponse = await fetch("/api/game/validate-move", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+          },
           body: JSON.stringify({
             id: gameIdState,
             orig,
             dest,
-            fen: gameState?.fen,
-            turn: gameState?.turn,
-            playerId: gameState?.players[gameState?.turn]?.id,
+            fen: gameState.fen,
+            turn: gameState.turn,
+            playerId:
+              gameState.turn === "red"
+                ? gameState.players.red.id
+                : gameState.players.black.id,
           }),
         });
 
-        const responseData = await response.json();
-        if (!response.ok || responseData.error) {
-          // Revert to previous state on error
-          setGameState(previousState);
-          throw new Error(
-            responseData.error ||
-              (responseData.details
-                ? Object.entries(responseData.details)
-                    .map(([field, message]) => `${field}: ${message}`)
-                    .join(", ")
-                : "Invalid move")
-          );
+        const responseData = await validateResponse.json();
+
+        if (!validateResponse.ok) {
+          throw new Error(responseData.error || "Move validation failed");
         }
 
-        // setLastMoveTimestamp(Date.now());
-        await refetch(true);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to make move");
-        setGameState(previousState);
-      } finally {
-        isMakingMoveRef.current = false;
-        if (pendingRefetchRef.current) {
-          pendingRefetchRef.current = false;
-          refetch(true);
+        if (!responseData.success || !responseData.game) {
+          throw new Error("Invalid response from server");
         }
+
+        // Update local state with the validated move
+        setGameState((prevState) => {
+          if (!prevState) return null;
+
+          const newState = {
+            ...prevState,
+            ...responseData.game,
+            lastMove: responseData.game.lastMove,
+            turn: responseData.game.turn,
+            fen: responseData.game.fen,
+            moves: responseData.game.moves,
+          };
+
+          // Update refs immediately to prevent race conditions
+          lastFenRef.current = responseData.game.fen;
+          currentGameStateRef.current = newState;
+
+          return newState;
+        });
+
+        setLastMoveTimestamp(Date.now());
+
+        // Check for checkmate after each move
+        if (isCheckmate(responseData.game.fen)) {
+          // The turn in responseData.game.turn is already switched to the next player
+          // So if turn is 'red', it means black just won
+          const winningColor =
+            responseData.game.turn === "red" ? "Black" : "Red";
+          setWinner(winningColor);
+          setShowWinModal(true);
+
+          // Update game status in database
+          try {
+            await fetch(`/api/game/${gameIdState}`, {
+              method: "PATCH",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                status: "completed",
+                gameOver: true,
+                winner: winningColor,
+              }),
+            });
+
+            // Update local state
+            setGameState((prevState) => {
+              if (!prevState) return null;
+              return {
+                ...prevState,
+                status: "completed",
+                gameOver: true,
+                winner: winningColor,
+              };
+            });
+          } catch (err) {
+            console.error("Failed to update game status:", err);
+          }
+        }
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : "Failed to make move";
+        setError(errorMessage);
+        if (err instanceof Error) {
+          console.error("Move error:", err);
+        }
+      } finally {
+        // Small delay before allowing new moves
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        isMakingMoveRef.current = false;
       }
     },
-    [gameIdState, gameState, refetch]
+    [gameIdState, gameState]
   );
 
   useEffect(() => {
     if (!isValidGameContext) return;
 
     isMountedRef.current = true;
-    const isFirstFetch = true;
 
     if (gameIdState) {
-      refetch(!isFirstFetch);
+      refetch();
 
       // Only start polling if we're on a game page (not during creation)
       if (pathname?.startsWith("/games/")) {
         pollingIntervalRef.current = setInterval(() => {
-          if (isMountedRef.current && !isMakingMoveRef.current) {
+          if (isMountedRef.current) {
             refetch(true);
           }
         }, POLLING_INTERVAL);
@@ -289,7 +307,6 @@ export const GameProvider: React.FC<GameProviderProps> = ({
     gameState,
     isLoading,
     error,
-    hasInitialLoad,
     makeMove,
     refetch,
     togglePolling,

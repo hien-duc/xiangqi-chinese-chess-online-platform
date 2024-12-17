@@ -24,37 +24,37 @@ const letters = {
   pawn: "p",
 };
 
-// export function read(fen: cg.FEN): cg.Pieces {
-//   if (fen === "start") fen = initial;
-//   const pieces: cg.Pieces = new Map();
-//   let row = 9,
-//     col = 0;
-//   for (const c of fen) {
-//     switch (c) {
-//       case " ":
-//         return pieces;
-//       case "/":
-//         --row;
-//         if (row < 0) return pieces;
-//         col = 0;
-//         break;
-//       default: {
-//         const nb = c.charCodeAt(0);
-//         if (nb < 58) col += nb - 48;
-//         else {
-//           const role = c.toLowerCase();
-//           // console.log(col, row);
-//           pieces.set(pos2key([col, row]), {
-//             role: roles[role],
-//             color: c === role ? "black" : "red",
-//           });
-//           ++col;
-//         }
-//       }
-//     }
-//   }
-//   return pieces;
-// }
+export function read(fen: cg.FEN): cg.Pieces {
+  if (fen === "start") fen = initial;
+  const pieces: cg.Pieces = new Map();
+  let row = 9,
+    col = 0;
+  for (const c of fen) {
+    switch (c) {
+      case " ":
+        return pieces;
+      case "/":
+        --row;
+        if (row < 0) return pieces;
+        col = 0;
+        break;
+      default: {
+        const nb = c.charCodeAt(0);
+        if (nb < 58) col += nb - 48;
+        else {
+          const role = c.toLowerCase();
+          // console.log(col, row);
+          pieces.set(pos2key([col, row]), {
+            role: roles[role],
+            color: c === role ? "black" : "red",
+          });
+          ++col;
+        }
+      }
+    }
+  }
+  return pieces;
+}
 
 export function readXiangqi(fen: cg.FEN): cg.Pieces {
   if (fen === "start") fen = initial; // Use the initial Xiangqi position if "start" is passed.

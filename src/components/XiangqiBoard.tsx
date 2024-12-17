@@ -3,7 +3,6 @@ import { Xiangqiground } from "@/utils/xiangqiground";
 import { useGameContext } from "@/hooks/useGameState";
 import { Config } from "@/utils/config";
 import { useSession } from "next-auth/react";
-import * as cg from "@/utils/types";
 
 interface XiangqiBoardProps {
   className?: string;
@@ -32,10 +31,12 @@ const XiangqiBoard: React.FC<XiangqiBoardProps> = ({ className = "" }) => {
       movable: {
         free: false,
         color: gameState?.turn,
+        // color: gameState?.players?.red?.id === session?.user?.id ? "red" : "black",
+
         showDests: true,
         events: {
           after: (orig: string, dest: string) => {
-            makeMove(orig as cg.Key, dest as cg.Key);
+            makeMove(orig, dest);
           },
         },
       },

@@ -13,7 +13,7 @@ import "@/app/globals.css";
 export default function GamePage() {
   const params = useParams();
   const searchParams = useSearchParams();
-  const { setGameId, gameState, isLoading, error, hasInitialLoad } = useGameContext();
+  const { setGameId, gameState, isLoading, error } = useGameContext();
   const gameId = params.gameId as string;
   const isSpectator = searchParams.get("spectate") === "true";
 
@@ -23,36 +23,26 @@ export default function GamePage() {
     }
   }, [gameId, setGameId]);
 
-  // Show initial loading state
-  if (!hasInitialLoad) {
+  if (isLoading && !gameState && !error) {
     return (
-      <div className={styles.loadingContainer}>
-        <div className={styles.loadingSpinner}></div>
+      <div className={styles.loading}>
         <p>Loading game...</p>
       </div>
     );
   }
 
-  // Show error state
   if (error) {
     return (
-      <div className={styles.errorContainer}>
-        <div className={styles.error}>
-          <h2>Error</h2>
-          <p>{error}</p>
-        </div>
+      <div className={styles.error}>
+        <p>{error}</p>
       </div>
     );
   }
 
-  // Show game not found state
   if (!gameState) {
     return (
-      <div className={styles.errorContainer}>
-        <div className={styles.error}>
-          <h2>Game Not Found</h2>
-          <p>The game you're looking for doesn't exist or has been deleted.</p>
-        </div>
+      <div className={styles.error}>
+        <p>Game not found</p>
       </div>
     );
   }
@@ -60,12 +50,6 @@ export default function GamePage() {
   return (
     <main className="p-8">
       <div className={styles.container}>
-        {/* Show loading overlay during subsequent loads */}
-        {isLoading && (
-          <div className={styles.loadingOverlay}>
-            <div className={styles.loadingSpinner}></div>
-          </div>
-        )}
         <div className={styles["game-container"]}>
           <LeftPanel />
           <div className={styles.boardContainer}>

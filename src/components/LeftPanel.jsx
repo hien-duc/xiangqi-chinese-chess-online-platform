@@ -134,7 +134,7 @@ const LeftPanel = () => {
                   className={styles.joinButton}
                   onClick={() => handleJoinGame(game._id, game)}
                 >
-                  Join {game.players.red.id === "waiting" ? "Red" : "Black"}
+                  Join as {game.players.red.id === "waiting" ? "Red" : "Black"}
                 </button>
               )}
               {game.status === "active" && (

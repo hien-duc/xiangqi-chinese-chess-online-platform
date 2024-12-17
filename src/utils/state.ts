@@ -113,7 +113,7 @@ export interface State extends HeadlessState {
 
 export function defaults(): HeadlessState {
   return {
-    pieces: fen.readXiangqi(fen.initial),
+    pieces: fen.read(fen.initial),
     orientation: "red",
     turnColor: "red",
     coordinates: true,
