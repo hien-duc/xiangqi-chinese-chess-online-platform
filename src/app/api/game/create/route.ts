@@ -12,35 +12,43 @@ export async function POST(request: Request) {
       id: "waiting",
       isGuest: true,
       name: "Waiting for player...",
-      orientation: "red"
+      orientation: "red",
     };
 
     // Initialize game data with the default FEN for Xiangqi
-    const gameData: Partial<IGameState> = {
+    const DEFAULT_TIME = 10 * 60; // 10 minutes in seconds
+    
+    const gameData: IGameState = {
       fen: "rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR",
       players: {
-        red: side === "red" 
-          ? { ...playerInfo, orientation: "red" }
-          : { ...waitingPlayer, orientation: "red" },
-        black: side === "black"
-          ? { ...playerInfo, orientation: "black" }
-          : { ...waitingPlayer, orientation: "black" },
+        red:
+          side === "red"
+            ? { ...playerInfo, orientation: "red" }
+            : { ...waitingPlayer, orientation: "red" },
+        black:
+          side === "black"
+            ? { ...playerInfo, orientation: "black" }
+            : { ...waitingPlayer, orientation: "black" },
       },
       status: "waiting",
       turn: "red", // Red always moves first in Xiangqi
       moves: [],
-      gameOver: false,
       check: undefined,
       winner: undefined,
       lastMove: undefined,
-      premove: undefined
+      premove: undefined,
+      times: {
+        red: DEFAULT_TIME,
+        black: DEFAULT_TIME,
+      },
+      gameOver: false,
     };
 
     const game = await GameModel.create(gameData);
-    return NextResponse.json({ 
+    return NextResponse.json({
       success: true,
       gameId: game._id.toString(),
-      game: game.toObject()
+      game: game.toObject(),
     });
   } catch (error) {
     console.error("Error creating game:", error);

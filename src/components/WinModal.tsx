@@ -7,6 +7,7 @@ interface WinModalProps {
   onClose: () => void;
   gameId: string;
   forfeitedBy?: "red" | "black" | null;
+  timeoutLoss?: "red" | "black" | null;
 }
 
 const WinModal: React.FC<WinModalProps> = ({
@@ -15,6 +16,7 @@ const WinModal: React.FC<WinModalProps> = ({
   onClose,
   gameId,
   forfeitedBy,
+  timeoutLoss,
 }) => {
   const router = useRouter();
 
@@ -31,11 +33,15 @@ const WinModal: React.FC<WinModalProps> = ({
         body: JSON.stringify({
           winner,
           forfeitedBy,
+          timeoutLoss,
         }),
       });
 
       if (!completeResponse.ok) {
-        console.error("Failed to complete game:", await completeResponse.text());
+        console.error(
+          "Failed to complete game:",
+          await completeResponse.text()
+        );
       }
 
       // Delete the completed game from active games list
@@ -55,17 +61,25 @@ const WinModal: React.FC<WinModalProps> = ({
     router.push("/games"); // Then navigate
   };
 
-  const message = forfeitedBy
-    ? `${
+  const getMessage = () => {
+    if (forfeitedBy) {
+      return `${
         forfeitedBy.charAt(0).toUpperCase() + forfeitedBy.slice(1)
-      } forfeited. ${winner} Wins!`
-    : `${winner} has won the game!`;
+      } forfeited. ${winner} Wins!`;
+    }
+    if (timeoutLoss) {
+      return `${
+        timeoutLoss.charAt(0).toUpperCase() + timeoutLoss.slice(1)
+      } ran out of time. ${winner} Wins!`;
+    }
+    return `${winner} has won the game!`;
+  };
 
   return (
     <div className={styles.overlay}>
       <div className={styles.modal}>
         <h2 className={styles.title}>Game Over!</h2>
-        <p className={styles.message}>{message}</p>
+        <p className={styles.message}>{getMessage()}</p>
         <div className={styles.buttonContainer}>
           <button
             onClick={handleReturnToGames}

@@ -13,7 +13,7 @@ import "@/app/globals.css";
 export default function GamePage() {
   const params = useParams();
   const searchParams = useSearchParams();
-  const { setGameId, gameState, isLoading, error } = useGameContext();
+  const { setGameId, gameState, isLoading } = useGameContext();
   const gameId = params.gameId as string;
   const isSpectator = searchParams.get("spectate") === "true";
 
@@ -23,18 +23,10 @@ export default function GamePage() {
     }
   }, [gameId, setGameId]);
 
-  if (isLoading && !gameState && !error) {
+  if (isLoading && !gameState) {
     return (
       <div className={styles.loading}>
         <p>Loading game...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className={styles.error}>
-        <p>{error}</p>
       </div>
     );
   }

@@ -22,6 +22,10 @@ export interface IGameState extends Document {
   premove?: [string, string];
   check?: string;
   gameOver?: boolean;
+  times?: {
+    red: number;
+    black: number;
+  };
   createdAt: Date;
   updatedAt: Date;
 }
@@ -80,6 +84,14 @@ const GameSchema = new Schema<IGameState>(
     gameOver: {
       type: Boolean,
       default: false,
+    },
+    times: {
+      type: {
+        red: { type: Number, required: true, default: 600 }, // 10 minutes in seconds
+        black: { type: Number, required: true, default: 600 }
+      },
+      required: true,
+      _id: false // Prevent Mongoose from creating an _id for the times subdocument
     },
   },
   {

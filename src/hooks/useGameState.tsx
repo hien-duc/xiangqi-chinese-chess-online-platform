@@ -11,13 +11,13 @@ import React, {
 import { IGameState } from "../lib/db/models/gameState";
 import WinModal from "../components/WinModal";
 import { isCheckmate } from "../utils/chess-rules";
+import { useError } from "../context/ErrorContext";
 
 interface GameContextType {
   gameId: string;
   setGameId: (id: string) => void;
   gameState: IGameState | null;
   isLoading: boolean;
-  error: string | null;
   makeMove: (orig: string, dest: string) => Promise<void>;
   refetch: (silent?: boolean) => Promise<void>;
   togglePolling: (shouldPoll: boolean) => void;
@@ -28,7 +28,6 @@ const GameContext = createContext<GameContextType>({
   setGameId: () => {},
   gameState: null,
   isLoading: false,
-  error: null,
   makeMove: async () => {},
   refetch: async () => {},
   togglePolling: () => {},
@@ -48,7 +47,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({
   const [gameIdState, setGameId] = useState(gameId);
   const [gameState, setGameState] = useState<IGameState | null>(null);
   const [isLoading, setIsLoading] = useState(true); // Start with true for initial load only
-  const [error, setError] = useState<string | null>(null);
+
   const [lastMoveTimestamp, setLastMoveTimestamp] = useState(0);
   const [showWinModal, setShowWinModal] = useState(false);
   const [winner, setWinner] = useState<string>("");
@@ -56,6 +55,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({
   const lastFenRef = useRef<string | null>(null);
   const isMakingMoveRef = useRef(false);
   const currentGameStateRef = useRef<IGameState | null>(null);
+  const { showError } = useError();
 
   useEffect(() => {
     currentGameStateRef.current = gameState;
@@ -66,7 +66,6 @@ export const GameProvider: React.FC<GameProviderProps> = ({
       if (!gameState || isMakingMoveRef.current) return;
 
       isMakingMoveRef.current = true;
-      setError(null);
 
       try {
         // First validate the move
@@ -160,7 +159,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : "Failed to make move";
-        setError(errorMessage);
+        showError(errorMessage);
         if (err instanceof Error) {
           console.error("Move error:", err);
         }
@@ -189,7 +188,6 @@ export const GameProvider: React.FC<GameProviderProps> = ({
 
         if (response.status === 404) {
           setGameState(null);
-          setError("Game not found");
           return;
         }
 
@@ -217,12 +215,10 @@ export const GameProvider: React.FC<GameProviderProps> = ({
           return hasChanged ? data.game : prevState;
         });
       } catch (err) {
-        if (!silent) {
-          const errorMessage =
-            err instanceof Error ? err.message : "Failed to fetch game state";
-          setError(errorMessage);
-          console.error("Fetch error:", err);
-        }
+        const errorMessage =
+          err instanceof Error ? err.message : "Failed to fetch game state";
+        showError(errorMessage);
+        console.error("Fetch error:", err);
       } finally {
         if (!silent) setIsLoading(false);
       }
@@ -230,22 +226,25 @@ export const GameProvider: React.FC<GameProviderProps> = ({
     [gameIdState, lastMoveTimestamp]
   );
 
-  const togglePolling = useCallback((shouldPoll: boolean) => {
-    if (shouldPoll) {
-      // Start polling if not already polling
-      if (!pollingIntervalRef.current) {
-        pollingIntervalRef.current = setInterval(() => {
-          refetch(true);
-        }, POLLING_INTERVAL);
+  const togglePolling = useCallback(
+    (shouldPoll: boolean) => {
+      if (shouldPoll) {
+        // Start polling if not already polling
+        if (!pollingIntervalRef.current) {
+          pollingIntervalRef.current = setInterval(() => {
+            refetch(true);
+          }, POLLING_INTERVAL);
+        }
+      } else {
+        // Stop polling if currently polling
+        if (pollingIntervalRef.current) {
+          clearInterval(pollingIntervalRef.current);
+          pollingIntervalRef.current = null;
+        }
       }
-    } else {
-      // Stop polling if currently polling
-      if (pollingIntervalRef.current) {
-        clearInterval(pollingIntervalRef.current);
-        pollingIntervalRef.current = null;
-      }
-    }
-  }, [refetch]);
+    },
+    [refetch]
+  );
 
   // Clean up polling interval on unmount
   useEffect(() => {
@@ -273,7 +272,6 @@ export const GameProvider: React.FC<GameProviderProps> = ({
     setGameId,
     gameState,
     isLoading,
-    error,
     makeMove,
     refetch,
     togglePolling,
