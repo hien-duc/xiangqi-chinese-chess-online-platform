@@ -1,6 +1,6 @@
-import { NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/db/db-connect';
-import GameModel from '@/lib/db/models/gameState';
+import { NextResponse } from "next/server";
+import { connectToDatabase } from "@/lib/db/db-connect";
+import GameModel from "@/lib/db/models/gameState";
 
 export async function POST(
   request: Request,
@@ -8,29 +8,26 @@ export async function POST(
 ) {
   try {
     const { playerInfo, side } = await request.json();
-    const { gameId } = params;
+    const { gameId } = await params;
 
     await connectToDatabase();
     const game = await GameModel.findById(gameId);
 
     if (!game) {
-      return NextResponse.json(
-        { error: 'Game not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Game not found" }, { status: 404 });
     }
 
-    if (game.status !== 'waiting') {
+    if (game.status !== "waiting") {
       return NextResponse.json(
-        { error: 'Game is not available to join' },
+        { error: "Game is not available to join" },
         { status: 400 }
       );
     }
 
     // Check if the requested side is available
-    if (game.players[side].id !== 'waiting') {
+    if (game.players[side].id !== "waiting") {
       return NextResponse.json(
-        { error: 'Selected side is not available' },
+        { error: "Selected side is not available" },
         { status: 400 }
       );
     }
@@ -38,27 +35,29 @@ export async function POST(
     // Update the player info for the selected side
     game.players[side] = {
       ...playerInfo,
-      orientation: side
+      orientation: side,
     };
 
     // If both sides are filled, set the game to active
     const redPlayer = game.players.red;
     const blackPlayer = game.players.black;
-    if (redPlayer.id && redPlayer.id !== 'waiting' && blackPlayer.id && blackPlayer.id !== 'waiting') {
-      game.status = 'active';
-      console.log('Game activated:', gameId); // Add logging for debugging
+    if (
+      redPlayer.id &&
+      redPlayer.id !== "waiting" &&
+      blackPlayer.id &&
+      blackPlayer.id !== "waiting"
+    ) {
+      game.status = "active";
+      console.log("Game activated:", gameId); // Add logging for debugging
     }
 
     await game.save();
-    return NextResponse.json({ 
+    return NextResponse.json({
       success: true,
-      game: game.toObject() 
+      game: game.toObject(),
     });
   } catch (error) {
-    console.error('Error joining game:', error);
-    return NextResponse.json(
-      { error: 'Failed to join game' },
-      { status: 500 }
-    );
+    console.error("Error joining game:", error);
+    return NextResponse.json({ error: "Failed to join game" }, { status: 500 });
   }
 }

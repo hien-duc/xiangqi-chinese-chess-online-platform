@@ -48,10 +48,11 @@ export default async function LoginPage(props: {
       redirect(searchParams?.callbackUrl || "/");
     } catch (error) {
       if (error instanceof Error) {
-        const errorMessage = error.message === "NEXT_REDIRECT" 
-          ? "Invalid credentials"
-          : error.message;
-          
+        const errorMessage =
+          error.message === "NEXT_REDIRECT"
+            ? "Invalid credentials"
+            : error.message;
+
         const params = new URLSearchParams({
           message: errorMessage,
           email: rawData.email as string,
@@ -109,16 +110,12 @@ export default async function LoginPage(props: {
               </button>
             </form>
 
-            <div className="divider">
-              <span>or</span>
-            </div>
-
             {/* Github login */}
             <form
               action={async () => {
                 "use server";
-                await signIn("github", { 
-                  redirectTo: searchParams?.callbackUrl || "/" 
+                await signIn("github", {
+                  redirectTo: searchParams?.callbackUrl || "/",
                 });
               }}
             >
@@ -132,8 +129,8 @@ export default async function LoginPage(props: {
             <form
               action={async () => {
                 "use server";
-                await signIn("google", { 
-                  redirectTo: searchParams?.callbackUrl || "/" 
+                await signIn("google", {
+                  redirectTo: searchParams?.callbackUrl || "/",
                 });
               }}
             >

@@ -58,6 +58,10 @@ const RightPanel = () => {
   const { data: session } = useSession();
   const { getGameMessages, addMessage } = useChat();
   const [message, setMessage] = useState("");
+  const [showForfeitConfirm, setShowForfeitConfirm] = useState(false);
+  const [showForfeitModal, setShowForfeitModal] = useState(false);
+  const [forfeitWinner, setForfeitWinner] = useState(null);
+  const [forfeitedBy, setForfeitedBy] = useState(null);
   const {
     times,
     startTimer,
@@ -67,6 +71,29 @@ const RightPanel = () => {
     timeoutLoser,
     onWinModalClose,
   } = useGameTimer();
+
+  const isCurrentPlayer =
+    session?.user?.id &&
+    (session.user.id === gameState?.players.red.id ||
+      session.user.id === gameState?.players.black.id);
+
+  const handleForfeit = async () => {
+    if (!gameState?._id) return;
+    const currentSide =
+      session?.user?.id === gameState?.players.red.id ? "red" : "black";
+    const winner = currentSide === "red" ? "Black" : "Red";
+
+    setForfeitWinner(winner);
+    setForfeitedBy(currentSide);
+    setShowForfeitModal(true);
+    setShowForfeitConfirm(false);
+  };
+
+  const onForfeitModalClose = () => {
+    setShowForfeitModal(false);
+    setForfeitWinner(null);
+    setForfeitedBy(null);
+  };
 
   // Start timer when game starts
   useEffect(() => {
@@ -151,6 +178,37 @@ const RightPanel = () => {
           </div>
         </div>
 
+        {isCurrentPlayer && gameState?.status === "active" && (
+          <div className={styles.forfeitContainer}>
+            {showForfeitConfirm ? (
+              <>
+                <div className={styles.forfeitConfirm}>
+                  Are you sure you want to forfeit?
+                </div>
+                <button
+                  onClick={handleForfeit}
+                  className={styles.forfeitConfirmBtn}
+                >
+                  Yes, Forfeit Game
+                </button>
+                <button
+                  onClick={() => setShowForfeitConfirm(false)}
+                  className={styles.forfeitCancelBtn}
+                >
+                  Cancel
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={() => setShowForfeitConfirm(true)}
+                className={styles.forfeitBtn}
+              >
+                Forfeit Game
+              </button>
+            )}
+          </div>
+        )}
+
         <PlayerInfo
           player={gameState?.players.black}
           side="black"
@@ -160,15 +218,21 @@ const RightPanel = () => {
         />
       </div>
 
-      {showWinModal && (
-        <WinModal
-          isOpen={showWinModal}
-          winner={timeoutWinner}
-          onClose={onWinModalClose}
-          gameId={gameState.id}
-          timeoutLoss={timeoutLoser}
-        />
-      )}
+      <WinModal
+        isOpen={showWinModal}
+        winner={timeoutWinner}
+        onClose={onWinModalClose}
+        gameId={gameState?._id}
+        timeoutLoss={timeoutLoser}
+      />
+
+      <WinModal
+        isOpen={showForfeitModal}
+        winner={forfeitWinner}
+        onClose={onForfeitModalClose}
+        gameId={gameState?._id}
+        forfeitedBy={forfeitedBy}
+      />
     </>
   );
 };

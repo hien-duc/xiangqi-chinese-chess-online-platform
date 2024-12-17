@@ -537,3 +537,71 @@
 .messageInput button:active {
   transform: translateY(0);
 }
+
+.forfeitContainer {
+  width: 100%;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  background-color: rgba(255, 77, 79, 0.1);
+  border-radius: 8px;
+  margin: 15px 0;
+}
+
+.forfeitBtn,
+.forfeitConfirmBtn,
+.forfeitCancelBtn {
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 1em;
+  cursor: pointer;
+  transition: all 0.2s;
+  width: 100%;
+  max-width: 200px;
+}
+
+.forfeitBtn {
+  background-color: #ff4d4f;
+  color: white;
+  border: none;
+  box-shadow: 0 2px 4px rgba(255, 77, 79, 0.2);
+}
+
+.forfeitBtn:hover {
+  background-color: #ff7875;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(255, 77, 79, 0.3);
+}
+
+.forfeitConfirm {
+  width: 100%;
+  text-align: center;
+  color: #ff4d4f;
+  font-weight: bold;
+  font-size: 1.1em;
+}
+
+.forfeitConfirmBtn {
+  background-color: #ff4d4f;
+  color: white;
+  border: none;
+  box-shadow: 0 2px 4px rgba(255, 77, 79, 0.2);
+}
+
+.forfeitConfirmBtn:hover {
+  background-color: #ff7875;
+  transform: translateY(-1px);
+}
+
+.forfeitCancelBtn {
+  background-color: #f0f0f0;
+  color: #000;
+  border: 1px solid #d9d9d9;
+}
+
+.forfeitCancelBtn:hover {
+  background-color: #fafafa;
+  transform: translateY(-1px);
+}

@@ -16,7 +16,7 @@ export async function POST(
   try {
     await connectToDatabase();
     const { gameId } = await params;
-    const { winner, forfeitedBy } = await request.json();
+    const { winner, forfeitedBy, timeoutLoss } = await request.json();
 
     const game = await GameModel.findById(gameId);
     if (!game) {
@@ -28,6 +28,7 @@ export async function POST(
     game.gameOver = true;
     game.winner = winner;
     game.forfeitedBy = forfeitedBy;
+    game.timeoutLoss = timeoutLoss;
     await game.save();
 
     // Update player stats
@@ -51,7 +52,9 @@ export async function POST(
     }
 
     if (!blackPlayer.isGuest) {
-      const blackPlayerDoc = await PlayerModel.findOne({ userId: blackPlayer.id });
+      const blackPlayerDoc = await PlayerModel.findOne({
+        userId: blackPlayer.id,
+      });
       if (blackPlayerDoc) {
         await updatePlayerStats(
           blackPlayerDoc._id.toString(),

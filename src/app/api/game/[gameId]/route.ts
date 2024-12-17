@@ -8,8 +8,7 @@ export async function GET(
 ) {
   try {
     await connectToDatabase();
-
-    const gameId = (await params).gameId;
+    const { gameId } = await params;
 
     // Fetch game from database without strict format validation
     const game = await GameModel.findById(gameId).catch(() => null);
@@ -66,21 +65,19 @@ export async function DELETE(
 ) {
   try {
     await connectToDatabase();
-    const { gameId } = params;
+    const { gameId } = await params;
 
     const game = await GameModel.findById(gameId);
     if (!game) {
       return NextResponse.json({ error: "Game not found" }, { status: 404 });
     }
 
-    // Handle game abandonment which will update player stats if needed
-    await game.handleAbandonment();
-
+    await GameModel.deleteOne({ _id: gameId });
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error deleting game:", error);
     return NextResponse.json(
-      { error: "Failed to delete game" },
+      { error: "Internal Server Error" },
       { status: 500 }
     );
   }
@@ -93,7 +90,7 @@ export async function POST(
 ) {
   try {
     await connectToDatabase();
-    const { gameId } = params;
+    const { gameId } = await params;
     const { playerId } = await request.json();
 
     const game = await GameModel.findById(gameId);
@@ -102,20 +99,20 @@ export async function POST(
     }
 
     // If player disconnects during active game, they forfeit
-    if (game.status === 'active') {
-      const playerColor = game.players.red.id === playerId ? 'red' : 'black';
-      const winningColor = playerColor === 'red' ? 'Black' : 'Red';
+    if (game.status === "active") {
+      const playerColor = game.players.red.id === playerId ? "red" : "black";
+      const winningColor = playerColor === "red" ? "Black" : "Red";
 
-      game.status = 'completed';
+      game.status = "completed";
       game.gameOver = true;
       game.winner = winningColor;
       game.forfeitedBy = playerColor;
       await game.save();
-      await game.remove(); // This will trigger the pre-remove hook to update stats
+      await GameModel.deleteOne({ _id: gameId });
     }
     // If in waiting state, just remove the game
-    else if (game.status === 'waiting') {
-      await game.remove();
+    else if (game.status === "waiting") {
+      await GameModel.deleteOne({ _id: gameId });
     }
 
     return NextResponse.json({ success: true });
