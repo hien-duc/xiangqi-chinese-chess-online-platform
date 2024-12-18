@@ -212,6 +212,12 @@ export const GameProvider: React.FC<GameProviderProps> = ({
             prevState.players.black.id !== data.game.players.black.id ||
             JSON.stringify(prevState.moves) !== JSON.stringify(data.game.moves);
 
+          // Show win modal if game just completed
+          if (data.game.status === "completed" && data.game.winner && !showWinModal) {
+            setWinner(data.game.winner);
+            setShowWinModal(true);
+          }
+
           return hasChanged ? data.game : prevState;
         });
       } catch (err) {
@@ -223,7 +229,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({
         if (!silent) setIsLoading(false);
       }
     },
-    [gameIdState, lastMoveTimestamp]
+    [gameIdState, lastMoveTimestamp, showWinModal]
   );
 
   const togglePolling = useCallback(
