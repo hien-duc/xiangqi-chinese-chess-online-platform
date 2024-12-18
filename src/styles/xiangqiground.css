@@ -1,6 +1,7 @@
 @import "xiangqiground.base.css";
 @import "xiangqiground.board.css";
 @import "xiangqiground.pieces.css";
+@import "xiangqiground.inactive.css";
 
 .xiangqiground {
   width: 540px;

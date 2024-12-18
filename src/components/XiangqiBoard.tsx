@@ -16,7 +16,7 @@ const DEFAULT_FEN =
   "rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR";
 
 const XiangqiBoard: React.FC<XiangqiBoardProps> = ({ className = "" }) => {
-  const { gameState, makeMove } = useGameContext();
+  const { gameState, makeMove, isLoading } = useGameContext();
   const { data: session } = useSession();
   const boardRef = useRef<HTMLDivElement | null>(null);
   const groundRef = useRef<XiangqigroundInstance | null>(null);
@@ -24,16 +24,15 @@ const XiangqiBoard: React.FC<XiangqiBoardProps> = ({ className = "" }) => {
 
   // Initialize the board
   useEffect(() => {
+    const isGameActive = gameState?.status === "active";
     const config: Config = {
       orientation:
         gameState?.players?.red?.id === session?.user?.id ? "red" : "black",
       turnColor: gameState?.turn,
       movable: {
         free: false,
-        color: gameState?.turn,
-        // color: gameState?.players?.red?.id === session?.user?.id ? "red" : "black",
-
-        showDests: true,
+        color: isGameActive ? gameState?.turn : undefined,
+        showDests: isGameActive,
         events: {
           after: (orig: string, dest: string) => {
             makeMove(orig, dest);
@@ -42,14 +41,14 @@ const XiangqiBoard: React.FC<XiangqiBoardProps> = ({ className = "" }) => {
       },
       fen: gameState?.fen || DEFAULT_FEN,
       drawable: {
-        enabled: true,
-        visible: true,
+        enabled: isGameActive,
+        visible: isGameActive,
         defaultSnapToValidMove: true,
         eraseOnClick: true,
       },
       premovable: {
-        enabled: true,
-        showDests: true,
+        enabled: isGameActive,
+        showDests: isGameActive,
         events: {
           set: (orig: string, dest: string) => {
             console.log(`Premove set from ${orig} to ${dest}`);
@@ -68,8 +67,8 @@ const XiangqiBoard: React.FC<XiangqiBoardProps> = ({ className = "" }) => {
         duration: 200,
       },
       draggable: {
-        enabled: true,
-        showGhost: true,
+        enabled: isGameActive,
+        showGhost: isGameActive,
         deleteOnDropOff: false,
       },
     };
@@ -92,12 +91,48 @@ const XiangqiBoard: React.FC<XiangqiBoardProps> = ({ className = "" }) => {
     isInitialMount.current = false;
   }, [gameState?.fen]);
 
+  // Get message based on game state
+  const getMessage = () => {
+    if (isLoading || !gameState) return "Loading...";
+    if (gameState.status === "waiting") return "Waiting for opponent...";
+    if (gameState.status !== "active") return "Game is not active";
+    return null;
+  };
+
+  const message = getMessage();
+  console.log("Current message:", message);
+
   return (
-    <div
-      ref={boardRef}
-      className={`xiangqiground ${className}`}
-      style={{ width: "540px", height: "600px" }}
-    />
+    <div style={{ position: "relative", width: "540px", height: "600px" }}>
+      <div
+        ref={boardRef}
+        className={`xiangqiground ${className} ${
+          !gameState || gameState.status !== "active" ? "inactive-game" : ""
+        }`}
+        style={{ width: "100%", height: "100%" }}
+      />
+      {message && (
+        <div
+          style={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            zIndex: 9999,
+            background: "rgba(0, 0, 0, 0.7)",
+            color: "white",
+            padding: "1rem 2rem",
+            borderRadius: "8px",
+            fontSize: "1.2rem",
+            fontWeight: 500,
+            whiteSpace: "nowrap",
+            pointerEvents: "none",
+          }}
+        >
+          {message}
+        </div>
+      )}
+    </div>
   );
 };
 
