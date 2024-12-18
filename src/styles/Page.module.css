@@ -9,8 +9,10 @@
 }
 
 .container {
-  background: linear-gradient(to right, rgb(182, 244, 146), rgb(51, 139, 147));
+  /* background: linear-gradient(to right, rgb(182, 244, 146), rgb(51, 139, 147)); */
   /* background-color: #fffbf2; */
+  background-color: #3bb78f;
+  background-image: linear-gradient(315deg, #3bb78f 0%, #0bab64 74%);
   padding: 0;
   margin: 0;
 }
