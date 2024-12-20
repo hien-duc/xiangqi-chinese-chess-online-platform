@@ -4,49 +4,36 @@
     <meta charset="UTF-8" />
     <link rel="stylesheet" href="styles.css" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>UCCI Interpreter</title>
+    <title>Tauri App</title>
     <script type="module" src="/main.js" defer></script>
   </head>
 
   <body>
     <main class="container">
-      <h1>UCCI Interpreter</h1>
-      
-      <div class="engine-control">
-        <div class="file-input-wrapper">
-          <input type="file" id="engine-file" accept=".exe" />
-          <button id="load-engine" class="primary-btn">Load Engine</button>
-        </div>
-        <button id="unload-engine" class="secondary-btn" disabled>Unload Engine</button>
-        <div id="engine-status" class="status">Engine Status: Not Loaded</div>
-      </div>
+      <h1>Welcome to Tauri</h1>
 
-      <div class="io-container">
-        <div class="output-section">
-          <h3>Engine Output</h3>
-          <div id="engine-output" class="terminal"></div>
-        </div>
-        
-        <div class="input-section">
-          <h3>Command Input</h3>
-          <div class="command-input">
-            <input type="text" id="command-input" placeholder="Enter UCCI command..." />
-            <button id="send-command" class="primary-btn" disabled>Send</button>
-          </div>
-          <div class="quick-commands">
-            <button class="command-btn" data-command="ucci">ucci</button>
-            <button class="command-btn" data-command="isready">isready</button>
-            <button class="command-btn" data-command="position fen rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w">Default Position</button>
-            <button class="command-btn" data-command="go depth 10">Go Depth 10</button>
-            <button class="command-btn" data-command="quit">Quit</button>
-          </div>
-        </div>
+      <div class="row">
+        <a href="https://tauri.app" target="_blank">
+          <img src="/assets/tauri.svg" class="logo tauri" alt="Tauri logo" />
+        </a>
+        <a
+          href="https://developer.mozilla.org/en-US/docs/Web/JavaScript"
+          target="_blank"
+        >
+          <img
+            src="/assets/javascript.svg"
+            class="logo vanilla"
+            alt="JavaScript logo"
+          />
+        </a>
       </div>
+      <p>Click on the Tauri logo to learn more about the framework</p>
 
-      <div class="api-status">
-        <span>API Status: </span>
-        <span id="api-status-indicator">Disconnected</span>
-      </div>
+      <form class="row" id="greet-form">
+        <input id="greet-input" placeholder="Enter a name..." />
+        <button type="submit">Greet</button>
+      </form>
+      <p id="greet-msg"></p>
     </main>
   </body>
 </html>
