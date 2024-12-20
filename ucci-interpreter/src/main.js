@@ -1,12 +1,11 @@
 const { invoke } = window.__TAURI__.core;
 const { open } = window.__TAURI__.dialog;
+const { listen } = window.__TAURI__.event;
 
-let engineProcess = null;
-let enginePath = "";
 let isEngineRunning = false;
 
 // UI Elements
-const engineFileInput = document.getElementById("engine-file");
+// const engineFileInput = document.getElementById("engine-file");
 const loadEngineBtn = document.getElementById("load-engine");
 const engineStatusText = document.getElementById("engine-status-text");
 const commandForm = document.getElementById("command-form");
@@ -23,39 +22,73 @@ function addToLog(message, type = "sent") {
   logContent.scrollTop = logContent.scrollHeight;
 }
 
+// Update engine status
+function updateEngineStatus(status) {
+  engineStatusText.textContent = status;
+  if (status === "Loaded") {
+    engineStatusText.style.color = "#27ae60";
+    isEngineRunning = true;
+  } else if (status === "Failed to load") {
+    engineStatusText.style.color = "#c0392b";
+    isEngineRunning = false;
+  } else {
+    engineStatusText.style.color = "#000";
+    isEngineRunning = false;
+  }
+}
+
+// Setup event listeners for engine output
+async function setupEngineListeners() {
+  // Listen for engine output
+  await listen("engine-output", (event) => {
+    addToLog(event.payload, "received");
+  });
+
+  // Listen for engine errors
+  await listen("engine-error", (event) => {
+    addToLog(`Error: ${event.payload}`, "error");
+  });
+}
+
 // Load engine
 async function loadEngine() {
+  if (isEngineRunning) {
+    console.log("Engine is already running");
+    return;
+  }
+
   try {
-    // Use Tauri's dialog to get the file path
-    const selectedPath = await open({
+    console.log("Opening file dialog...");
+    const result = await open({
       multiple: false,
-      filters: [{
-        name: 'Engine',
-        extensions: ['exe']
-      }]
+      filters: [
+        {
+          name: "Engine",
+          extensions: ["exe"],
+        },
+      ],
     });
 
-    if (!selectedPath) {
+    console.log("Dialog result:", result);
+    if (!result) {
+      console.log("No file selected");
       addToLog("No engine file selected", "received");
       return;
     }
 
-    enginePath = selectedPath[0]; // Get the first element of the array
-    await invoke("start_engine", { enginePath: enginePath });
-    isEngineRunning = true;
-    engineStatusText.textContent = "Loaded";
-    engineStatusText.style.color = "#27ae60";
-
+    const enginePath = result;
+    console.log("Starting engine with path:", enginePath);
+    
+    await invoke("start_engine", { enginePath });
+    console.log("Engine started successfully");
+    updateEngineStatus("Loaded");
+    
     // Send initial UCCI command
     await sendCommand("ucci");
-
-    // Start reading engine output
-    startEngineOutputLoop();
   } catch (error) {
-    console.error("Failed to load engine:", error);
-    addToLog(`Error loading engine: ${error}`, "received");
-    engineStatusText.textContent = "Error";
-    engineStatusText.style.color = "#e74c3c";
+    console.error("Error loading engine:", error);
+    updateEngineStatus("Failed to load");
+    addToLog(`Error: ${error}`, "received");
   }
 }
 
@@ -68,6 +101,7 @@ async function sendCommand(command) {
 
   try {
     addToLog(command);
+    console.log("Sending command:", command);
     await invoke("send_command", { command });
   } catch (error) {
     console.error("Failed to send command:", error);
@@ -75,25 +109,8 @@ async function sendCommand(command) {
   }
 }
 
-// Continuously read engine output
-async function startEngineOutputLoop() {
-  while (isEngineRunning) {
-    try {
-      const output = await invoke("read_engine_output");
-      if (output && output.trim()) {
-        addToLog(output.trim(), "received");
-      }
-    } catch (error) {
-      console.error("Failed to read engine output:", error);
-      isEngineRunning = false;
-      engineStatusText.textContent = "Error";
-      engineStatusText.style.color = "#e74c3c";
-      break;
-    }
-    // Small delay to prevent excessive CPU usage
-    await new Promise((resolve) => setTimeout(resolve, 100));
-  }
-}
+// Setup event listeners
+setupEngineListeners().catch(console.error);
 
 // Event Listeners
 loadEngineBtn.addEventListener("click", loadEngine);
@@ -108,8 +125,10 @@ commandForm.addEventListener("submit", async (e) => {
 });
 
 quickCommandBtns.forEach((btn) => {
-  btn.addEventListener("click", () => {
+  btn.addEventListener("click", async () => {
     const command = btn.dataset.cmd;
-    sendCommand(command);
+    if (command) {
+      await sendCommand(command);
+    }
   });
 });

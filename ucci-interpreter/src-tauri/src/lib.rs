@@ -2,12 +2,12 @@
 use std::io::{BufRead, BufReader, Write};
 use std::process::{Child, Command, Stdio};
 use std::sync::Mutex;
-use tauri::State;
+use tauri::{State};
+use tauri::{Emitter};
 
 // Structure to hold the engine process
 struct EngineState {
     process: Option<Child>,
-    reader: Option<BufReader<std::process::ChildStdout>>,
     writer: Option<std::process::ChildStdin>,
 }
 
@@ -15,7 +15,6 @@ impl EngineState {
     fn new() -> Self {
         Self {
             process: None,
-            reader: None,
             writer: None,
         }
     }
@@ -28,6 +27,7 @@ type SafeEngineState = Mutex<EngineState>;
 async fn start_engine(
     engine_path: String,
     state: State<'_, SafeEngineState>,
+    app_handle: tauri::AppHandle,
 ) -> Result<(), String> {
     let mut engine = state.lock().map_err(|e| e.to_string())?;
 
@@ -38,14 +38,45 @@ async fn start_engine(
         .spawn()
         .map_err(|e| e.to_string())?;
 
-    // Get stdin and stdout handles
+    // Get stdin handle
     let writer = child.stdin.take().ok_or("Failed to get stdin")?;
+    
+    // Get stdout handle and create a reader
     let reader = BufReader::new(child.stdout.take().ok_or("Failed to get stdout")?);
 
     // Store the handles
     engine.writer = Some(writer);
-    engine.reader = Some(reader);
     engine.process = Some(child);
+
+    // Drop the lock before spawning the thread
+    drop(engine);
+
+    // Spawn a thread to continuously read engine output
+    std::thread::spawn(move || {
+        let mut line = String::new();
+        let mut reader = reader;
+        loop {
+            line.clear();
+            match reader.read_line(&mut line) {
+                Ok(0) => {
+                    // EOF reached, engine probably terminated
+                    let _ = app_handle.emit("engine-error", "Engine process terminated");
+                    break;
+                }
+                Ok(_) => {
+                    // Emit the output as an event
+                    if let Err(e) = app_handle.emit("engine-output", line.trim()) {
+                        eprintln!("Failed to emit engine output: {}", e);
+                        break;
+                    }
+                }
+                Err(e) => {
+                    let _ = app_handle.emit("engine-error", format!("Error reading engine output: {}", e));
+                    break;
+                }
+            }
+        }
+    });
 
     Ok(())
 }
@@ -65,19 +96,6 @@ async fn send_command(command: String, state: State<'_, SafeEngineState>) -> Res
 }
 
 #[tauri::command]
-async fn read_engine_output(state: State<'_, SafeEngineState>) -> Result<String, String> {
-    let mut engine = state.lock().map_err(|e| e.to_string())?;
-
-    if let Some(reader) = &mut engine.reader {
-        let mut line = String::new();
-        reader.read_line(&mut line).map_err(|e| e.to_string())?;
-        Ok(line)
-    } else {
-        Err("Engine not started".to_string())
-    }
-}
-
-#[tauri::command]
 fn greet(name: &str) -> String {
     format!("Hello, {}! You've been greeted from Rust!", name)
 }
@@ -91,7 +109,6 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             start_engine,
             send_command,
-            read_engine_output,
             greet
         ])
         .run(tauri::generate_context!())
