@@ -58,17 +58,17 @@ async fn start_engine(
         loop {
             line.clear();
             match reader.read_line(&mut line) {
-                Ok(0) => {
-                    // EOF reached, engine probably terminated
-                    let _ = app_handle.emit("engine-error", "Engine process terminated");
-                    break;
-                }
+                // Ok(0) => {
+                //     // EOF reached, engine probably terminated
+                //     let _ = app_handle.emit("engine-error", "Engine process terminated");
+                //     break;
+                // }
                 Ok(_) => {
-                    // Skip if the line is just an echo of the command
+                    // Skip if the line is just an echo of the command or is empty/whitespace
                     let trimmed = line.trim();
-                    if !trimmed.starts_with("Received command:") {
+                    if !trimmed.is_empty() && !trimmed.starts_with("Received command:") {
                         // Emit the output as an event
-                        if let Err(e) = app_handle.emit("engine-output", trimmed) {
+                        if let Err(e) = app_handle.emit("engine-output", line.clone()) {
                             eprintln!("Failed to emit engine output: {}", e);
                             break;
                         }

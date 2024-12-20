@@ -3,6 +3,8 @@ const { open } = window.__TAURI__.dialog;
 const { listen } = window.__TAURI__.event;
 
 let isEngineRunning = false;
+let messageBuffer = "";
+let messageTimeout = null;
 
 // UI Elements
 // const engineFileInput = document.getElementById("engine-file");
@@ -13,13 +15,74 @@ const commandInput = document.getElementById("command-input");
 const logContent = document.getElementById("log-content");
 const quickCommandBtns = document.querySelectorAll(".cmd-btn");
 
+// Function to preserve all spaces including leading ones
+function preserveSpaces(text) {
+  // Special handling for board display
+  if (text.includes('┌') || text.includes('└')) {
+    return text.split('').map(char => {
+      if (char === ' ') return '\u2007'; // Figure space for better alignment
+      if (char === '·') return '\u00B7'; // Middle dot
+      return char;
+    }).join('');
+  }
+  return text.split('').map(char => char === ' ' ? '&nbsp;' : char).join('');
+}
+
+// Function to flush the message buffer
+function flushMessageBuffer() {
+  if (messageBuffer) {
+    const messageDiv = document.createElement("div");
+    messageDiv.classList.add("message-wrapper", "received");
+    
+    const messageContent = document.createElement("pre");
+    messageContent.classList.add("message-content");
+    
+    // Add board-text class if it's a board display
+    if (messageBuffer.includes('┌') || messageBuffer.includes('└')) {
+      messageContent.classList.add("board-text");
+    }
+    
+    messageContent.innerHTML = preserveSpaces(messageBuffer);
+    
+    messageDiv.appendChild(messageContent);
+    logContent.appendChild(messageDiv);
+    logContent.scrollTop = logContent.scrollHeight;
+  }
+  messageBuffer = "";
+  messageTimeout = null;
+}
+
 // Add message to log
 function addToLog(message, type = "sent") {
-  const messageDiv = document.createElement("div");
-  messageDiv.classList.add("message", type);
-  messageDiv.textContent = `${type === "sent" ? "> " : "< "}${message}`;
-  logContent.appendChild(messageDiv);
-  logContent.scrollTop = logContent.scrollHeight;
+  if (type === "sent" || type === "error") {
+    // Flush any pending received messages
+    if (messageTimeout) {
+      clearTimeout(messageTimeout);
+      flushMessageBuffer();
+    }
+
+    const messageDiv = document.createElement("div");
+    messageDiv.classList.add("message-wrapper", type);
+    
+    const messageContent = document.createElement("pre");
+    messageContent.classList.add("message-content");
+    messageContent.innerHTML = preserveSpaces(message);
+    
+    messageDiv.appendChild(messageContent);
+    logContent.appendChild(messageDiv);
+    logContent.scrollTop = logContent.scrollHeight;
+  } else {
+    // Buffer received messages
+    messageBuffer += message + "\n";
+    
+    // Clear any existing timeout
+    if (messageTimeout) {
+      clearTimeout(messageTimeout);
+    }
+    
+    // Set a new timeout to flush the buffer
+    messageTimeout = setTimeout(flushMessageBuffer, 50);
+  }
 }
 
 // Update engine status
