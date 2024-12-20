@@ -23,17 +23,17 @@ src/
 ```
 
 ## Getting Started
-
 1. Clone the repository
 2. Install dependencies:
+Using nodejs 23.1.0
    ```bash
-   npm install
+   npm install --legacy-peer-deps
    ```
-3. Set up your environment variables:
+4. Set up your environment variables:
    ```
    Copy .env.example to .env.local and fill in your values
    ```
-4. Run the development server:
+5. Run the development server:
    ```bash
    npm run dev
    ```
