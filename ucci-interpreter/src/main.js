@@ -55,20 +55,20 @@ function flushMessageBuffer() {
     // Add crush lines for received messages
     const crushLines = document.createElement("div");
     crushLines.classList.add("crush-lines");
-    
+
     for (let i = 0; i < 3; i++) {
       const line = document.createElement("div");
       line.classList.add("crush-line");
       crushLines.appendChild(line);
     }
-    
+
     messageDiv.appendChild(crushLines);
 
     logContent.appendChild(messageDiv);
 
     // Ensure animation plays and then scroll
     requestAnimationFrame(() => {
-      messageDiv.style.display = 'flex'; // Force reflow
+      messageDiv.style.display = "flex"; // Force reflow
       logContent.scrollTop = logContent.scrollHeight;
     });
 
@@ -94,10 +94,10 @@ function addToLog(message, type = "sent") {
 
     messageDiv.appendChild(messageContent);
     logContent.appendChild(messageDiv);
-    
+
     // Ensure animation plays and then scroll
     requestAnimationFrame(() => {
-      messageDiv.style.display = 'flex'; // Force reflow
+      messageDiv.style.display = "flex"; // Force reflow
       logContent.scrollTop = logContent.scrollHeight;
     });
   } else {
@@ -222,9 +222,9 @@ async function unloadEngine() {
     if (isEngineRunning) {
       await sendCommand("quit");
       // Small delay to allow the quit command to process
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
     }
-    
+
     clearInterface();
     await invoke("unload_engine");
     updateEngineStatus("Not loaded");
@@ -232,7 +232,7 @@ async function unloadEngine() {
     unloadEngineBtn.disabled = true;
   } catch (error) {
     console.error("Failed to unload engine:", error);
-    updateEngineStatus("Failed to unload");
+    updateEngineStatus("Not loaded");
   }
 }
 

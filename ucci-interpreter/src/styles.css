@@ -235,15 +235,15 @@ h1 {
 .message-wrapper.received::before {
   width: 40%;
   right: 30%;
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(45, 212, 191, 0.4);
   animation: groundCrushCenter 0.25s cubic-bezier(0.2, 0.9, 0.1, 1) 0.45s forwards;
-  box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 12px rgba(45, 212, 191, 0.3);
 }
 
 .message-wrapper.received::after {
   width: 60%;
   right: 20%;
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(45, 212, 191, 0.25);
   animation: groundCrushWide 0.3s cubic-bezier(0.2, 0.9, 0.1, 1) 0.46s forwards;
 }
 
@@ -263,9 +263,10 @@ h1 {
 
 .message-wrapper.received .crush-line {
   position: absolute;
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(45, 212, 191, 0.2);
   height: 1px;
   transform-origin: center;
+  box-shadow: 0 0 8px rgba(45, 212, 191, 0.15);
 }
 
 .message-wrapper.received .crush-line:nth-child(1) {
@@ -318,7 +319,7 @@ h1 {
 
 .received .message-content {
   font-size: 14px;
-  line-height: 0.7;
+  line-height: 1;
   padding: 12px 16px;
   background: #1a1a1a;
   color: #ffffff;
@@ -336,7 +337,7 @@ h1 {
 }
 
 .board-text {
-  line-height: 0.55 !important;
+  line-height: 1 !important;
   font-variant-east-asian: full-width;
   text-align-last: justify;
   font-kerning: none;
@@ -417,11 +418,58 @@ button:disabled {
   background: rgba(0, 0, 0, 0.03);
 }
 
+.cmd-btn,
+button[type="submit"] {
+  position: relative;
+  overflow: hidden;
+  background: #4b5563;
+  color: white;
+}
+
+.cmd-btn::before,
+button[type="submit"]::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: #1a1a1a;
+  clip-path: polygon(-100% -100%, -100% -100%, 0% 0%);
+}
+
+.engine-loaded .cmd-btn::before,
+.engine-loaded button[type="submit"]::before {
+  animation: diagonalButtonTransition 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.engine-loaded .cmd-btn,
+.engine-loaded button[type="submit"] {
+  animation: fadeToBlack 0.3s ease forwards;
+  animation-delay: 1.2s;
+}
+
+@keyframes diagonalButtonTransition {
+  0% {
+    clip-path: polygon(-100% -100%, -100% -100%, 0% 0%);
+  }
+  100% {
+    clip-path: polygon(-100% -100%, 200% 200%, 200% -100%);
+  }
+}
+
+@keyframes fadeToBlack {
+  to {
+    background: #1a1a1a;
+  }
+}
+
+.cmd-btn span,
+button[type="submit"] span {
+  position: relative;
+  z-index: 2;
+}
+
 .cmd-btn {
   flex: 1;
   padding: 0.75rem 1.5rem;
-  background: #1a1a1a;
-  color: white;
   font-size: 1rem;
   font-weight: 500;
   text-align: center;
@@ -654,6 +702,33 @@ button {
   }
   100% {
     opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes diagonalButtonTransition {
+  0% {
+    clip-path: polygon(-100% -100%, -100% -100%, 0% 0%);
+  }
+  100% {
+    clip-path: polygon(-100% -100%, 200% 200%, 200% -100%);
+  }
+}
+
+@keyframes diagonalLineTransition {
+  0% {
+    transform: translateX(-100%) translateY(-100%);
+  }
+  100% {
+    transform: translateX(100%) translateY(100%);
+  }
+}
+
+@keyframes fillAfterLine {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
     transform: translateX(0);
   }
 }
