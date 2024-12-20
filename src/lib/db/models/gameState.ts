@@ -88,10 +88,10 @@ const GameSchema = new Schema<IGameState>(
     times: {
       type: {
         red: { type: Number, required: true, default: 600 }, // 10 minutes in seconds
-        black: { type: Number, required: true, default: 600 }
+        black: { type: Number, required: true, default: 600 },
       },
       required: true,
-      _id: false // Prevent Mongoose from creating an _id for the times subdocument
+      _id: false, // Prevent Mongoose from creating an _id for the times subdocument
     },
   },
   {

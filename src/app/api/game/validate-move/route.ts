@@ -77,10 +77,10 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const updatedGame = await GameModel.findByIdAndUpdate(
       id,
       {
-        $set: { 
+        $set: {
           fen: newFen,
-          turn: turn === 'red' ? 'black' : 'red',
-          lastMove: [orig, dest]
+          turn: turn === "red" ? "black" : "red",
+          lastMove: [orig, dest],
         },
         $push: { moves: `${orig}-${dest}` },
       },
@@ -94,12 +94,12 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       );
     }
 
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
       game: {
         ...updatedGame.toObject(),
-        lastMove: [orig, dest]
-      }
+        lastMove: [orig, dest],
+      },
     });
   } catch (error) {
     console.error("Error handling move:", error);
