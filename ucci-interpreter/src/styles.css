@@ -34,7 +34,7 @@ body {
 }
 
 .container::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
   background: linear-gradient(135deg, #f8f9fa, #e9ecef);
@@ -211,10 +211,82 @@ h1 {
 
 .message-wrapper.sent {
   justify-content: flex-start;
+  animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .message-wrapper.received {
   justify-content: flex-end;
+  animation: slideInFromLeft 0.5s cubic-bezier(0.2, 0.7, 0.3, 1);
+  transform-origin: left center;
+  position: relative;
+}
+
+.message-wrapper.received::before,
+.message-wrapper.received::after,
+.message-wrapper.received .crush-effect {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  height: 1px;
+  transform: scaleX(0);
+  transform-origin: center;
+}
+
+.message-wrapper.received::before {
+  width: 40%;
+  right: 30%;
+  background: rgba(255, 255, 255, 0.3);
+  animation: groundCrushCenter 0.25s cubic-bezier(0.2, 0.9, 0.1, 1) 0.45s forwards;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+}
+
+.message-wrapper.received::after {
+  width: 60%;
+  right: 20%;
+  background: rgba(255, 255, 255, 0.2);
+  animation: groundCrushWide 0.3s cubic-bezier(0.2, 0.9, 0.1, 1) 0.46s forwards;
+}
+
+.message-wrapper.received .message-content {
+  animation: impactScale 0.15s cubic-bezier(0.2, 0.8, 0.3, 1) 0.45s backwards;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.2s ease;
+}
+
+.message-wrapper.received .crush-lines {
+  position: absolute;
+  bottom: -1px;
+  right: 25%;
+  width: 50%;
+  height: 2px;
+}
+
+.message-wrapper.received .crush-line {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.15);
+  height: 1px;
+  transform-origin: center;
+}
+
+.message-wrapper.received .crush-line:nth-child(1) {
+  width: 20%;
+  right: 40%;
+  transform: rotate(25deg);
+  animation: crushLine 0.2s cubic-bezier(0.3, 0.7, 0.1, 1) 0.47s forwards;
+}
+
+.message-wrapper.received .crush-line:nth-child(2) {
+  width: 15%;
+  right: 30%;
+  transform: rotate(-15deg);
+  animation: crushLine 0.2s cubic-bezier(0.3, 0.7, 0.1, 1) 0.48s forwards;
+}
+
+.message-wrapper.received .crush-line:nth-child(3) {
+  width: 10%;
+  right: 60%;
+  transform: rotate(-35deg);
+  animation: crushLine 0.2s cubic-bezier(0.3, 0.7, 0.1, 1) 0.49s forwards;
 }
 
 .message-wrapper.error {
@@ -252,6 +324,8 @@ h1 {
   color: #ffffff;
   border-radius: 4px;
   font-weight: normal;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.2s ease;
 }
 
 .error .message-content {
@@ -265,7 +339,7 @@ h1 {
   line-height: 0.55 !important;
   font-variant-east-asian: full-width;
   text-align-last: justify;
-  font-kerning: none;   
+  font-kerning: none;
   font-feature-settings: "chws" 1;
   -webkit-font-feature-settings: "chws" 1;
   text-spacing: space-first allow-end;
@@ -440,6 +514,147 @@ button {
   }
   100% {
     clip-path: polygon(-100% -100%, 200% 200%, 200% -100%);
+  }
+}
+
+@keyframes popIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes slideInFromLeft {
+  0% {
+    opacity: 0;
+    transform: translateX(-100vw) translateY(-5px) rotate(-0.5deg);
+  }
+  15% {
+    opacity: 1;
+  }
+  88% {
+    transform: translateX(-5%) translateY(-2px) rotate(-0.2deg);
+  }
+  95% {
+    transform: translateX(0) translateY(1px) rotate(0.1deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) translateY(0) rotate(0);
+  }
+}
+
+@keyframes impactScale {
+  0% {
+    transform: scale(1.015);
+  }
+  50% {
+    transform: scale(0.995);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes groundCrush {
+  0% {
+    transform: scaleX(0);
+    opacity: 1;
+  }
+  20% {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scaleX(0.8);
+    opacity: 0;
+  }
+}
+
+@keyframes groundCrushWide {
+  0% {
+    transform: scaleX(0);
+    opacity: 1;
+  }
+  30% {
+    transform: scaleX(1.3);
+    opacity: 1;
+  }
+  100% {
+    transform: scaleX(1);
+    opacity: 0;
+  }
+}
+
+@keyframes groundCrushCenter {
+  0% {
+    transform: scaleX(0);
+    opacity: 1;
+  }
+  30% {
+    transform: scaleX(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: scaleX(0.9);
+    opacity: 0;
+  }
+}
+
+@keyframes crushLine {
+  0% {
+    transform: scaleX(0) rotate(var(--rotation));
+    opacity: 0;
+  }
+  40% {
+    transform: scaleX(1) rotate(var(--rotation));
+    opacity: 1;
+  }
+  100% {
+    transform: scaleX(1) rotate(var(--rotation));
+    opacity: 0;
+  }
+}
+
+@keyframes groundImpact {
+  0% {
+    transform: scaleX(0);
+    opacity: 1;
+  }
+  20% {
+    transform: scaleX(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: scaleX(1);
+    opacity: 0;
+  }
+}
+
+@keyframes shadowPop {
+  0% {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  50% {
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  }
+  100% {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+}
+
+@keyframes slideInFromRight {
+  0% {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
   }
 }
 

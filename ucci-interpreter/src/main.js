@@ -50,13 +50,30 @@ function flushMessageBuffer() {
     }
 
     messageContent.innerHTML = preserveSpaces(messageBuffer);
-
     messageDiv.appendChild(messageContent);
+
+    // Add crush lines for received messages
+    const crushLines = document.createElement("div");
+    crushLines.classList.add("crush-lines");
+    
+    for (let i = 0; i < 3; i++) {
+      const line = document.createElement("div");
+      line.classList.add("crush-line");
+      crushLines.appendChild(line);
+    }
+    
+    messageDiv.appendChild(crushLines);
+
     logContent.appendChild(messageDiv);
-    logContent.scrollTop = logContent.scrollHeight;
+
+    // Ensure animation plays and then scroll
+    requestAnimationFrame(() => {
+      messageDiv.style.display = 'flex'; // Force reflow
+      logContent.scrollTop = logContent.scrollHeight;
+    });
+
+    messageBuffer = "";
   }
-  messageBuffer = "";
-  messageTimeout = null;
 }
 
 // Add message to log
@@ -77,7 +94,12 @@ function addToLog(message, type = "sent") {
 
     messageDiv.appendChild(messageContent);
     logContent.appendChild(messageDiv);
-    logContent.scrollTop = logContent.scrollHeight;
+    
+    // Ensure animation plays and then scroll
+    requestAnimationFrame(() => {
+      messageDiv.style.display = 'flex'; // Force reflow
+      logContent.scrollTop = logContent.scrollHeight;
+    });
   } else {
     // Buffer received messages
     messageBuffer += message + "\n";
