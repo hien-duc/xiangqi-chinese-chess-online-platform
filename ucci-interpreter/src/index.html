@@ -1,39 +1,56 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <link rel="stylesheet" href="styles.css" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Tauri App</title>
-    <script type="module" src="/main.js" defer></script>
+    <title>UCCI Interpreter</title>
+    <script type="module" src="./main.js" defer></script>
   </head>
 
   <body>
     <main class="container">
-      <h1>Welcome to Tauri</h1>
+      <h1>UCCI Interpreter</h1>
 
-      <div class="row">
-        <a href="https://tauri.app" target="_blank">
-          <img src="/assets/tauri.svg" class="logo tauri" alt="Tauri logo" />
-        </a>
-        <a
-          href="https://developer.mozilla.org/en-US/docs/Web/JavaScript"
-          target="_blank"
-        >
-          <img
-            src="/assets/javascript.svg"
-            class="logo vanilla"
-            alt="JavaScript logo"
-          />
-        </a>
+      <div class="engine-control">
+        <div class="file-input-wrapper">
+          <input type="file" id="engine-file" accept=".exe" />
+          <button id="load-engine">Load Engine</button>
+        </div>
+        <div class="engine-status">
+          <span>Status: </span>
+          <span id="engine-status-text">Not loaded</span>
+        </div>
       </div>
-      <p>Click on the Tauri logo to learn more about the framework</p>
 
-      <form class="row" id="greet-form">
-        <input id="greet-input" placeholder="Enter a name..." />
-        <button type="submit">Greet</button>
-      </form>
-      <p id="greet-msg"></p>
+      <div class="communication-panel">
+        <div class="log-display">
+          <h3>Communication Log</h3>
+          <div id="log-content"></div>
+        </div>
+
+        <div class="command-input">
+          <form id="command-form">
+            <input
+              type="text"
+              id="command-input"
+              placeholder="Enter UCCI command..."
+              autocomplete="off"
+            />
+            <button type="submit">Send</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="quick-commands">
+        <h3>Quick Commands</h3>
+        <button class="cmd-btn" data-cmd="ucci">ucci</button>
+        <button class="cmd-btn" data-cmd="isready">isready</button>
+        <button class="cmd-btn" data-cmd="position startpos">
+          position startpos
+        </button>
+        <button class="cmd-btn" data-cmd="quit">quit</button>
+      </div>
     </main>
   </body>
 </html>
