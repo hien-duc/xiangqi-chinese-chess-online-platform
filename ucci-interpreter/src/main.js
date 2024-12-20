@@ -88,14 +88,22 @@ function addToLog(message, type = "sent") {
 // Update engine status
 function updateEngineStatus(status) {
   engineStatusText.textContent = status;
+  const container = document.querySelector('.container');
+  
   if (status === "Loaded") {
-    engineStatusText.style.color = "#27ae60";
+    engineStatusText.style.color = "#22c55e";
+    engineStatusText.classList.add('loaded');
+    container.classList.add('engine-loaded');
     isEngineRunning = true;
   } else if (status === "Failed to load") {
-    engineStatusText.style.color = "#c0392b";
+    engineStatusText.style.color = "#dc2626";
+    engineStatusText.classList.remove('loaded');
+    container.classList.remove('engine-loaded');
     isEngineRunning = false;
   } else {
-    engineStatusText.style.color = "#000";
+    engineStatusText.style.color = "#666";
+    engineStatusText.classList.remove('loaded');
+    container.classList.remove('engine-loaded');
     isEngineRunning = false;
   }
 }

@@ -4,7 +4,7 @@
   line-height: 1.4;
   font-weight: 400;
   color: #1a1a1a;
-  background: linear-gradient(135deg, #ffffff, #f5f5f5);
+  background: #1a1a1a;
   height: 100vh;
   overflow: hidden;
 }
@@ -21,12 +21,32 @@ body {
 }
 
 .container {
+  position: relative;
   max-width: 1000px;
   margin: 0 auto;
-  padding: 1rem;
+  padding: 2rem;
   height: 100vh;
   display: flex;
   flex-direction: column;
+  gap: 1rem;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+.container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+}
+
+.container.engine-loaded::before {
+  opacity: 1;
+  animation: diagonalTransition 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
 h1 {
@@ -72,11 +92,37 @@ h1 {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  transition: all 0.3s ease;
 }
 
 #engine-status-text {
   font-weight: 600;
   transition: color 0.3s ease;
+  position: relative;
+  padding-left: 1.5rem;
+}
+
+#engine-status-text::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0.8rem;
+  height: 0.8rem;
+  border-radius: 50%;
+  background: #dc2626;
+  transition: all 0.3s ease;
+}
+
+#engine-status-text.loaded::before {
+  background: #22c55e;
+}
+
+#engine-status-text:not(.loaded)::before {
+  animation: loading 2s ease infinite;
+  background: linear-gradient(90deg, #dc2626, #ef4444, #dc2626);
+  background-size: 200% 200%;
 }
 
 .communication-panel {
@@ -249,7 +295,7 @@ button {
   font-size: 0.9rem;
   cursor: pointer;
   transition: all 0.2s ease;
-  backgroxnd: #1a1a1a;
+  background: #1a1a1a;
   color: white;
 }
 
@@ -343,6 +389,54 @@ button {
 
 #greet-input {
   margin-right: 5px;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes loading {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes diagonalTransition {
+  0% {
+    clip-path: polygon(-100% -100%, -100% -100%, 0% 0%);
+  }
+  100% {
+    clip-path: polygon(-100% -100%, 200% 200%, 200% -100%);
+  }
+}
+
+.container > * {
+  animation: slideIn 0.5s ease-out forwards;
+}
+
+.container > *:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.container > *:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.container > *:nth-child(3) {
+  animation-delay: 0.3s;
 }
 
 @media (prefers-color-scheme: dark) {
