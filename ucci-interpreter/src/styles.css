@@ -79,6 +79,26 @@ h1 {
   padding: 0.75rem 1.5rem;
 }
 
+.engine-buttons {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+#unload-engine {
+  background: #dc2626;
+  transition: all 0.3s ease;
+}
+
+#unload-engine:hover:not(:disabled) {
+  background: #ef4444;
+}
+
+#unload-engine:disabled {
+  background: #d1d5db;
+  cursor: not-allowed;
+}
+
 .file-input-wrapper {
   display: flex;
   gap: 0.75rem;
