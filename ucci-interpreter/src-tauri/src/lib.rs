@@ -23,6 +23,9 @@ impl EngineState {
 // Wrap the engine state in a mutex for thread-safe access
 type SafeEngineState = Mutex<EngineState>;
 
+#[cfg(target_os = "windows")]
+use std::os::windows::process::CommandExt;
+
 #[tauri::command]
 async fn start_engine(
     engine_path: String,
@@ -32,9 +35,15 @@ async fn start_engine(
     let mut engine = state.lock().map_err(|e| e.to_string())?;
 
     // Start the engine process
-    let mut child = Command::new(engine_path)
-        .stdin(Stdio::piped())
-        .stdout(Stdio::piped())
+    let mut command = Command::new(engine_path);
+    
+    command.stdin(Stdio::piped())
+           .stdout(Stdio::piped());
+
+    #[cfg(target_os = "windows")]
+    command.creation_flags(0x08000000); // CREATE_NO_WINDOW
+
+    let mut child = command
         .spawn()
         .map_err(|e| e.to_string())?;
 
