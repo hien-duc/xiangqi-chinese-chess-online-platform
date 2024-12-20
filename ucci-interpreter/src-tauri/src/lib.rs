@@ -64,10 +64,14 @@ async fn start_engine(
                     break;
                 }
                 Ok(_) => {
-                    // Emit the output as an event
-                    if let Err(e) = app_handle.emit("engine-output", line.trim()) {
-                        eprintln!("Failed to emit engine output: {}", e);
-                        break;
+                    // Skip if the line is just an echo of the command
+                    let trimmed = line.trim();
+                    if !trimmed.starts_with("Received command:") {
+                        // Emit the output as an event
+                        if let Err(e) = app_handle.emit("engine-output", trimmed) {
+                            eprintln!("Failed to emit engine output: {}", e);
+                            break;
+                        }
                     }
                 }
                 Err(e) => {
