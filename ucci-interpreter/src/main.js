@@ -207,7 +207,7 @@ async function loadEngine() {
     updateEngineStatus("Loaded");
 
     // Send initial UCCI command
-    await sendCommand("ucci");
+    await sendCommand("uci");
   } catch (error) {
     console.error("Error loading engine:", error);
     updateEngineStatus("Failed to load");
