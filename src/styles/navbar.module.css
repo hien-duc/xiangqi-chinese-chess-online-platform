@@ -1,0 +1,136 @@
+.nav {
+  background-color: rgba(34, 84, 61, 0.95);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.navContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 4.5rem;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  transition: transform 0.2s ease;
+}
+
+.logo:hover {
+  transform: scale(1.05);
+}
+
+.logoText {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: white;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  letter-spacing: 0.05em;
+}
+
+.authSection {
+  display: flex;
+  align-items: center;
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.welcomeText {
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.signInButton, .signOutButton, .registerButton {
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.signInButton {
+  background-color: #48bb78;
+  color: white;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+.signInButton:hover {
+  background-color: #38a169;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.registerButton {
+  background-color: transparent;
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+}
+
+.registerButton:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: white;
+  transform: translateY(-1px);
+}
+
+.signOutButton {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.signOutButton:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+@media (max-width: 640px) {
+  .container {
+    padding: 0 1rem;
+  }
+
+  .navContent {
+    height: 4rem;
+  }
+
+  .logoText {
+    font-size: 1.25rem;
+  }
+
+  .welcomeText {
+    display: none;
+  }
+
+  .buttonGroup {
+    gap: 0.5rem;
+  }
+
+  .signInButton, .signOutButton, .registerButton {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+}

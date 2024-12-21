@@ -1,80 +1,55 @@
-import React, { useState } from "react";
-import styles from "../styles/LeftPanel.module.css";
+import React from "react";
+import { useGameContext } from "@/hooks/useGameState";
+import styles from "../styles/leftpanel.module.css";
 
 const LeftPanel = () => {
-  const [activeView, setActiveView] = useState("view");
+  const { gameState } = useGameContext();
+
+  const renderMoveHistory = () => (
+    <div className={styles.moveHistory}>
+      <h3>Move History</h3>
+      <div className={styles.movesList}>
+        {gameState?.moves
+          .reduce((pairs, move, index) => {
+            if (index % 2 === 0) {
+              pairs.push({
+                number: Math.floor(index / 2) + 1,
+                red: move,
+                black: gameState.moves[index + 1] || "",
+              });
+            }
+            return pairs;
+          }, [])
+          .map((pair, index) => (
+            <div key={index} className={styles.movePair}>
+              <span className={styles.moveNumber}>{pair.number}.</span>
+              <div className={styles.moveItem}>
+                <span className={`${styles.moveText} ${styles.redMove}`}>
+                  {pair.red}
+                </span>
+                <span className={`${styles.moveText} ${styles.blackMove}`}>
+                  {pair.black}
+                </span>
+              </div>
+            </div>
+          ))}
+        {(!gameState?.moves || gameState.moves.length === 0) && (
+          <div className={styles.noMoves}>No moves yet</div>
+        )}
+      </div>
+    </div>
+  );
 
   const renderPanel = () => {
-    switch (activeView) {
-      case "view":
-        return (
-          <div className={styles.panelContent}>
-            <h3>Game Information</h3>
-            <div>
-              <p>Current Side: </p>
-              <p>Pieces Captured:</p>
-            </div>
-          </div>
-        );
-      case "create":
-        return (
-          <div className={styles.panelContent}>
-            <h3>Create Mode</h3>
-            <div>
-              <p>Setup your custom game configuration here</p>
-              <p>Feature coming soon...</p>
-            </div>
-          </div>
-        );
-      case "chat":
-        return (
-          <div className={styles.panelContent}>
-            <h3>Chat</h3>
-            <div className={styles.chatContainer}>
-              <p>Chat messages will appear here...</p>
-            </div>
-          </div>
-        );
-      default:
-        return null;
-    }
+    return renderMoveHistory();
   };
 
   return (
     <div className={styles.leftPanel}>
-      {/* Turn indicator */}
-      <div className={styles.turnIndicator}>RedTurn</div>
-
-      {/* Content panel */}
-      <div className={styles.contentPanel}>{renderPanel()}</div>
-
-      {/* Navigation buttons */}
-      <div className={styles.buttonContainer}>
-        <button
-          className={`${styles.navButton} ${
-            activeView === "view" ? styles.active : ""
-          }`}
-          onClick={() => setActiveView("view")}
-        >
-          View
-        </button>
-        <button
-          className={`${styles.navButton} ${
-            activeView === "create" ? styles.active : ""
-          }`}
-          onClick={() => setActiveView("create")}
-        >
-          Create
-        </button>
-        <button
-          className={`${styles.navButton} ${
-            activeView === "chat" ? styles.active : ""
-          }`}
-          onClick={() => setActiveView("chat")}
-        >
-          Chat
-        </button>
+      <div className={styles.turnIndicator} data-turn={gameState.turn}>
+        {gameState.turn}'s Turn
       </div>
+      <div className={styles.contentPanel}>{renderPanel()}</div>
     </div>
   );
 };

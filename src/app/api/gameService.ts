@@ -1,67 +1,84 @@
-// api/gameService.ts
-import { GameState, MoveResult } from "../utils/types";
+import { nanoid } from "nanoid";
+// import { ObjectId } from "mongodb";
+import { connectToDatabase } from "@/lib/db/db-connect";
+import GameModel, { IGameState } from "@/lib/db/models/gameState";
+import GuestModel from "@/lib/db/models/guest.model";
+// import { GameState } from "@/utils/types";
 
-export async function makeMove(
-  gameId: string,
-  orig: string,
-  dest: string,
-  xiangqiground: any
-): Promise<MoveResult> {
-  try {
-    // 1. Validate move locally first
-    const state = xiangqiground.state;
-    if (!state.movable.dests?.get(orig)?.includes(dest)) {
-      return {
-        success: false,
-        error: "Invalid move",
-      };
-    }
+export async function createGuestGame(): Promise<IGameState> {
+  const guestId = `guest_${nanoid(8)}`;
 
-    // 2. Send move to backend
-    const response = await fetch("/api/games/move", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        gameId,
-        orig,
-        dest,
-        fen: xiangqiground.getFen(),
-        turn: state.turnColor,
-      }),
-    });
+  return createGame({
+    id: guestId,
+    isGuest: true,
+    name: `Guest${guestId.slice(-4)}`,
+  });
+}
+export async function createGame(playerInfo: {
+  id: string;
+  isGuest: boolean;
+  name: string;
+}): Promise<IGameState> {
+  await connectToDatabase();
 
-    if (!response.ok) {
-      throw new Error("Move failed");
-    }
-
-    // 3. Get updated game state
-    const gameState: GameState = await response.json();
-
-    // 4. Update local board
-    xiangqiground.set({
-      fen: gameState.fen,
-      turnColor: gameState.turn,
-      movable: {
-        color: gameState.turn,
-        dests: undefined, // Force recalculation of valid moves
+  const game = await GameModel.create({
+    players: {
+      red: {
+        id: playerInfo.id,
+        isGuest: playerInfo.isGuest,
+        name: playerInfo.name,
       },
-      check: gameState.check,
-    });
+      black: {
+        id: "",
+        isGuest: true,
+        name: "",
+      },
+    },
+    status: "waiting",
+    chat: {
+      enabled: !playerInfo.isGuest, // Only enable chat if creator is registered user
+    },
+  });
 
-    // 5. Play any pending premove
-    if (gameState.premove) {
-      xiangqiground.playPremove();
-    }
+  return game;
+}
 
-    return {
-      success: true,
-      gameState,
-    };
-  } catch (error) {
-    console.error("Move error:", error);
-    return {
-      success: false,
-      error: "Failed to make move",
-    };
+export async function joinGame(
+  gameId: string,
+  playerInfo: {
+    id: string;
+    isGuest: boolean;
+    name: string;
   }
+): Promise<IGameState | null> {
+  await connectToDatabase();
+
+  const game = await GameModel.findById(gameId);
+  if (!game || game.status !== "waiting") return null;
+
+  game.players.black = {
+    id: playerInfo.id,
+    isGuest: playerInfo.isGuest,
+    name: playerInfo.name,
+  };
+  game.status = "active";
+
+  // Enable chat only if both players are registered users
+  game.chat.enabled = !game.players.red.isGuest && !game.players.black.isGuest;
+
+  return await game.save();
+}
+
+export async function createGuest(): Promise<string> {
+  await connectToDatabase();
+
+  const guestId = `guest_${nanoid(8)}`;
+  const guestName = `Guest${Math.floor(Math.random() * 10000)}`;
+
+  await GuestModel.create({
+    guestId,
+    name: guestName,
+  });
+
+  return guestId;
 }

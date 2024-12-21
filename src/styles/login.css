@@ -9,9 +9,9 @@ body {
   align-items: center;
   justify-content: center;
   padding: 20px;
-  /* background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
-    background: linear-gradient(135deg, #1a365d, #2c5282);
-    background: linear-gradient(135deg, #742a2a, #9b2c2c); */
+  /* background: linear-gradient(135deg, #1a1a1a, #2d2d2d); */
+  /* background: linear-gradient(135deg, #1a365d, #2c5282); */
+  /* background: linear-gradient(135deg, #742a2a, #9b2c2c); */
 
   background: linear-gradient(135deg, #22543d, #276749);
   position: relative;
@@ -38,10 +38,11 @@ body {
   bottom: 0;
   opacity: 0.05;
   z-index: 0;
-  background-image: linear-gradient(45deg, #000 25%, transparent 25%),
-    linear-gradient(-45deg, #000 25%, transparent 25%),
-    linear-gradient(45deg, transparent 75%, #000 75%),
-    linear-gradient(-45deg, transparent 75%, #000 75%);
+  background-image: linear-gradient(45deg, #ccc 25%, transparent 25%),
+    linear-gradient(-45deg, #ccc 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #ccc 75%),
+    linear-gradient(-45deg, transparent 75%, #ccc 75%);
+
   background-size: 20px 20px;
   background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
 }
@@ -53,7 +54,7 @@ body {
 
 .header {
   text-align: center;
-  margin-bottom: 32px;
+  margin-bottom: 16px;
   color: white;
 }
 
@@ -74,7 +75,7 @@ body {
 .button-container {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
   /* Ensures equal spacing between buttons */
 }
 
@@ -84,7 +85,7 @@ body {
   background: white;
   border: none;
   border-radius: 8px;
-  color: #24292e;
+  color: white;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
@@ -93,10 +94,11 @@ body {
   justify-content: center;
   gap: 12px;
   transition: all 0.3s ease;
+  background-color: #333;
 }
 
 .github-button:hover {
-  background: #f5f5f5;
+  /* background: #f5f5f5; */
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
@@ -110,10 +112,10 @@ body {
 .google-button {
   width: 100%;
   padding: 12px 24px;
-  background: white;
-  border: 1px solid #e0e0e0;
+  background: black;
+  border: 1px solid #4285f4;
   border-radius: 8px;
-  color: #3c4043;
+  color: white;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
@@ -122,10 +124,11 @@ body {
   justify-content: center;
   gap: 12px;
   transition: all 0.3s ease;
+  background-color: #4285f4;
 }
 
 .google-button:hover {
-  background: #f8f9fa;
+  /* background: #f8f9fa; */
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(66, 133, 244, 0.1);
 }
@@ -136,10 +139,6 @@ body {
 }
 
 /* Credentials Form Styles */
-.credentials-form {
-  margin-top: 16px;
-}
-
 .credentials-form label {
   display: block;
   font-size: 1rem;
@@ -155,12 +154,35 @@ body {
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.1);
   color: white;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
   transition: all 0.3s ease;
 }
 
 .credentials-form input::placeholder {
   color: rgba(255, 255, 255, 0.6);
+}
+
+.credentials-form input:focus {
+  outline: none;
+  ring: 2px solid #0066ff;
+  ring-offset: 2px;
+}
+
+.error-message {
+  color: #dc2626;
+  background-color: #fee2e2;
+  padding: 0.75rem;
+  border-radius: 0.375rem;
+  margin-top: 0.5rem;
+  text-align: center;
+  font-size: 0.875rem;
+}
+
+.password-requirements {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.8rem;
+  margin-top: 4px;
+  margin-bottom: 8px;
 }
 
 /* Credentials Sign-In Button */
@@ -196,6 +218,26 @@ body {
   outline: none;
   ring: 2px solid #0066ff;
   ring-offset: 2px;
+}
+
+.register-link {
+  text-align: center;
+  margin-top: 16px;
+  margin-bottom: 16px;
+}
+
+.register-link p {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.create-account-link {
+  color: #4285f4;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.create-account-link:hover {
+  text-decoration: underline;
 }
 
 .features {
@@ -267,3 +309,5 @@ footer {
 .login-card {
   animation: fadeIn 0.6s ease-out;
 }
+
+/* styles/login.css */
