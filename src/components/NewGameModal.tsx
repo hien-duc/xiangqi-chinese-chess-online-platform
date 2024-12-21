@@ -1,4 +1,4 @@
-import styles from "@/styles/newGameModal.module.css";
+import styles from "@/styles/NewGameModal.module.css";
 
 interface NewGameModalProps {
   isOpen: boolean;

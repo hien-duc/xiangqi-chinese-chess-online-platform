@@ -1,6 +1,6 @@
 import React from "react";
 import { useGameContext } from "@/hooks/useGameState";
-import styles from "../styles/leftpanel.module.css";
+import styles from "../styles/LeftPanel.module.css";
 
 const LeftPanel = () => {
   const { gameState } = useGameContext();

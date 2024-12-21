@@ -1,5 +1,5 @@
 import { AuthProvider } from "@/components/auth-provider";
-import { Navbar } from "@/components/navbar";
+import { Navbar } from "@/components/Navbar";
 import { GameProvider } from "../hooks/useGameState";
 import "./globals.css";
 import { ChatProvider } from "@/context/ChatContext";

@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import XiangqiBoard from "@/components/XiangqiBoard";
 import { useGameContext } from "@/hooks/useGameState";
-import styles from "@/styles/page.module.css";
+import styles from "@/styles/Page.module.css";
 import LeftPanel from "@/components/LeftPanel";
 import RightPanel from "@/components/RightPanel";
 import "@/styles/xiangqiground.css";
