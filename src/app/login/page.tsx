@@ -1,8 +1,8 @@
 import { auth, signIn } from "auth";
 import { redirect } from "next/navigation";
 import { Github, Mail } from "lucide-react";
-import "../../styles/login.css";
-import { signInSchema } from "../../lib/zod";
+import "../../styles/LogIn.css";
+import { signInSchema } from "@/lib/zod";
 import "../globals.css";
 import Link from "next/link";
 import { Params } from "next/dist/server/request/params";

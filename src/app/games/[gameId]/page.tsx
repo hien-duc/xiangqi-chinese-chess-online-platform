@@ -7,7 +7,7 @@ import { useGameContext } from "@/hooks/useGameState";
 import styles from "@/styles/Page.module.css";
 import LeftPanel from "@/components/LeftPanel";
 import RightPanel from "@/components/RightPanel";
-import "@/styles/xiangqiground.css";
+import "@/styles/XiangqiGround.css";
 import "@/app/globals.css";
 
 export default function GamePage() {

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import styles from "@/styles/games.module.css";
+import styles from "@/styles/Games.module.css";
 import NewGameModal from "@/components/NewGameModal";
 import { useGameStore } from "@/stores/gameStore";
 

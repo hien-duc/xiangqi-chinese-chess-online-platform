@@ -1,5 +1,5 @@
 import { useRouter } from "next/navigation";
-import styles from "@/styles/winmodal.module.css";
+import styles from "@/styles/WinModal.module.css";
 
 interface WinModalProps {
   isOpen: boolean;

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import styles from "@/styles/lobby.module.css";
+import styles from "@/styles/Lobby.module.css";
 import { FaUsers } from "react-icons/fa";
 import { RiComputerLine } from "react-icons/ri";
 import { GiChessKnight } from "react-icons/gi";

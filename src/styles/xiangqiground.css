@@ -1,7 +1,7 @@
-@import "xiangqiground.base.css";
-@import "xiangqiground.board.css";
-@import "xiangqiground.pieces.css";
-@import "xiangqiground.inactive.css";
+@import "XiangqiGround.base.css";
+@import "XiangqiGround.board.css";
+@import "XiangqiGround.pieces.css";
+@import "XiangqiGround.inactive.css";
 
 .xiangqiground {
   width: 540px;

@@ -3,7 +3,7 @@ import { useGameContext } from "@/hooks/useGameState";
 import { useGameTimer } from "@/hooks/useGameTimer";
 import { useChat } from "@/context/ChatContext";
 import { useSession } from "next-auth/react";
-import styles from "../styles/RightPanel.module.css";
+import styles from "@/styles/RightPanel.module.css";
 import { FaTrophy, FaSkull, FaHandshake } from "react-icons/fa";
 import WinModal from "@/components/WinModal";
 
