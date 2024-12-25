@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
       {
         $set: {
           fen: engineMove.fen,
-          lastMove: engineMove.from + engineMove.to,
+          // lastMove: engineMove.from + engineMove.to,
         },
       },
       { new: true }

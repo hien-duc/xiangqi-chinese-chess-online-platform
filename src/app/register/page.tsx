@@ -3,24 +3,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
-import "@/styles/Login.css";
+import "@/styles/LogIn.css";
 import "../globals.css";
 import Link from "next/link";
-
-const registerSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Invalid email"),
-  password: z
-    .string()
-    .min(8, "Password must be at least 8 characters")
-    .max(32, "Password must be less than 32 characters")
-    .regex(/[a-zA-Z]/, "Password must contain at least one letter")
-    .regex(/[0-9]/, "Password must contain at least one number")
-    .regex(
-      /[^a-zA-Z0-9]/,
-      "Password must contain at least one special character"
-    ),
-});
+import { SignupFormSchema } from "@/lib/zod";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -34,7 +20,7 @@ export default function RegisterPage() {
         password: formData.get("password"),
       };
 
-      const validatedData = registerSchema.parse(rawData);
+      const validatedData = SignupFormSchema.parse(rawData);
 
       const response = await fetch("/api/auth/register", {
         method: "POST",
