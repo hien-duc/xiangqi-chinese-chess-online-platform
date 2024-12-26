@@ -1,9 +1,13 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Xiangqiground } from "@/utils/xiangqiground";
 import { useGameContext } from "@/hooks/useGameState";
 import { Config } from "@/utils/config";
 import { useSession } from "next-auth/react";
 import { getTurnColor, initialFen } from "@/utils/fen";
+import styles from "@/styles/FloatingButton.module.css";
+import { FaFlag } from "react-icons/fa";
+import ForfeitModal from "@/components/ForfeitModal";
+
 interface XiangqiBoardProps {
   className?: string;
 }
@@ -15,11 +19,25 @@ interface XiangqigroundInstance {
 const DEFAULT_FEN = initialFen;
 
 const XiangqiBoard: React.FC<XiangqiBoardProps> = ({ className = "" }) => {
-  const { gameState, makeMove, isLoading } = useGameContext();
+  const { gameState, makeMove, isLoading, forfeitGame } = useGameContext();
   const { data: session } = useSession();
   const boardRef = useRef<HTMLDivElement | null>(null);
   const groundRef = useRef<XiangqigroundInstance | null>(null);
   const isInitialMount = useRef(true);
+  const [showForfeitModal, setShowForfeitModal] = useState(false);
+
+  const handleForfeit = async () => {
+    await forfeitGame();
+    setShowForfeitModal(false);
+  };
+
+  const canForfeit = () => {
+    if (!session?.user?.id || !gameState) return false;
+    const isPlayer =
+      gameState.players.red.id === session.user.id ||
+      gameState.players.black.id === session.user.id;
+    return isPlayer && gameState.status === "active";
+  };
 
   // Initialize the board
   useEffect(() => {
@@ -132,6 +150,21 @@ const XiangqiBoard: React.FC<XiangqiBoardProps> = ({ className = "" }) => {
           {message}
         </div>
       )}
+      {canForfeit() && (
+        <button
+          className={styles.floatingButton}
+          onClick={() => setShowForfeitModal(true)}
+          title="Forfeit Game"
+          disabled={isLoading}
+        >
+          <FaFlag />
+        </button>
+      )}
+      <ForfeitModal
+        isOpen={showForfeitModal}
+        onClose={() => setShowForfeitModal(false)}
+        onConfirm={handleForfeit}
+      />
     </div>
   );
 };

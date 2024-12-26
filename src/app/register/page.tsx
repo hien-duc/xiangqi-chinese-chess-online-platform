@@ -6,7 +6,7 @@ import { z } from "zod";
 import "@/styles/LogIn.css";
 import "../globals.css";
 import Link from "next/link";
-import { SignupFormSchema } from "@/lib/zod";
+import { SignupFormSchema } from "@/lib/validations/authenticationZod";
 
 export default function RegisterPage() {
   const router = useRouter();

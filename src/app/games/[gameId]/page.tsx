@@ -40,7 +40,7 @@ export default function GamePage() {
   }
 
   return (
-    <main className="p-8">
+    <main className="p-0">
       <div className={styles.container}>
         <div className={styles["game-container"]}>
           <LeftPanel />

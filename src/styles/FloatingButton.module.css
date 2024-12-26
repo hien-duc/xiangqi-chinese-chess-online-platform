@@ -1,0 +1,67 @@
+.floatingButton {
+  position: absolute;
+  right: -70px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: linear-gradient(135deg, #f3f4f6, #ffffff);
+  color: #dc2626;
+  border: 2px solid rgba(220, 38, 38, 0.1);
+  border-radius: 50%;
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06),
+    inset 0 2px 4px rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.floatingButton:hover {
+  transform: translateY(-50%) scale(1.05);
+  color: #991b1b;
+  border-color: rgba(220, 38, 38, 0.2);
+  box-shadow: 
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05),
+    inset 0 2px 4px rgba(255, 255, 255, 0.5);
+}
+
+.floatingButton:active {
+  transform: translateY(-50%) scale(0.98);
+  box-shadow: 
+    0 2px 4px -1px rgba(0, 0, 0, 0.1),
+    0 1px 2px -1px rgba(0, 0, 0, 0.06),
+    inset 0 2px 4px rgba(255, 255, 255, 0.3);
+}
+
+.floatingButton svg {
+  width: 20px;
+  height: 20px;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.1));
+  transition: all 0.3s ease;
+}
+
+.floatingButton:hover svg {
+  transform: scale(1.1);
+}
+
+.floatingButton[disabled] {
+  background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+  color: #9ca3af;
+  border-color: rgba(156, 163, 175, 0.1);
+  cursor: not-allowed;
+  opacity: 0.8;
+  box-shadow: none;
+}
+
+.floatingButton[disabled]:hover {
+  transform: translateY(-50%);
+  color: #9ca3af;
+  border-color: rgba(156, 163, 175, 0.1);
+}

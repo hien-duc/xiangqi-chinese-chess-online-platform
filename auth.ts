@@ -8,7 +8,7 @@ import bcrypt from "bcryptjs";
 import { findUserByEmail } from "./src/lib/user-service";
 import { MongoDBAdapter } from "@auth/mongodb-adapter";
 import clientPromise from "./src/lib/db/db-connect";
-import { signInSchema } from "./src/lib/zod";
+import { signInSchema } from "./src/lib/validations/authenticationZod";
 import { createPlayerProfile } from "./src/lib/db/models/player.model";
 
 // Type for our extended session user

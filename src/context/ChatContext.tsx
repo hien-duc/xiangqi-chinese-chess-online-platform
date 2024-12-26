@@ -1,152 +1,99 @@
 "use client";
 
-import React, {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  useCallback,
-} from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
 
 interface ChatMessage {
   gameId: string;
-  userId: string;
-  userName: string;
-  message: string;
+  content: string;
+  sender: string;
+  senderName: string;
   timestamp: Date;
 }
 
 interface ChatContextType {
-  messages: ChatMessage[];
-  addMessage: (message: Omit<ChatMessage, "timestamp">) => Promise<void>;
-  getGameMessages: (gameId: string | null) => ChatMessage[];
-  clearGameMessages: (gameId: string) => void;
-  isLoading: boolean;
-  error: string | null;
+  messages: Record<string, ChatMessage[]>;
+  sendMessage: (gameId: string, content: string) => Promise<void>;
+  getGameMessages: (gameId: string) => ChatMessage[];
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
 export function ChatProvider({ children }: { children: React.ReactNode }) {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [currentGameId, setCurrentGameId] = useState<string | null>(null);
-  const [lastTimestamp, setLastTimestamp] = useState<string | null>(null);
+  const [messages, setMessages] = useState<Record<string, ChatMessage[]>>({});
+  const [activeGameId, setActiveGameId] = useState<string | null>(null);
+  const { data: session } = useSession();
 
-  // Function to fetch messages from the API
-  const fetchMessages = useCallback(
-    async (gameId: string) => {
-      try {
-        setIsLoading(true);
-        const params = new URLSearchParams({
-          gameId,
-          ...(lastTimestamp && { lastTimestamp }),
-        });
-
-        const response = await fetch(`/api/chat?${params}`);
-        if (!response.ok) throw new Error("Failed to fetch messages");
-
-        const data = await response.json();
-
-        if (data.messages.length > 0) {
-          setMessages((prev) => {
-            const newMessages = [...prev];
-            data.messages.forEach((msg: ChatMessage) => {
-              if (
-                !newMessages.some(
-                  (m) =>
-                    m.userId === msg.userId &&
-                    m.timestamp === msg.timestamp &&
-                    m.message === msg.message
-                )
-              ) {
-                newMessages.push(msg);
-              }
-            });
-            return newMessages.sort(
-              (a, b) =>
-                new Date(a.timestamp).getTime() -
-                new Date(b.timestamp).getTime()
-            );
-          });
-          setLastTimestamp(data.messages[data.messages.length - 1].timestamp);
-        }
-      } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Failed to fetch messages"
-        );
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [lastTimestamp]
-  );
-
-  // Poll for new messages every 3 seconds
-  useEffect(() => {
-    if (!currentGameId) return;
-
-    const pollInterval = setInterval(() => {
-      fetchMessages(currentGameId);
-    }, 3000);
-
-    return () => clearInterval(pollInterval);
-  }, [currentGameId, fetchMessages]);
-
-  const addMessage = async (message: Omit<ChatMessage, "timestamp">) => {
+  // Polling function
+  const pollMessages = async (gameId: string) => {
     try {
+      const response = await fetch(`/api/chat?gameId=${gameId}`);
+      if (!response.ok) return;
+
+      const data = await response.json();
+      setMessages((prev) => ({
+        ...prev,
+        [gameId]: data.messages,
+      }));
+    } catch (error) {
+      console.error("Error polling messages:", error);
+    }
+  };
+
+  // Set up polling when game ID changes
+  useEffect(() => {
+    if (!activeGameId) return;
+
+    // Initial fetch
+    pollMessages(activeGameId);
+
+    // Set up polling interval
+    const interval = setInterval(() => {
+      pollMessages(activeGameId);
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, [activeGameId]);
+
+  const sendMessage = async (gameId: string, content: string) => {
+    if (!session?.user) return;
+
+    try {
+      const message = {
+        gameId,
+        content,
+        sender: session.user.id,
+        senderName: session.user.name || "Anonymous",
+      };
+
       const response = await fetch("/api/chat", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(message),
       });
 
-      if (!response.ok) throw new Error("Failed to send message");
+      if (!response.ok) {
+        throw new Error("Failed to send message");
+      }
 
-      const data = await response.json();
-      setMessages((prev) => [...prev, data.message]);
-      setLastTimestamp(data.message.timestamp);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to send message");
-      throw err;
+      // Immediately fetch messages to update UI
+      pollMessages(gameId);
+    } catch (error) {
+      console.error("Error sending message:", error);
+      throw error;
     }
   };
 
-  const getGameMessages = (gameId: string | null) => {
-    if (!gameId) {
-      return [];
+  const getGameMessages = (gameId: string) => {
+    // Set this game as active for polling
+    if (activeGameId !== gameId) {
+      setActiveGameId(gameId);
     }
-    
-    if (currentGameId !== gameId) {
-      setCurrentGameId(gameId);
-      setLastTimestamp(null);
-      setMessages([]);
-      fetchMessages(gameId);
-    }
-    return messages.filter((msg) => msg.gameId === gameId);
-  };
-
-  const clearGameMessages = (gameId: string) => {
-    setMessages((prev) => prev.filter((msg) => msg.gameId !== gameId));
-    if (currentGameId === gameId) {
-      setLastTimestamp(null);
-    }
+    return messages[gameId] || [];
   };
 
   return (
-    <ChatContext.Provider
-      value={{
-        messages,
-        addMessage,
-        getGameMessages,
-        clearGameMessages,
-        isLoading,
-        error,
-      }}
-    >
+    <ChatContext.Provider value={{ messages, sendMessage, getGameMessages }}>
       {children}
     </ChatContext.Provider>
   );

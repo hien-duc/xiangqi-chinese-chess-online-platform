@@ -4,9 +4,10 @@ import { useGameTimer } from "@/hooks/useGameTimer";
 import { useChat } from "@/context/ChatContext";
 import { useSession } from "next-auth/react";
 import styles from "@/styles/RightPanel.module.css";
-import { FaTrophy, FaSkull, FaHandshake } from "react-icons/fa";
+import { FaTrophy, FaSkull, FaHandshake, FaComments, FaTimes, FaPaperPlane } from "react-icons/fa";
 import WinModal from "@/components/WinModal";
 import { getTurnColor } from "@/utils/fen";
+
 const formatTime = (seconds) => {
   const minutes = Math.floor(seconds / 60);
   const remainingSeconds = seconds % 60;
@@ -20,27 +21,40 @@ const PlayerInfo = ({ player, side, isCurrentTurn, timeLeft, playerStats }) => {
     <div className={`${styles.playerCard} ${styles[side]}`}>
       <div className={styles.playerInfo}>
         <div className={styles.playerBasicInfo}>
-          <div className={styles.playerName}>
-            {player.name || "Waiting..."}
-            {isCurrentTurn && <span className={styles.turnIndicator}></span>}
+          <div className={styles.playerNameSection}>
+            <div className={styles.playerName}>
+              {player.name || "Waiting..."}
+              {isCurrentTurn && <span className={styles.turnIndicator}></span>}
+            </div>
+            <div className={styles.playerStatus}>
+              {player.isGuest ? "Guest" : playerStats?.rank || "The Bot"}
+            </div>
           </div>
-          <div className={styles.playerStatus}>
-            {player.isGuest ? "Guest" : playerStats?.rank || "Member"}
-          </div>
+          {!player.isGuest && playerStats && (
+            <div className={styles.ratingSection}>
+              <div className={styles.rating}>{playerStats.rating}</div>
+              <div className={styles.ratingLabel}>Rating</div>
+            </div>
+          )}
         </div>
 
-        <div className={styles.winStats}>
-          <div className={styles.winStat}>
-            <FaTrophy className={styles.statIcon} />
-            <span>{playerStats?.wins || 0}</span>
-          </div>
-          <div className={styles.lossStat}>
-            <FaSkull className={styles.statIcon} />
-            <span>{playerStats?.losses || 0}</span>
-          </div>
-          <div className={styles.drawStat}>
-            <FaHandshake className={styles.statIcon} />
-            <span>{playerStats?.draws || 0}</span>
+        <div className={styles.statsSection}>
+          <div className={styles.winStats}>
+            <div className={styles.statItem}>
+              <FaTrophy className={styles.statIcon} />
+              <span>{playerStats?.wins || 0}</span>
+              <div className={styles.statLabel}>Wins</div>
+            </div>
+            <div className={styles.statItem}>
+              <FaSkull className={styles.statIcon} />
+              <span>{playerStats?.losses || 0}</span>
+              <div className={styles.statLabel}>Losses</div>
+            </div>
+            <div className={styles.statItem}>
+              <FaHandshake className={styles.statIcon} />
+              <span>{playerStats?.draws || 0}</span>
+              <div className={styles.statLabel}>Draws</div>
+            </div>
           </div>
         </div>
 
@@ -58,10 +72,9 @@ const RightPanel = () => {
   const { data: session } = useSession();
   const { getGameMessages, addMessage } = useChat();
   const [message, setMessage] = useState("");
-  const [showForfeitConfirm, setShowForfeitConfirm] = useState(false);
-  const [showForfeitModal, setShowForfeitModal] = useState(false);
-  const [forfeitWinner, setForfeitWinner] = useState(null);
-  const [forfeitedBy, setForfeitedBy] = useState(null);
+  const [redPlayerStats, setRedPlayerStats] = useState(null);
+  const [blackPlayerStats, setBlackPlayerStats] = useState(null);
+
   const {
     times,
     startTimer,
@@ -72,28 +85,46 @@ const RightPanel = () => {
     onWinModalClose,
   } = useGameTimer();
 
-  const isCurrentPlayer =
-    session?.user?.id &&
-    (session.user.id === gameState?.players.red.id ||
-      session.user.id === gameState?.players.black.id);
+  const [showChat, setShowChat] = useState(false);
 
-  const handleForfeit = async () => {
-    if (!gameState?._id) return;
-    const currentSide =
-      session?.user?.id === gameState?.players.red.id ? "red" : "black";
-    const winner = currentSide === "red" ? "Black" : "Red";
+  // Fetch player stats when game state changes
+  useEffect(() => {
+    async function fetchPlayerStats() {
+      if (!gameState?.players) return;
 
-    setForfeitWinner(winner);
-    setForfeitedBy(currentSide);
-    setShowForfeitModal(true);
-    setShowForfeitConfirm(false);
-  };
+      // Fetch red player stats if not a guest
+      if (!gameState.players.red.isGuest) {
+        try {
+          const response = await fetch(
+            `/api/player/${gameState.players.red.id}`
+          );
+          if (response.ok) {
+            const stats = await response.json();
+            setRedPlayerStats(stats);
+          }
+        } catch (error) {
+          console.error("Error fetching red player stats:", error);
+        }
+      }
 
-  const onForfeitModalClose = () => {
-    setShowForfeitModal(false);
-    setForfeitWinner(null);
-    setForfeitedBy(null);
-  };
+      // Fetch black player stats if not a guest
+      if (!gameState.players.black.isGuest) {
+        try {
+          const response = await fetch(
+            `/api/player/${gameState.players.black.id}`
+          );
+          if (response.ok) {
+            const stats = await response.json();
+            setBlackPlayerStats(stats);
+          }
+        } catch (error) {
+          console.error("Error fetching black player stats:", error);
+        }
+      }
+    }
+
+    fetchPlayerStats();
+  }, [gameState?.players]);
 
   // Start timer when game starts
   useEffect(() => {
@@ -104,119 +135,117 @@ const RightPanel = () => {
     }
   }, [gameState?.status, startTimer, stopTimer]);
 
-  // Get messages for current game
-  const messages = gameState ? getGameMessages(gameState.id) : [];
+  const currentTurn = getTurnColor(gameState?.fen);
+  const isRedPlayer = session?.user?.id === gameState?.players?.red?.id;
 
-  const handleSendMessage = async () => {
-    if (!message.trim() || !gameState || !session?.user) return;
+  // Determine which player should be shown at the bottom based on board orientation
+  const [topPlayer, bottomPlayer] = isRedPlayer
+    ? [gameState?.players.black, gameState?.players.red]
+    : [gameState?.players.red, gameState?.players.black];
 
-    try {
-      await addMessage({
-        gameId: gameState.id,
-        userId: session.user.id,
-        userName: session.user.name || "Anonymous",
-        message: message.trim(),
-      });
-      setMessage("");
-    } catch (err) {
-      console.error("Failed to send message:", err);
-    }
-  };
+  const [topPlayerStats, bottomPlayerStats] = isRedPlayer
+    ? [blackPlayerStats, redPlayerStats]
+    : [redPlayerStats, blackPlayerStats];
 
-  // Simulated player stats
-  const redPlayerStats = gameState?.players?.red?.isGuest
-    ? null
-    : {
-        rating: 1500,
-        rank: "Advanced",
-        gamesPlayed: 25,
-        wins: 15,
-        losses: 8,
-        draws: 2,
-      };
-
-  const blackPlayerStats = gameState?.players?.black?.isGuest
-    ? null
-    : {
-        rating: 1420,
-        rank: "Intermediate",
-        gamesPlayed: 18,
-        wins: 10,
-        losses: 6,
-        draws: 2,
-      };
-  const currentTurn = getTurnColor(gameState.fen);
+  const [topSide, bottomSide] = isRedPlayer
+    ? ["black", "red"]
+    : ["red", "black"];
+  const [topTime, bottomTime] = isRedPlayer
+    ? [times.black, times.red]
+    : [times.red, times.black];
 
   return (
-    <>
-      <div className={styles.rightPanel}>
+    <div className={styles.rightPanel}>
+      <div className={styles.content}>
         <PlayerInfo
-          player={gameState?.players.red}
-          side="red"
-          isCurrentTurn={currentTurn === "red"}
-          timeLeft={times.red}
-          playerStats={redPlayerStats}
+          player={topPlayer}
+          side={topSide}
+          isCurrentTurn={currentTurn === topSide}
+          timeLeft={topTime}
+          playerStats={topPlayerStats}
         />
 
-        <div className={styles.chatContainer}>
-          <div className={styles.messageList}>
-            {messages.map((msg, index) => (
-              <div key={index} className={styles.messageItem}>
-                <span className={styles.messageSender}>{msg.userName}:</span>
-                <span className={styles.messageContent}>{msg.message}</span>
-              </div>
-            ))}
-          </div>
-          <div className={styles.messageInput}>
-            <input
-              type="text"
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
-              placeholder="Type a message..."
-            />
-            <button onClick={handleSendMessage}>Send</button>
-          </div>
-        </div>
+        <PlayerInfo
+          player={bottomPlayer}
+          side={bottomSide}
+          isCurrentTurn={currentTurn === bottomSide}
+          timeLeft={bottomTime}
+          playerStats={bottomPlayerStats}
+        />
+      </div>
 
-        {isCurrentPlayer && gameState?.status === "active" && (
-          <div className={styles.forfeitContainer}>
-            {showForfeitConfirm ? (
-              <>
-                <div className={styles.forfeitConfirm}>
-                  Are you sure you want to forfeit?
-                </div>
-                <button
-                  onClick={handleForfeit}
-                  className={styles.forfeitConfirmBtn}
-                >
-                  Yes, Forfeit Game
-                </button>
-                <button
-                  onClick={() => setShowForfeitConfirm(false)}
-                  className={styles.forfeitCancelBtn}
-                >
-                  Cancel
-                </button>
-              </>
-            ) : (
-              <button
-                onClick={() => setShowForfeitConfirm(true)}
-                className={styles.forfeitBtn}
-              >
-                Forfeit Game
-              </button>
-            )}
-          </div>
+      {/* Floating Chat Button */}
+      <button
+        className={`${styles.chatToggle} ${showChat ? styles.active : ''}`}
+        onClick={() => setShowChat(!showChat)}
+        title={showChat ? "Hide Chat" : "Show Chat"}
+      >
+        <FaComments />
+        {!showChat && gameState?.messages?.length > 0 && (
+          <span className={styles.messageCount}>
+            {gameState.messages.length}
+          </span>
         )}
+      </button>
 
-        <PlayerInfo
-          player={gameState?.players.black}
-          side="black"
-          isCurrentTurn={currentTurn === "black"}
-          timeLeft={times.black}
-          playerStats={blackPlayerStats}
-        />
+      {/* Floating Chat Panel */}
+      <div className={`${styles.floatingChat} ${showChat ? styles.show : ''}`}>
+        <div className={styles.chatHeader}>
+          <h3>Game Chat</h3>
+          <button 
+            className={styles.closeChat}
+            onClick={() => setShowChat(false)}
+          >
+            <FaTimes />
+          </button>
+        </div>
+        <div className={styles.messagesContainer}>
+          {gameState?.messages?.length === 0 ? (
+            <div className={styles.noMessages}>No messages yet</div>
+          ) : (
+            gameState?.messages?.map((msg, index) => (
+              <div
+                key={index}
+                className={`${styles.chatMessage} ${
+                  msg.sender === session?.user?.id ? styles.ownMessage : ""
+                }`}
+              >
+                <span className={styles.messageSender}>
+                  {msg.sender === session?.user?.id
+                    ? "You"
+                    : msg.senderName || "Guest"}
+                </span>
+                <span className={styles.messageContent}>{msg.content}</span>
+              </div>
+            ))
+          )}
+        </div>
+        <div className={styles.inputContainer}>
+          <input
+            type="text"
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            placeholder="Type a message..."
+            className={styles.chatInput}
+            onKeyPress={(e) => {
+              if (e.key === "Enter" && message.trim()) {
+                addMessage(message);
+                setMessage("");
+              }
+            }}
+          />
+          <button
+            className={styles.sendButton}
+            onClick={() => {
+              if (message.trim()) {
+                addMessage(message);
+                setMessage("");
+              }
+            }}
+          >
+            <FaPaperPlane />
+          </button>
+        </div>
       </div>
 
       <WinModal
@@ -226,15 +255,7 @@ const RightPanel = () => {
         gameId={gameState?._id}
         timeoutLoss={timeoutLoser}
       />
-
-      <WinModal
-        isOpen={showForfeitModal}
-        winner={forfeitWinner}
-        onClose={onForfeitModalClose}
-        gameId={gameState?._id}
-        forfeitedBy={forfeitedBy}
-      />
-    </>
+    </div>
   );
 };
 

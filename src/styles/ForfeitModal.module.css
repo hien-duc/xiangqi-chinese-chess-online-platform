@@ -1,0 +1,125 @@
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  animation: fadeIn 0.2s ease-out;
+}
+
+.modal {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  transform-origin: center;
+  animation: scaleIn 0.3s ease-out;
+  position: relative;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  color: #dc2626;
+  gap: 0.75rem;
+}
+
+.header svg {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.content {
+  margin-bottom: 2rem;
+  color: #4b5563;
+  line-height: 1.5;
+  font-size: 0.95rem;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+.button {
+  padding: 0.625rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 100px;
+}
+
+.cancelButton {
+  background-color: #f3f4f6;
+  color: #4b5563;
+  border-color: #e5e7eb;
+}
+
+.cancelButton:hover {
+  background-color: #e5e7eb;
+  border-color: #d1d5db;
+}
+
+.forfeitButton {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  color: white;
+  border: none;
+}
+
+.forfeitButton:hover {
+  background: linear-gradient(135deg, #b91c1c, #991b1b);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(220, 38, 38, 0.2);
+}
+
+.forfeitButton:active {
+  transform: translateY(0);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

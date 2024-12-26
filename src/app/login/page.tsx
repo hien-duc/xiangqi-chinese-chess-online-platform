@@ -2,7 +2,7 @@ import { auth, signIn } from "auth";
 import { redirect } from "next/navigation";
 import { Github, Mail } from "lucide-react";
 import "../../styles/LogIn.css";
-import { signInSchema } from "@/lib/zod";
+import { signInSchema } from "@/lib/validations/authenticationZod";
 import "../globals.css";
 import Link from "next/link";
 import { Params } from "next/dist/server/request/params";

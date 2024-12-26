@@ -23,6 +23,7 @@ interface GameContextType {
   makeMove: (orig: string, dest: string) => Promise<void>;
   refetch: (silent?: boolean) => Promise<void>;
   togglePolling: (shouldPoll: boolean) => void;
+  forfeitGame: () => Promise<void>;
 }
 
 const GameContext = createContext<GameContextType>({
@@ -33,6 +34,7 @@ const GameContext = createContext<GameContextType>({
   makeMove: async () => {},
   refetch: async () => {},
   togglePolling: () => {},
+  forfeitGame: async () => {},
 });
 
 const POLLING_INTERVAL = 2000;
@@ -261,6 +263,41 @@ export const GameProvider: React.FC<GameProviderProps> = ({
     [refetch]
   );
 
+  const forfeitGame = useCallback(async () => {
+    try {
+      const currentPlayer = getTurnColor(gameState.fen);
+      const winner = currentPlayer === "red" ? "Black" : "Red";
+
+      await fetch(`/api/game/${gameIdState}/complete`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          winner,
+          forfeitedBy: currentPlayer,
+          timeoutLoss: false,
+        }),
+      });
+
+      setGameState((prevState) => {
+        if (!prevState) return null;
+        return {
+          ...prevState,
+          status: "completed",
+          gameOver: true,
+          winner,
+          forfeitedBy: currentPlayer,
+        };
+      });
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to forfeit game";
+      showError(errorMessage);
+      console.error("Forfeit error:", err);
+    }
+  }, [gameIdState, showError, gameState]);
+
   useEffect(() => {
     const handleBotMove = async () => {
       if (!gameState || gameState.status !== "active" || isThinking) return;
@@ -319,6 +356,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({
     makeMove,
     refetch,
     togglePolling,
+    forfeitGame,
   };
 
   return (
