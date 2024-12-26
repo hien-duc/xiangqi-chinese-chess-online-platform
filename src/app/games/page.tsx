@@ -11,6 +11,7 @@ interface Player {
   id: string;
   isGuest: boolean;
   name: string;
+  isBot?: boolean;
 }
 
 interface Game {
@@ -49,7 +50,6 @@ export default function GamesPage() {
         id:
           session?.user?.id ||
           "guest-" + Math.random().toString(36).substr(2, 9),
-        isGuest: !session?.user,
         name: session?.user?.name || "Guest Player",
       };
 
@@ -81,38 +81,40 @@ export default function GamesPage() {
     router.push(`/games/${gameId}?spectate=true`);
   };
 
-  const handleCreateGame = async (side: "red" | "black") => {
+  const handleCreateGame = async (side: "red" | "black", againstBot: boolean) => {
     try {
       const playerInfo = {
-        id:
-          session?.user?.id ||
-          "guest-" + Math.random().toString(36).substr(2, 9),
-        isGuest: !session?.user,
-        name: session?.user?.name || "Guest Player",
+        id: session?.user?.id || "guest-" + Math.random().toString(36).substr(2, 9),
+        name: session?.user?.name || "Guest",
+        isBot: false,
       };
 
-      const response = await fetch("/api/game/create", {
+      const botInfo = {
+        id: "bot-" + Math.random().toString(36).substr(2, 9),
+        name: "XiangQi Bot",
+        isBot: true,
+      };
+
+      const response = await fetch("/api/games", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          playerInfo,
-          side,
+          players: {
+            red: side === "red" ? playerInfo : (againstBot ? botInfo : { ...playerInfo, id: "", name: "" }),
+            black: side === "black" ? playerInfo : (againstBot ? botInfo : { ...playerInfo, id: "", name: "" }),
+          },
         }),
       });
 
       const data = await response.json();
-
-      if (response.ok && data.success && data.gameId) {
-        router.push(`/games/${data.gameId}`);
-      } else {
-        console.error("Failed to create game:", data.error || "Unknown error");
+      if (data.game) {
+        router.push(`/games/${data.game._id}`);
       }
     } catch (error) {
       console.error("Error creating game:", error);
     }
-    setIsModalOpen(false);
   };
 
   return (

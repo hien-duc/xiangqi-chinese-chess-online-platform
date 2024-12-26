@@ -12,6 +12,8 @@ import { IGameState } from "../lib/db/models/gameState";
 import WinModal from "../components/WinModal";
 import { isCheckmate } from "../utils/chess-rules";
 import { useError } from "../context/ErrorContext";
+import { useComputerPlayer } from "./useComputerPlayer";
+import { getTurnColor } from "@/utils/fen";
 
 interface GameContextType {
   gameId: string;
@@ -56,6 +58,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({
   const isMakingMoveRef = useRef(false);
   const currentGameStateRef = useRef<IGameState | null>(null);
   const { showError } = useError();
+  const { getComputerMove, isThinking } = useComputerPlayer();
 
   useEffect(() => {
     currentGameStateRef.current = gameState;
@@ -66,6 +69,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({
       if (!gameState || isMakingMoveRef.current) return;
 
       isMakingMoveRef.current = true;
+      const currentTurn = getTurnColor(gameState.fen);
 
       try {
         // First validate the move
@@ -79,9 +83,8 @@ export const GameProvider: React.FC<GameProviderProps> = ({
             orig,
             dest,
             fen: gameState.fen,
-            turn: gameState.turn,
             playerId:
-              gameState.turn === "red"
+              currentTurn === "red"
                 ? gameState.players.red.id
                 : gameState.players.black.id,
           }),
@@ -105,7 +108,6 @@ export const GameProvider: React.FC<GameProviderProps> = ({
             ...prevState,
             ...responseData.game,
             lastMove: responseData.game.lastMove,
-            turn: responseData.game.turn,
             fen: responseData.game.fen,
             moves: responseData.game.moves,
           };
@@ -123,8 +125,9 @@ export const GameProvider: React.FC<GameProviderProps> = ({
         if (isCheckmate(responseData.game.fen)) {
           // The turn in responseData.game.turn is already switched to the next player
           // So if turn is 'red', it means black just won
-          const winningColor =
-            responseData.game.turn === "red" ? "Black" : "Red";
+          const currentTurn = getTurnColor(responseData.game.fen);
+
+          const winningColor = currentTurn === "red" ? "Black" : "Red";
           setWinner(winningColor);
           setShowWinModal(true);
 
@@ -202,18 +205,24 @@ export const GameProvider: React.FC<GameProviderProps> = ({
         // Update state if any field has changed
         setGameState((prevState) => {
           if (!prevState) return data.game;
+          const previousTurn = getTurnColor(prevState.fen);
+          const currentTurn = getTurnColor(data.game.fen);
 
           // Check if any field has changed
           const hasChanged =
             prevState.fen !== data.game.fen ||
             prevState.status !== data.game.status ||
-            prevState.turn !== data.game.turn ||
+            previousTurn !== currentTurn ||
             prevState.players.red.id !== data.game.players.red.id ||
             prevState.players.black.id !== data.game.players.black.id ||
             JSON.stringify(prevState.moves) !== JSON.stringify(data.game.moves);
 
           // Show win modal if game just completed
-          if (data.game.status === "completed" && data.game.winner && !showWinModal) {
+          if (
+            data.game.status === "completed" &&
+            data.game.winner &&
+            !showWinModal
+          ) {
             setWinner(data.game.winner);
             setShowWinModal(true);
           }
@@ -251,6 +260,35 @@ export const GameProvider: React.FC<GameProviderProps> = ({
     },
     [refetch]
   );
+
+  useEffect(() => {
+    const handleBotMove = async () => {
+      if (!gameState || gameState.status !== "active" || isThinking) return;
+      const currentTurn = getTurnColor(gameState.fen);
+
+      const currentPlayer = gameState.players[currentTurn];
+      if (currentPlayer.isBot) {
+        try {
+          const botMove = await getComputerMove(gameState.fen);
+          console.log("Current FEN:", gameState.fen);
+          console.log("Bot move received:", botMove);
+          if (botMove) {
+            // Split into 2-character chunks (e.g., "a0b1" -> ["a0", "b1"])
+            const [orig, dest] = botMove.match(/.{1,2}/g) || [];
+            console.log("Parsed move - Origin:", orig, "Destination:", dest);
+            if (orig && dest) {
+              await makeMove(orig, dest);
+            }
+          }
+        } catch (error) {
+          console.error("Bot move error:", error);
+          showError("Failed to make bot move");
+        }
+      }
+    };
+
+    handleBotMove();
+  }, [gameState?.fen, gameState?.status]);
 
   // Clean up polling interval on unmount
   useEffect(() => {

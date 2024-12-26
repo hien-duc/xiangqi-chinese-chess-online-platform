@@ -1,10 +1,10 @@
 import mongoose, { Schema, model, Document } from "mongoose";
 
-interface IPlayer {
+export interface IPlayer {
   id: string;
-  isGuest: boolean;
   name: string;
   orientation: string;
+  isBot?: boolean;
 }
 
 export interface IGameState extends Document {
@@ -18,7 +18,6 @@ export interface IGameState extends Document {
   status: "waiting" | "active" | "completed";
   winner?: string;
   lastMove?: [string, string];
-  turn: "red" | "black";
   premove?: [string, string];
   check?: string;
   gameOver?: boolean;
@@ -35,15 +34,15 @@ const GameSchema = new Schema<IGameState>(
     players: {
       red: {
         id: { type: String, required: true },
-        isGuest: { type: Boolean, default: true },
         name: { type: String, required: true },
         orientation: { type: String, required: true },
+        isBot: { type: Boolean, default: false },
       },
       black: {
         id: { type: String, required: true },
-        isGuest: { type: Boolean, default: true },
         name: { type: String, required: true },
         orientation: { type: String, required: true },
+        isBot: { type: Boolean, default: false },
       },
     },
     fen: {
@@ -67,11 +66,6 @@ const GameSchema = new Schema<IGameState>(
     lastMove: {
       type: [String],
       default: null,
-    },
-    turn: {
-      type: String,
-      enum: ["red", "black"],
-      required: true,
     },
     premove: {
       type: [String],

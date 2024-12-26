@@ -1,7 +1,7 @@
 import * as util from "./util";
 import * as cg from "./types";
 import { getValidMoves } from "./moves";
-import { readXiangqi } from "./fen";
+import { getTurnColor, readXiangqi, write } from "./fen";
 
 // Check if a move would put the moving side's general in check
 export function wouldBeInCheck(
@@ -45,14 +45,18 @@ export function wouldBeInCheck(
 // Check if the current position is checkmate
 export function isCheckmate(pieces: cg.Pieces, color: cg.Color): boolean;
 export function isCheckmate(fen: string): boolean;
-export function isCheckmate(arg1: string | cg.Pieces, arg2?: cg.Color): boolean {
-  if (typeof arg1 === 'string') {
+export function isCheckmate(
+  arg1: string | cg.Pieces,
+  arg2?: cg.Color
+): boolean {
+  if (typeof arg1 === "string") {
     // Parse FEN string to get pieces and turn
     const pieces = readXiangqi(arg1);
+    const fen = write(pieces);
     // Get turn color from FEN (after the space)
-    const [_, turn] = arg1.split(' ');
-    const color = turn === 'w' ? 'red' : 'black';
-    return isCheckmateCore(pieces, color);
+    const currentTurn = getTurnColor(fen);
+
+    return isCheckmateCore(pieces, currentTurn);
   }
   return isCheckmateCore(arg1, arg2!);
 }
@@ -67,7 +71,7 @@ function isCheckmateCore(pieces: cg.Pieces, color: cg.Color): boolean {
       break;
     }
   }
-  
+
   // If no general found, technically it's checkmate
   if (!generalPos) return true;
 
@@ -91,7 +95,7 @@ function isCheckmateCore(pieces: cg.Pieces, color: cg.Color): boolean {
     if (piece.color === color) {
       // Get all possible moves for this piece
       const moves = getValidMoves(pieces, from);
-      
+
       // For each possible move
       for (const to of moves) {
         // Try the move and see if it gets us out of check
@@ -99,7 +103,7 @@ function isCheckmateCore(pieces: cg.Pieces, color: cg.Color): boolean {
         const capturedPiece = newPieces.get(to);
         newPieces.delete(from);
         newPieces.set(to, piece);
-        
+
         // After making the move, are we still in check?
         if (!wouldBeInCheck(newPieces, from, to, color)) {
           // Restore the captured piece before returning
@@ -108,7 +112,7 @@ function isCheckmateCore(pieces: cg.Pieces, color: cg.Color): boolean {
           }
           return false; // Found a legal move that gets us out of check
         }
-        
+
         // Restore the captured piece for next iteration
         if (capturedPiece) {
           newPieces.set(to, capturedPiece);
@@ -116,7 +120,7 @@ function isCheckmateCore(pieces: cg.Pieces, color: cg.Color): boolean {
       }
     }
   }
-  
+
   // If we haven't found any legal moves and we're in check, it's checkmate
   return true;
 }
@@ -161,7 +165,7 @@ export function getLegalMoves(pieces: cg.Pieces, from: cg.Key): cg.Key[] {
   if (!piece) return [];
 
   const moves = getValidMoves(pieces, from);
-  return moves.filter(to => !wouldBeInCheck(pieces, from, to, piece.color));
+  return moves.filter((to) => !wouldBeInCheck(pieces, from, to, piece.color));
 }
 
 // Check if a move is legal (considering check and other special rules)

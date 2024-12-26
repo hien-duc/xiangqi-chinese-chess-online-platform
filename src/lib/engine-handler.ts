@@ -49,28 +49,41 @@ export class EngineHandler {
     });
   }
 
-  public sendMove(fen: string, callback: (move: string) => void) {
-    if (!this.engine || !this.isReady) {
-      throw new Error("Engine not ready");
+  public sendMove(fen: string, callback: (move: string) => void): void {
+    if (!this.isReady || !this.engine) {
+      console.error("Engine not ready");
+      return;
     }
 
     this.moveCallback = callback;
+
+    // Log the FEN and command for debugging
+    console.log("Sending FEN to engine:", fen);
+    console.log("Position command:", `position fen ${fen}`);
+    
+    // Set the position and get the best move
     this.sendCommand(`position fen ${fen}`);
-    this.sendCommand("go movetime 1000"); // Think for 1 second
+    this.sendCommand("go depth 15"); // Adjust depth as needed for balance of speed vs strength
   }
 
   private sendCommand(command: string) {
-    if (this.engine?.stdin) {
-      this.engine.stdin.write(command + "\n");
-    }
+    console.log("Sending command to engine:", command);
+    this.engine?.stdin?.write(command + "\n");
   }
 
   private parseBestMove(output: string): string | null {
-    const match = output.match(/bestmove\s+(\S+)/);
-    return match ? match[1] : null;
+    console.log("Raw engine output:", output);
+    const match = output.match(/bestmove\s+(\w+)/);
+    if (match && match[1]) {
+      const engineMove = match[1];
+      console.log("Engine move format:", engineMove);
+      // Convert engine move format to board format if needed
+      return engineMove;
+    }
+    return null;
   }
 
-  public stop() {
+  public stop(): void {
     if (this.engine) {
       this.sendCommand("quit");
       this.engine.kill();

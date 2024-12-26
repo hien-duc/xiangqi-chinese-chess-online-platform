@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db/db-connect";
 import GameModel from "@/lib/db/models/gameState";
-
+import { initialFen } from "@/utils/fen";
 // GET /api/games - Get all games
 export async function GET() {
   try {
@@ -22,23 +22,36 @@ export async function GET() {
 // POST /api/games - Create a new game
 export async function POST(request: Request) {
   try {
-    const { side, playerInfo } = await request.json();
+    const { players } = await request.json();
     await connectToDatabase();
 
     const gameData = {
       players: {
-        red: side === "red" ? playerInfo : { id: "", isGuest: true, name: "" },
-        black:
-          side === "black" ? playerInfo : { id: "", isGuest: true, name: "" },
+        red: { ...players.red, orientation: "red" },
+        black: { ...players.black, orientation: "black" },
       },
-      status: "waiting",
-      chat: {
-        enabled: !playerInfo.isGuest,
+      fen: initialFen, // Initial position
+      moves: [],
+      status:
+        players.red.isBot && players.black.isBot ? "completed" : "waiting",
+      times: {
+        red: 600, // 10 minutes in milliseconds
+        black: 600,
       },
     };
 
     const game = await GameModel.create(gameData);
-    return NextResponse.json(game);
+
+    // If one player is a bot and the other has joined, set status to active
+    if (
+      (players.red.isBot && players.black.id) ||
+      (players.black.isBot && players.red.id)
+    ) {
+      game.status = "active";
+      await game.save();
+    }
+
+    return NextResponse.json({ game });
   } catch (error) {
     console.error("Error creating game:", error);
     return NextResponse.json(

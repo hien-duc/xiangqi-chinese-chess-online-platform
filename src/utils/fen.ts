@@ -1,8 +1,8 @@
 import { pos2key, invRanks } from "./util.ts";
 import * as cg from "./types.ts";
 
-export const initial: cg.FEN =
-  "rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR";
+export const initialFen: cg.FEN =
+  "rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w - - 0 1";
 
 const roles: { [letter: string]: cg.Role } = {
   k: "king",
@@ -25,7 +25,7 @@ const letters = {
 };
 
 export function read(fen: cg.FEN): cg.Pieces {
-  if (fen === "start") fen = initial;
+  if (fen === "start") fen = initialFen;
   const pieces: cg.Pieces = new Map();
   let row = 9,
     col = 0;
@@ -57,7 +57,7 @@ export function read(fen: cg.FEN): cg.Pieces {
 }
 
 export function readXiangqi(fen: cg.FEN): cg.Pieces {
-  if (fen === "start") fen = initial; // Use the initial Xiangqi position if "start" is passed.
+  if (fen === "start") fen = initialFen; // Use the initial Xiangqi position if "start" is passed.
   const pieces: cg.Pieces = new Map();
   let row = 9, // Start from the top row (9 in Xiangqi).
     col = 0;
@@ -91,8 +91,14 @@ export function readXiangqi(fen: cg.FEN): cg.Pieces {
   return pieces;
 }
 
-export function write(pieces: cg.Pieces): cg.FEN {
-  return invRanks
+/**
+ * Write the current position to FEN notation
+ * @param pieces The pieces on the board
+ * @param nextTurn Optional - specify whose turn is next (defaults to black)
+ * @returns Complete FEN string including turn, castling rights, etc.
+ */
+export function write(pieces: cg.Pieces, nextTurn: "red" | "black" = "black"): cg.FEN {
+  const position = invRanks
     .map((y) =>
       cg.files
         .map((x) => {
@@ -107,4 +113,17 @@ export function write(pieces: cg.Pieces): cg.FEN {
     )
     .join("/")
     .replace(/1{2,}/g, (s) => s.length.toString());
+
+  // Add the latter part of FEN: turn, castling, en passant, halfmove, fullmove
+  return `${position} ${nextTurn === "red" ? "w" : "b"} - - 0 1`;
+}
+
+/**
+ * Extract the turn color from a FEN string
+ * @param fen The FEN string
+ * @returns "red" if it's red's turn (w), "black" if it's black's turn (b)
+ */
+export function getTurnColor(fen: cg.FEN): "red" | "black" {
+  const [_, turn] = fen.split(" ");
+  return turn === "w" ? "red" : "black";
 }

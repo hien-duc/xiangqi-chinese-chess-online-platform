@@ -113,7 +113,7 @@ export interface State extends HeadlessState {
 
 export function defaults(): HeadlessState {
   return {
-    pieces: fen.read(fen.initial),
+    pieces: fen.read(fen.initialFen),
     orientation: "red",
     turnColor: "red",
     coordinates: true,

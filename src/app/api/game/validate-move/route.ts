@@ -1,17 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db/db-connect";
 import GameModel from "@/lib/db/models/gameState";
-import { readXiangqi, write } from "@/utils/fen";
+import { readXiangqi, write, getTurnColor } from "@/utils/fen";
 import { getValidMoves } from "@/utils/moves";
 import { Key, Piece } from "@/utils/types";
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
     await connectToDatabase();
-    const { id, orig, dest, fen, turn, playerId } = await req.json();
+    const { id, orig, dest, fen, playerId } = await req.json();
 
     // Validate inputs
-    if (!id || !orig || !dest || !fen || !turn || !playerId) {
+    if (!id || !orig || !dest || !fen || !playerId) {
       return NextResponse.json(
         {
           error: "Missing required fields",
@@ -20,7 +20,6 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
             orig: !orig ? "Origin position is required" : null,
             dest: !dest ? "Destination position is required" : null,
             fen: !fen ? "FEN string is required" : null,
-            turn: !turn ? "Player turn is required" : null,
             playerId: !playerId ? "Player ID is required" : null,
           },
         },
@@ -41,6 +40,9 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         { status: 400 }
       );
     }
+
+    // Get turn from FEN
+    const turn = getTurnColor(fen);
 
     // Verify player's turn
     const isRed = turn === "red";
@@ -71,7 +73,9 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     // Apply the move
     newPiecesList.delete(orig);
     newPiecesList.set(dest, pickedPiece);
-    const newFen = write(newPiecesList);
+    // Get the next turn (opposite of current turn)
+    const nextTurn = turn === "red" ? "black" : "red";
+    const newFen = write(newPiecesList, nextTurn);
 
     // Update the game state in the database
     const updatedGame = await GameModel.findByIdAndUpdate(
@@ -79,7 +83,6 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       {
         $set: {
           fen: newFen,
-          turn: turn === "red" ? "black" : "red",
           lastMove: [orig, dest],
         },
         $push: { moves: `${orig}-${dest}` },

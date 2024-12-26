@@ -1,7 +1,7 @@
 import React from "react";
 import { useGameContext } from "@/hooks/useGameState";
 import styles from "@/styles/LeftPanel.module.css";
-
+import { getTurnColor } from "@/utils/fen";
 const LeftPanel = () => {
   const { gameState } = useGameContext();
 
@@ -43,11 +43,11 @@ const LeftPanel = () => {
   const renderPanel = () => {
     return renderMoveHistory();
   };
-
+  const currentTurn = getTurnColor(gameState.fen);
   return (
     <div className={styles.leftPanel}>
-      <div className={styles.turnIndicator} data-turn={gameState.turn}>
-        {gameState.turn}'s Turn
+      <div className={styles.turnIndicator} data-turn={currentTurn}>
+        {currentTurn}'s Turn
       </div>
       <div className={styles.contentPanel}>{renderPanel()}</div>
     </div>

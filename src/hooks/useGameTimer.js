@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useGameContext } from "./useGameState";
-
+import { getTurnColor } from "../utils/fen";
 const DEFAULT_TIME = 10 * 60; // 10 minutes in seconds
 
 export const useGameTimer = (initialTime = DEFAULT_TIME) => {
@@ -65,11 +65,13 @@ export const useGameTimer = (initialTime = DEFAULT_TIME) => {
 
   // Update time on server
   const updateTime = useCallback(async () => {
-    if (!gameId || !gameState?.turn || !isRunning) return;
+    const currentTurn = getTurnColor(gameState.fen);
+
+    if (!gameId || !currentTurn || !isRunning) return;
 
     const newTimes = {
       ...times,
-      [gameState.turn]: Math.max(0, times[gameState.turn] - 1),
+      [currentTurn]: Math.max(0, times[currentTurn] - 1),
     };
 
     try {
@@ -95,7 +97,7 @@ export const useGameTimer = (initialTime = DEFAULT_TIME) => {
     } catch (error) {
       console.error("Failed to update time:", error);
     }
-  }, [gameId, gameState?.turn, times, isRunning, stopTimer]);
+  }, [gameId, gameState.fen, times, isRunning, stopTimer]);
 
   // Timer effect
   useEffect(() => {

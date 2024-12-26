@@ -6,7 +6,7 @@ import { useSession } from "next-auth/react";
 import styles from "@/styles/RightPanel.module.css";
 import { FaTrophy, FaSkull, FaHandshake } from "react-icons/fa";
 import WinModal from "@/components/WinModal";
-
+import { getTurnColor } from "@/utils/fen";
 const formatTime = (seconds) => {
   const minutes = Math.floor(seconds / 60);
   const remainingSeconds = seconds % 60;
@@ -145,6 +145,7 @@ const RightPanel = () => {
         losses: 6,
         draws: 2,
       };
+  const currentTurn = getTurnColor(gameState.fen);
 
   return (
     <>
@@ -152,7 +153,7 @@ const RightPanel = () => {
         <PlayerInfo
           player={gameState?.players.red}
           side="red"
-          isCurrentTurn={gameState?.turn === "red"}
+          isCurrentTurn={currentTurn === "red"}
           timeLeft={times.red}
           playerStats={redPlayerStats}
         />
@@ -212,7 +213,7 @@ const RightPanel = () => {
         <PlayerInfo
           player={gameState?.players.black}
           side="black"
-          isCurrentTurn={gameState?.turn === "black"}
+          isCurrentTurn={currentTurn === "black"}
           timeLeft={times.black}
           playerStats={blackPlayerStats}
         />
