@@ -63,16 +63,57 @@ export const useGameTimer = (initialTime = DEFAULT_TIME) => {
     setTimeoutLoser(null);
   }, []);
 
-  // Update time on server
-  const updateTime = useCallback(async () => {
-    const currentTurn = getTurnColor(gameState.fen);
+  // Update time locally every second, but sync with server less frequently
+  useEffect(() => {
+    let interval;
+    let syncInterval;
+    const SYNC_INTERVAL = 10; // Sync with server every 10 seconds
+    let localTimes = { ...times };
+    let secondsSinceSync = 0;
 
-    if (!gameId || !currentTurn || !isRunning) return;
+    if (isRunning) {
+      interval = setInterval(() => {
+        const currentTurn = getTurnColor(gameState?.fen);
+        if (!currentTurn) return;
 
-    const newTimes = {
-      ...times,
-      [currentTurn]: Math.max(0, times[currentTurn] - 1),
+        // Update time locally
+        localTimes = {
+          ...localTimes,
+          [currentTurn]: Math.max(0, localTimes[currentTurn] - 1),
+        };
+        setTimes(localTimes);
+        secondsSinceSync++;
+
+        // Check for time out
+        if (localTimes[currentTurn] === 0) {
+          stopTimer();
+          setTimeoutWinner(currentTurn === "red" ? "Black" : "Red");
+          setTimeoutLoser(currentTurn);
+          setShowWinModal(true);
+        }
+
+        // Sync with server every SYNC_INTERVAL seconds or when time is low
+        if (
+          secondsSinceSync >= SYNC_INTERVAL ||
+          localTimes[currentTurn] <= 30
+        ) {
+          syncWithServer(localTimes);
+          secondsSinceSync = 0;
+        }
+      }, 1000);
+    }
+
+    return () => {
+      clearInterval(interval);
+      if (secondsSinceSync > 0) {
+        syncWithServer(localTimes); // Sync one last time when cleaning up
+      }
     };
+  }, [isRunning, gameState?.fen]);
+
+  // Function to sync time with server
+  const syncWithServer = async (timesToSync) => {
+    if (!gameId) return;
 
     try {
       const response = await fetch(`/api/game/${gameId}/time`, {
@@ -80,14 +121,11 @@ export const useGameTimer = (initialTime = DEFAULT_TIME) => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ times: newTimes }),
+        body: JSON.stringify({ times: timesToSync }),
       });
       const data = await response.json();
 
-      // Update local times
-      setTimes(data.times);
-
-      // Check if game is over due to time
+      // Handle any server-side game over conditions
       if (data.gameOver) {
         stopTimer();
         setTimeoutWinner(data.winner);
@@ -95,18 +133,9 @@ export const useGameTimer = (initialTime = DEFAULT_TIME) => {
         setShowWinModal(true);
       }
     } catch (error) {
-      console.error("Failed to update time:", error);
+      console.error("Failed to sync time with server:", error);
     }
-  }, [gameId, gameState.fen, times, isRunning, stopTimer]);
-
-  // Timer effect
-  useEffect(() => {
-    let interval;
-    if (isRunning && gameState?.status === "active") {
-      interval = setInterval(updateTime, 1000);
-    }
-    return () => clearInterval(interval);
-  }, [isRunning, gameState?.status, updateTime]);
+  };
 
   // Stop timer if game is completed
   useEffect(() => {

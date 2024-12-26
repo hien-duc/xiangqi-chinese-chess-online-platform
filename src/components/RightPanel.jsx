@@ -21,6 +21,17 @@ const formatTime = (seconds) => {
   return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
 };
 
+const formatTimeChat = (timestamp) => {
+  return new Date(timestamp).toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+
+const isCurrentUser = (senderId, session) => {
+  return senderId === session?.user?.id;
+};
+
 const PlayerInfo = ({ player, side, isCurrentTurn, timeLeft, playerStats }) => {
   if (!player) return null;
 
@@ -81,6 +92,8 @@ const RightPanel = () => {
   const [message, setMessage] = useState("");
   const [redPlayerStats, setRedPlayerStats] = useState(null);
   const [blackPlayerStats, setBlackPlayerStats] = useState(null);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [previousMessageCount, setPreviousMessageCount] = useState(0);
 
   const {
     times,
@@ -142,6 +155,22 @@ const RightPanel = () => {
     }
   }, [gameState?.status, startTimer, stopTimer]);
 
+  useEffect(() => {
+    setPreviousMessageCount(gameState?.messages?.length || 0);
+  }, [gameState?.messages]);
+
+  useEffect(() => {
+    if (!showChat && gameState?.messages) {
+      setUnreadCount(gameState.messages.length - (previousMessageCount || 0));
+    }
+  }, [gameState?.messages, showChat, previousMessageCount]);
+
+  useEffect(() => {
+    if (showChat) {
+      setUnreadCount(0);
+    }
+  }, [showChat]);
+
   const currentTurn = getTurnColor(gameState?.fen);
   const isRedPlayer = session?.user?.id === gameState?.players?.red?.id;
 
@@ -181,21 +210,19 @@ const RightPanel = () => {
         />
       </div>
 
-      {/* Floating Chat Button */}
+      {/* Chat Button */}
       <button
         className={`${styles.chatToggle} ${showChat ? styles.active : ""}`}
         onClick={() => setShowChat(!showChat)}
         title={showChat ? "Hide Chat" : "Show Chat"}
       >
         <FaComments />
-        {!showChat && gameState?.messages?.length > 0 && (
-          <span className={styles.messageCount}>
-            {gameState.messages.length}
-          </span>
+        {!showChat && unreadCount > 0 && (
+          <span className={styles.messageCount}>{unreadCount}</span>
         )}
       </button>
 
-      {/* Floating Chat Panel */}
+      {/* Chat Panel */}
       <div className={`${styles.floatingChat} ${showChat ? styles.show : ""}`}>
         <div className={styles.chatHeader}>
           <h3>Game Chat</h3>
@@ -206,6 +233,7 @@ const RightPanel = () => {
             <FaTimes />
           </button>
         </div>
+
         <div className={styles.messagesContainer}>
           {gameState?.messages?.length === 0 ? (
             <div className={styles.noMessages}>No messages yet</div>
@@ -213,20 +241,28 @@ const RightPanel = () => {
             gameState?.messages?.map((msg, index) => (
               <div
                 key={index}
-                className={`${styles.chatMessage} ${
-                  msg.sender === session?.user?.id ? styles.ownMessage : ""
+                className={`${styles.messageWrapper} ${
+                  isCurrentUser(msg.sender, session) ? styles.ownMessage : ""
                 }`}
               >
-                <span className={styles.messageSender}>
-                  {msg.sender === session?.user?.id
-                    ? "You"
-                    : msg.senderName || "Guest"}
-                </span>
-                <span className={styles.messageContent}>{msg.content}</span>
+                <div className={styles.messageContent}>
+                  <div className={styles.messageHeader}>
+                    <span className={styles.messageSender}>
+                      {isCurrentUser(msg.sender, session)
+                        ? "You"
+                        : msg.senderName}
+                    </span>
+                    <span className={styles.messageTime}>
+                      {formatTimeChat(msg.timestamp)}
+                    </span>
+                  </div>
+                  <div className={styles.messageText}>{msg.content}</div>
+                </div>
               </div>
             ))
           )}
         </div>
+
         <div className={styles.inputContainer}>
           <input
             type="text"

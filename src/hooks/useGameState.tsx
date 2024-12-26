@@ -192,7 +192,9 @@ export const GameProvider: React.FC<GameProviderProps> = ({
         const data = await response.json();
 
         if (response.status === 404) {
+          // If game is not found, immediately stop polling and reset state
           setGameState(null);
+          togglePolling(false);
           return;
         }
 
@@ -217,8 +219,19 @@ export const GameProvider: React.FC<GameProviderProps> = ({
             previousTurn !== currentTurn ||
             prevState.players.red.id !== data.game.players.red.id ||
             prevState.players.black.id !== data.game.players.black.id ||
-            JSON.stringify(prevState.moves) !== JSON.stringify(data.game.moves) ||
-            JSON.stringify(prevState.messages) !== JSON.stringify(data.game.messages);
+            JSON.stringify(prevState.moves) !==
+              JSON.stringify(data.game.moves) ||
+            JSON.stringify(prevState.messages) !==
+              JSON.stringify(data.game.messages);
+
+          // Stop polling if game is completed or inactive
+          if (
+            data.game.status === "completed" ||
+            data.game.gameOver ||
+            data.game.status === "waiting"
+          ) {
+            togglePolling(false);
+          }
 
           // Show win modal if game just completed
           if (
@@ -237,6 +250,9 @@ export const GameProvider: React.FC<GameProviderProps> = ({
           err instanceof Error ? err.message : "Failed to fetch game state";
         showError(errorMessage);
         console.error("Fetch error:", err);
+
+        // Stop polling on any error
+        togglePolling(false);
       } finally {
         if (!silent) setIsLoading(false);
       }
@@ -338,16 +354,16 @@ export const GameProvider: React.FC<GameProviderProps> = ({
     };
   }, []);
 
-  // Start polling when gameId changes
+  // Start polling when gameId changes or game status changes
   useEffect(() => {
-    if (gameIdState) {
+    if (gameIdState && (!gameState || gameState.status === "active")) {
       refetch();
       togglePolling(true);
     } else {
       togglePolling(false);
     }
     return () => togglePolling(false);
-  }, [gameIdState, togglePolling]);
+  }, [gameIdState, togglePolling, gameState?.status]);
 
   const value = {
     gameId: gameIdState,
