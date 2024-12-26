@@ -25,7 +25,7 @@ export async function POST(
     }
 
     // Check if the requested side is available
-    if (game.players[side].id !== "waiting") {
+    if (game.players[side].id !== `waiting-${side}`) {
       return NextResponse.json(
         { error: "Selected side is not available" },
         { status: 400 }

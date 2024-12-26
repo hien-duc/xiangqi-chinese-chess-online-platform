@@ -103,6 +103,7 @@
   border-radius: 12px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02), 0 1px 3px rgba(0, 0, 0, 0.03);
   transition: all 0.3s ease;
+  transition: all 0.3s ease;
   overflow: hidden;
   border: 1px solid rgba(229, 231, 235, 0.5);
 }
@@ -229,8 +230,19 @@
 }
 
 .button.spectate {
-  background: linear-gradient(135deg, #6b7280, #9ca3af);
+  background: linear-gradient(135deg, #3b82f6, #60a5fa);
   color: white;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.button.spectate:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
+  box-shadow: 
+    0 4px 8px rgba(59, 130, 246, 0.25),
+    0 2px 4px rgba(59, 130, 246, 0.1);
 }
 
 .button:hover {

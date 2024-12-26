@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db/db-connect";
-import GameModel from "@/lib/db/models/gameState";
+import GameModel, { IPlayer } from "@/lib/db/models/gameState";
 import { initialFen } from "@/utils/fen";
+
 // GET /api/games - Get all games
 export async function GET() {
   try {
@@ -25,17 +26,44 @@ export async function POST(request: Request) {
     const { players } = await request.json();
     await connectToDatabase();
 
+    // Helper function to get player data with defaults for waiting players
+    const getPlayerData = (
+      playerInfo: IPlayer,
+      orientation: "red" | "black"
+    ) => {
+      if (playerInfo.id && playerInfo.name) {
+        return {
+          ...playerInfo,
+          orientation,
+        };
+      }
+      if (playerInfo.isBot) {
+        return {
+          id: `bot-${Math.random().toString(36).substr(2, 9)}`,
+          name: "XiangQi Bot",
+          isBot: true,
+          orientation,
+        };
+      }
+      return {
+        id: `waiting-${orientation}`,
+        name: "Waiting for player...",
+        orientation,
+        isBot: false,
+      };
+    };
+
     const gameData = {
       players: {
-        red: { ...players.red, orientation: "red" },
-        black: { ...players.black, orientation: "black" },
+        red: getPlayerData(players.red, "red"),
+        black: getPlayerData(players.black, "black"),
       },
-      fen: initialFen, // Initial position
+      fen: initialFen,
       moves: [],
       status:
         players.red.isBot && players.black.isBot ? "completed" : "waiting",
       times: {
-        red: 600, // 10 minutes in milliseconds
+        red: 600,
         black: 600,
       },
     };
@@ -44,8 +72,8 @@ export async function POST(request: Request) {
 
     // If one player is a bot and the other has joined, set status to active
     if (
-      (players.red.isBot && players.black.id) ||
-      (players.black.isBot && players.red.id)
+      (players.red.isBot && players.black.id && !players.black.isBot) ||
+      (players.black.isBot && players.red.id && !players.red.isBot)
     ) {
       game.status = "active";
       await game.save();

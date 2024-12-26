@@ -224,7 +224,8 @@ export default function GamesPage() {
               <div className={styles.actions}>
                 {game.status === "waiting" && (
                   <>
-                    {!game.players.red.id && (
+                    {(!game.players.red.id ||
+                      game.players.red.name === "Waiting for player...") && (
                       <button
                         onClick={() => handleJoinGame(game._id, "red")}
                         className={`${styles.button} ${styles.redSide}`}
@@ -232,7 +233,8 @@ export default function GamesPage() {
                         <FaUserFriends /> Join as Red
                       </button>
                     )}
-                    {!game.players.black.id && (
+                    {(!game.players.black.id ||
+                      game.players.black.name === "Waiting for player...") && (
                       <button
                         onClick={() => handleJoinGame(game._id, "black")}
                         className={`${styles.button} ${styles.blackSide}`}
@@ -242,7 +244,7 @@ export default function GamesPage() {
                     )}
                   </>
                 )}
-                {game.status === "active" && (
+                {game.status !== "completed" && (
                   <button
                     onClick={() => handleSpectate(game._id)}
                     className={`${styles.button} ${styles.spectate}`}
