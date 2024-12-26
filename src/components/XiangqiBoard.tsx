@@ -118,7 +118,7 @@ const XiangqiBoard: React.FC<XiangqiBoardProps> = ({ className = "" }) => {
   };
 
   const message = getMessage();
-  console.log("Current message:", message);
+  // console.log("Current message:", message);
 
   return (
     <div style={{ position: "relative", width: "540px", height: "600px" }}>

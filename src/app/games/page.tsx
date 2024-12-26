@@ -150,7 +150,7 @@ export default function GamesPage() {
             <MdRefresh className={isLoading ? styles.spinning : ""} />
           </button>
         </div>
-        {!isLoading && games.length > 0 && (
+        {!isLoading && games?.length > 0 && (
           <button
             className={styles.newGameButton}
             onClick={() => setIsModalOpen(true)}

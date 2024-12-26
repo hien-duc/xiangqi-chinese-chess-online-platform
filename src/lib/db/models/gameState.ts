@@ -7,6 +7,13 @@ export interface IPlayer {
   isBot?: boolean;
 }
 
+export interface IMessage {
+  sender: string;
+  senderName: string;
+  content: string;
+  timestamp: Date;
+}
+
 export interface IGameState extends Document {
   id: string;
   players: {
@@ -25,9 +32,17 @@ export interface IGameState extends Document {
     red: number;
     black: number;
   };
+  messages: IMessage[];
   createdAt: Date;
   updatedAt: Date;
 }
+
+const MessageSchema = new Schema<IMessage>({
+  sender: { type: String, required: true },
+  senderName: { type: String, required: true },
+  content: { type: String, required: true, maxlength: 500 },
+  timestamp: { type: Date, default: Date.now },
+});
 
 const GameSchema = new Schema<IGameState>(
   {
@@ -84,8 +99,11 @@ const GameSchema = new Schema<IGameState>(
         red: { type: Number, required: true, default: 600 }, // 10 minutes in seconds
         black: { type: Number, required: true, default: 600 },
       },
-      required: true,
-      _id: false, // Prevent Mongoose from creating an _id for the times subdocument
+      default: { red: 600, black: 600 },
+    },
+    messages: {
+      type: [MessageSchema],
+      default: [],
     },
   },
   {
@@ -93,9 +111,12 @@ const GameSchema = new Schema<IGameState>(
   }
 );
 
+MessageSchema.index({ timestamp: -1 });
 GameSchema.index({ status: 1 });
 GameSchema.index({ "players.red.id": 1 });
 GameSchema.index({ "players.black.id": 1 });
 GameSchema.index({ createdAt: 1 });
 
-export default mongoose.models.Game || model<IGameState>("Game", GameSchema);
+const GameModel = mongoose.models.Game || model("Game", GameSchema);
+
+export default GameModel;

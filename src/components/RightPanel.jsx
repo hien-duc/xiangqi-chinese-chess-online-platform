@@ -4,7 +4,14 @@ import { useGameTimer } from "@/hooks/useGameTimer";
 import { useChat } from "@/context/ChatContext";
 import { useSession } from "next-auth/react";
 import styles from "@/styles/RightPanel.module.css";
-import { FaTrophy, FaSkull, FaHandshake, FaComments, FaTimes, FaPaperPlane } from "react-icons/fa";
+import {
+  FaTrophy,
+  FaSkull,
+  FaHandshake,
+  FaComments,
+  FaTimes,
+  FaPaperPlane,
+} from "react-icons/fa";
 import WinModal from "@/components/WinModal";
 import { getTurnColor } from "@/utils/fen";
 
@@ -70,7 +77,7 @@ const PlayerInfo = ({ player, side, isCurrentTurn, timeLeft, playerStats }) => {
 const RightPanel = () => {
   const { gameState } = useGameContext();
   const { data: session } = useSession();
-  const { getGameMessages, addMessage } = useChat();
+  const { sendMessage } = useChat();
   const [message, setMessage] = useState("");
   const [redPlayerStats, setRedPlayerStats] = useState(null);
   const [blackPlayerStats, setBlackPlayerStats] = useState(null);
@@ -92,34 +99,34 @@ const RightPanel = () => {
     async function fetchPlayerStats() {
       if (!gameState?.players) return;
 
-      // Fetch red player stats if not a guest
-      if (!gameState.players.red.isGuest) {
-        try {
-          const response = await fetch(
+      try {
+        // Fetch red player stats if not a bot
+        if (!gameState.players.red.isBot) {
+          const redResponse = await fetch(
             `/api/player/${gameState.players.red.id}`
           );
-          if (response.ok) {
-            const stats = await response.json();
-            setRedPlayerStats(stats);
+          if (redResponse.ok) {
+            const redData = await redResponse.json();
+            setRedPlayerStats(redData);
           }
-        } catch (error) {
-          console.error("Error fetching red player stats:", error);
+        } else {
+          setRedPlayerStats({ rating: "BOT", rank: "Bot Player" });
         }
-      }
 
-      // Fetch black player stats if not a guest
-      if (!gameState.players.black.isGuest) {
-        try {
-          const response = await fetch(
+        // Fetch black player stats if not a bot
+        if (!gameState.players.black.isBot) {
+          const blackResponse = await fetch(
             `/api/player/${gameState.players.black.id}`
           );
-          if (response.ok) {
-            const stats = await response.json();
-            setBlackPlayerStats(stats);
+          if (blackResponse.ok) {
+            const blackData = await blackResponse.json();
+            setBlackPlayerStats(blackData);
           }
-        } catch (error) {
-          console.error("Error fetching black player stats:", error);
+        } else {
+          setBlackPlayerStats({ rating: "BOT", rank: "Bot Player" });
         }
+      } catch (error) {
+        console.error("Error fetching player stats:", error);
       }
     }
 
@@ -176,7 +183,7 @@ const RightPanel = () => {
 
       {/* Floating Chat Button */}
       <button
-        className={`${styles.chatToggle} ${showChat ? styles.active : ''}`}
+        className={`${styles.chatToggle} ${showChat ? styles.active : ""}`}
         onClick={() => setShowChat(!showChat)}
         title={showChat ? "Hide Chat" : "Show Chat"}
       >
@@ -189,10 +196,10 @@ const RightPanel = () => {
       </button>
 
       {/* Floating Chat Panel */}
-      <div className={`${styles.floatingChat} ${showChat ? styles.show : ''}`}>
+      <div className={`${styles.floatingChat} ${showChat ? styles.show : ""}`}>
         <div className={styles.chatHeader}>
           <h3>Game Chat</h3>
-          <button 
+          <button
             className={styles.closeChat}
             onClick={() => setShowChat(false)}
           >
@@ -229,7 +236,7 @@ const RightPanel = () => {
             className={styles.chatInput}
             onKeyPress={(e) => {
               if (e.key === "Enter" && message.trim()) {
-                addMessage(message);
+                sendMessage(gameState._id, message.trim());
                 setMessage("");
               }
             }}
@@ -238,7 +245,7 @@ const RightPanel = () => {
             className={styles.sendButton}
             onClick={() => {
               if (message.trim()) {
-                addMessage(message);
+                sendMessage(gameState._id, message.trim());
                 setMessage("");
               }
             }}

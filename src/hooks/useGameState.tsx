@@ -217,7 +217,8 @@ export const GameProvider: React.FC<GameProviderProps> = ({
             previousTurn !== currentTurn ||
             prevState.players.red.id !== data.game.players.red.id ||
             prevState.players.black.id !== data.game.players.black.id ||
-            JSON.stringify(prevState.moves) !== JSON.stringify(data.game.moves);
+            JSON.stringify(prevState.moves) !== JSON.stringify(data.game.moves) ||
+            JSON.stringify(prevState.messages) !== JSON.stringify(data.game.messages);
 
           // Show win modal if game just completed
           if (

@@ -60,12 +60,15 @@ export async function POST(request: Request) {
       },
       fen: initialFen,
       moves: [],
+      messages: [], // Initialize empty messages array
       status:
         players.red.isBot && players.black.isBot ? "completed" : "waiting",
       times: {
         red: 600,
         black: 600,
       },
+      createdAt: new Date(),
+      updatedAt: new Date(),
     };
 
     const game = await GameModel.create(gameData);

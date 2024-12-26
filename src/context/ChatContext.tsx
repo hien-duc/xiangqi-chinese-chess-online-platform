@@ -4,7 +4,6 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 
 interface ChatMessage {
-  gameId: string;
   content: string;
   sender: string;
   senderName: string;
@@ -27,7 +26,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
   // Polling function
   const pollMessages = async (gameId: string) => {
     try {
-      const response = await fetch(`/api/chat?gameId=${gameId}`);
+      const response = await fetch(`/api/game/${gameId}/chat`);
       if (!response.ok) return;
 
       const data = await response.json();
@@ -59,17 +58,14 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     if (!session?.user) return;
 
     try {
-      const message = {
-        gameId,
-        content,
-        sender: session.user.id,
-        senderName: session.user.name || "Anonymous",
-      };
-
-      const response = await fetch("/api/chat", {
+      const response = await fetch(`/api/game/${gameId}/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(message),
+        body: JSON.stringify({
+          sender: session.user.id,
+          senderName: session.user.name || "Anonymous",
+          content,
+        }),
       });
 
       if (!response.ok) {
