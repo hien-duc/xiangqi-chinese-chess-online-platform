@@ -67,6 +67,95 @@
   border: 1px solid rgba(255, 255, 255, 0.18);
 }
 
+.container {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 2rem;
+  min-height: calc(100vh - 4rem);
+  background: linear-gradient(to bottom, #f8fafc, #f1f5f9);
+}
+
+.game-container {
+  display: flex;
+  gap: 2rem;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-top: 2rem;
+}
+
+.boardContainer {
+  flex: 1;
+  max-width: 640px;
+  aspect-ratio: 1;
+  position: relative;
+  border-radius: 24px;
+  overflow: hidden;
+  background: white;
+  box-shadow: 
+    0 0 0 1px rgba(0, 0, 0, 0.05),
+    0 4px 6px rgba(0, 0, 0, 0.05),
+    0 10px 20px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.boardContainer:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 0 0 1px rgba(0, 0, 0, 0.05),
+    0 4px 6px rgba(0, 0, 0, 0.05),
+    0 20px 25px rgba(0, 0, 0, 0.1);
+}
+
+.spectatorBoard {
+  opacity: 0.9;
+}
+
+.spectatorBadge {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  padding: 0.5rem 1rem;
+  background: rgba(0, 0, 0, 0.75);
+  color: white;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  backdrop-filter: blur(4px);
+  z-index: 10;
+}
+
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 1rem;
+}
+
+.loader {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.errorContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  color: #ef4444;
+  font-weight: 500;
+}
+
 @media (max-width: 1200px) {
   .gameContainer {
     grid-template-columns: 200px 1fr 200px;
@@ -83,5 +172,43 @@
   
   .leftPanel, .rightPanel {
     padding: 1rem;
+  }
+}
+
+@media (max-width: 1400px) {
+  .container {
+    padding: 1.5rem;
+  }
+
+  .game-container {
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 1200px) {
+  .game-container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .boardContainer {
+    order: 1;
+    width: 100%;
+    max-width: 560px;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+
+  .game-container {
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+
+  .boardContainer {
+    max-width: 100%;
   }
 }

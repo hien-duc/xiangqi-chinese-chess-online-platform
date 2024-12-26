@@ -1,7 +1,7 @@
 import * as util from "./util";
 import * as cg from "./types";
 import { getValidMoves } from "./moves";
-import { getTurnColor, readXiangqi, write } from "./fen";
+import { getTurnColor, readXiangqi } from "./fen";
 
 // Check if a move would put the moving side's general in check
 export function wouldBeInCheck(
@@ -29,44 +29,70 @@ export function wouldBeInCheck(
   }
   if (!generalPos) return false;
 
-  // Check if any opponent piece can capture the general
+  // Check if any enemy piece can attack the general
   for (const [key, p] of newPieces.entries()) {
     if (p.color !== color) {
-      const moves = getValidMoves(newPieces, key);
-      if (moves.includes(generalPos)) {
-        return true;
+      if (p.role === "cannon") {
+        // Special check for cannon since it has unique capture rules
+        const [fromX, fromY] = util.key2pos(key);
+        const [toX, toY] = util.key2pos(generalPos);
+        
+        // Check if cannon and general are on same file or rank
+        if (fromX === toX || fromY === toY) {
+          let jumpCount = 0;
+          
+          // Count pieces between cannon and general
+          if (fromX === toX) {
+            const minY = Math.min(fromY, toY);
+            const maxY = Math.max(fromY, toY);
+            for (let y = minY + 1; y < maxY; y++) {
+              if (newPieces.has(util.pos2key([fromX, y]))) {
+                jumpCount++;
+              }
+            }
+          } else {
+            const minX = Math.min(fromX, toX);
+            const maxX = Math.max(fromX, toX);
+            for (let x = minX + 1; x < maxX; x++) {
+              if (newPieces.has(util.pos2key([x, fromY]))) {
+                jumpCount++;
+              }
+            }
+          }
+          
+          // Cannon captures with exactly one piece in between
+          if (jumpCount === 1) {
+            return true;
+          }
+        }
+      } else {
+        // For other pieces, use normal move validation
+        const validMoves = getValidMoves(newPieces, key);
+        if (validMoves.includes(generalPos)) {
+          return true;
+        }
       }
     }
+  }
+
+  // Check if generals are facing each other
+  if (generalsAreFacing(newPieces)) {
+    return true;
   }
 
   return false;
 }
 
 // Check if the current position is checkmate
-export function isCheckmate(pieces: cg.Pieces, color: cg.Color): boolean;
-export function isCheckmate(fen: string): boolean;
-export function isCheckmate(
-  arg1: string | cg.Pieces,
-  arg2?: cg.Color
-): boolean {
-  if (typeof arg1 === "string") {
-    // Parse FEN string to get pieces and turn
-    const pieces = readXiangqi(arg1);
-    const fen = write(pieces);
-    // Get turn color from FEN (after the space)
-    const currentTurn = getTurnColor(fen);
+export function isCheckmate(fen: string): boolean {
+  // Parse FEN string to get pieces and turn
+  const pieces = readXiangqi(fen);
+  const currentTurn = getTurnColor(fen);
 
-    return isCheckmateCore(pieces, currentTurn);
-  }
-  return isCheckmateCore(arg1, arg2!);
-}
-
-// Core checkmate detection logic
-function isCheckmateCore(pieces: cg.Pieces, color: cg.Color): boolean {
   // First check if we're in check
   let generalPos: cg.Key | undefined;
   for (const [key, p] of pieces.entries()) {
-    if (p.role === "king" && p.color === color) {
+    if (p.role === "king" && p.color === currentTurn) {
       generalPos = key;
       break;
     }
@@ -76,46 +102,22 @@ function isCheckmateCore(pieces: cg.Pieces, color: cg.Color): boolean {
   if (!generalPos) return true;
 
   // Check if the general is in check
-  let isInCheck = false;
-  for (const [key, p] of pieces.entries()) {
-    if (p.color !== color) {
-      const moves = getValidMoves(pieces, key);
-      if (moves.includes(generalPos)) {
-        isInCheck = true;
-        break;
-      }
-    }
+  if (!wouldBeInCheck(pieces, generalPos, generalPos, currentTurn)) {
+    return false;
   }
-
-  // If we're not in check, it's not checkmate
-  if (!isInCheck) return false;
 
   // For each piece of the current color
   for (const [from, piece] of pieces.entries()) {
-    if (piece.color === color) {
+    if (piece.color === currentTurn) {
       // Get all possible moves for this piece
       const moves = getValidMoves(pieces, from);
 
       // For each possible move
       for (const to of moves) {
         // Try the move and see if it gets us out of check
-        const newPieces = new Map(pieces);
-        const capturedPiece = newPieces.get(to);
-        newPieces.delete(from);
-        newPieces.set(to, piece);
-
-        // After making the move, are we still in check?
-        if (!wouldBeInCheck(newPieces, from, to, color)) {
-          // Restore the captured piece before returning
-          if (capturedPiece) {
-            newPieces.set(to, capturedPiece);
-          }
-          return false; // Found a legal move that gets us out of check
-        }
-
-        // Restore the captured piece for next iteration
-        if (capturedPiece) {
-          newPieces.set(to, capturedPiece);
+        if (!wouldBeInCheck(pieces, from, to, currentTurn)) {
+          // Found a legal move that gets us out of check
+          return false;
         }
       }
     }

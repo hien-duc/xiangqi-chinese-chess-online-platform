@@ -1,24 +1,24 @@
-"use client"
+"use client";
 
-import { useRouter } from 'next/navigation'
-import Link from 'next/link'
-import styles from '@/styles/PlayModal.module.css'
-import { IoClose } from 'react-icons/io5'
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import styles from "@/styles/PlayModal.module.css";
+import { IoClose } from "react-icons/io5";
 
 interface PlayModalProps {
-  isOpen: boolean
-  onClose: () => void
+  isOpen: boolean;
+  onClose: () => void;
 }
 
 export default function PlayModal({ isOpen, onClose }: PlayModalProps) {
-  const router = useRouter()
+  const router = useRouter();
 
-  if (!isOpen) return null
+  if (!isOpen) return null;
 
   const handlePlayAsGuest = () => {
-    router.push('/play/online')
-    onClose()
-  }
+    router.push("/play/online");
+    onClose();
+  };
 
   return (
     <div className={styles.modalOverlay}>
@@ -43,5 +43,5 @@ export default function PlayModal({ isOpen, onClose }: PlayModalProps) {
         </div>
       </div>
     </div>
-  )
+  );
 }
