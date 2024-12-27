@@ -23,7 +23,7 @@ interface GameContextType {
   makeMove: (orig: string, dest: string) => Promise<void>;
   refetch: (silent?: boolean) => Promise<void>;
   togglePolling: (shouldPoll: boolean) => void;
-  forfeitGame: () => Promise<void>;
+  forfeitGame: (leavingPlayerId?: string) => Promise<void>;
 }
 
 const GameContext = createContext<GameContextType>({
@@ -280,40 +280,53 @@ export const GameProvider: React.FC<GameProviderProps> = ({
     [refetch]
   );
 
-  const forfeitGame = useCallback(async () => {
-    try {
-      const currentPlayer = getTurnColor(gameState.fen);
-      const winner = currentPlayer === "red" ? "Black" : "Red";
+  const forfeitGame = useCallback(
+    async (leavingPlayerId?: string) => {
+      try {
+        let currentPlayer: "red" | "black";
 
-      await fetch(`/api/game/${gameIdState}/complete`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          winner,
-          forfeitedBy: currentPlayer,
-          timeoutLoss: false,
-        }),
-      });
+        if (leavingPlayerId) {
+          // If we have a specific player ID that's leaving
+          currentPlayer =
+            gameState.players.red.id === leavingPlayerId ? "red" : "black";
+        } else {
+          // Fallback to current turn if no specific player ID
+          currentPlayer = getTurnColor(gameState.fen);
+        }
 
-      setGameState((prevState) => {
-        if (!prevState) return null;
-        return {
-          ...prevState,
-          status: "completed",
-          gameOver: true,
-          winner,
-          forfeitedBy: currentPlayer,
-        };
-      });
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "Failed to forfeit game";
-      showError(errorMessage);
-      console.error("Forfeit error:", err);
-    }
-  }, [gameIdState, showError, gameState]);
+        const winner = currentPlayer === "red" ? "Black" : "Red";
+
+        await fetch(`/api/game/${gameIdState}/complete`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            winner,
+            forfeitedBy: currentPlayer,
+            timeoutLoss: false,
+          }),
+        });
+
+        setGameState((prevState) => {
+          if (!prevState) return null;
+          return {
+            ...prevState,
+            status: "completed",
+            gameOver: true,
+            winner,
+            forfeitedBy: currentPlayer,
+          };
+        });
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : "Failed to forfeit game";
+        showError(errorMessage);
+        console.error("Forfeit error:", err);
+      }
+    },
+    [gameIdState, showError, gameState]
+  );
 
   useEffect(() => {
     const handleBotMove = async () => {
