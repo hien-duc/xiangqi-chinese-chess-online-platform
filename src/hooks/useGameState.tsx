@@ -206,6 +206,44 @@ export const GameProvider: React.FC<GameProviderProps> = ({
           throw new Error("No game data received");
         }
 
+        // Check for inactive games
+        if (
+          data.game.status === "active" &&
+          data.game.moves &&
+          data.game.moves.length > 0
+        ) {
+          const lastMoveTime = new Date(data.game.updatedAt).getTime();
+          const now = new Date().getTime();
+          const inactiveTime = now - lastMoveTime;
+          const currentTurn = getTurnColor(data.game.fen);
+
+          // 2 minutes
+          const timeoutThreshold = 2 * 60 * 1000;
+
+          if (inactiveTime > timeoutThreshold) {
+            // The current turn player has been inactive too long
+            const inactivePlayer = currentTurn; // red or black
+            const winner = inactivePlayer === "red" ? "Black" : "Red";
+
+            // Complete the game and update stats
+            await fetch(`/api/game/${gameIdState}/complete`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                winner,
+                forfeitedBy: inactivePlayer,
+                timeoutLoss: true,
+              }),
+            });
+
+            data.game.status = "completed";
+            data.game.gameOver = true;
+            data.game.winner = winner;
+          }
+        }
+
         // Update state if any field has changed
         setGameState((prevState) => {
           if (!prevState) return data.game;
@@ -286,7 +324,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({
         let currentPlayer: "red" | "black";
 
         if (leavingPlayerId) {
-          // If we have a specific player ID that's leaving
+          // If we have a specifi c player ID that's leaving
           currentPlayer =
             gameState.players.red.id === leavingPlayerId ? "red" : "black";
         } else {

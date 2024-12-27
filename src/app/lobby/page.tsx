@@ -55,7 +55,7 @@ export default function LobbyPage() {
             <p>Test your skills against AI</p>
           </Link>
 
-          <Link href="/puzzles" className={styles.option}>
+          <Link href="#" className={styles.option}>
             <div className={styles.iconWrapper}>
               <GiChessKnight className={styles.icon} />
             </div>
@@ -63,7 +63,7 @@ export default function LobbyPage() {
             <p>Solve chess puzzles to improve your game</p>
           </Link>
 
-          <Link href="/learn" className={styles.option}>
+          <Link href="#" className={styles.option}>
             <div className={styles.iconWrapper}>
               <IoSchoolOutline className={styles.icon} />
             </div>

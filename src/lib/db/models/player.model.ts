@@ -1,5 +1,4 @@
 import mongoose, { Schema, Document } from "mongoose";
-import { IUser } from "../models/user.model";
 
 export interface IPlayer extends Document {
   userId: string | Schema.Types.ObjectId; // Allow both string and ObjectId
@@ -15,10 +14,10 @@ export interface IPlayer extends Document {
 
 const PlayerSchema = new Schema(
   {
-    userId: { 
+    userId: {
       type: Schema.Types.Mixed, // Allow both string and ObjectId
-      ref: "User", 
-      required: true 
+      ref: "User",
+      required: true,
     },
     name: { type: String, required: true },
     rating: { type: Number, default: 1200 },

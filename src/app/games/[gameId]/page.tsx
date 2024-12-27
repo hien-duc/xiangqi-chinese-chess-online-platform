@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { useParams, useSearchParams } from "next/navigation";
-import { useSession } from "next-auth/react";
 import XiangqiBoard from "@/components/XiangqiBoard";
 import { useGameContext } from "@/hooks/useGameState";
 import styles from "@/styles/Page.module.css";
@@ -16,18 +15,10 @@ import "@/app/globals.css";
 export default function GamePage() {
   const params = useParams();
   const searchParams = useSearchParams();
-  const { data: session } = useSession();
-  const {
-    setGameId,
-    gameState,
-    isLoading,
-    refetch,
-    togglePolling,
-    forfeitGame,
-  } = useGameContext();
+  const { setGameId, gameState, isLoading, refetch, togglePolling } =
+    useGameContext();
   const gameId = params.gameId as string;
   const isSpectator = searchParams.get("spectate") === "true";
-  const unmountingRef = useRef(false);
 
   useEffect(() => {
     if (gameId) {
@@ -37,32 +28,10 @@ export default function GamePage() {
     }
 
     return () => {
-      unmountingRef.current = true;
-      if (
-        unmountingRef.current &&
-        gameState?.status === "active" &&
-        gameState.moves &&
-        gameState.moves.length > 0 &&
-        !isSpectator &&
-        session?.user?.id &&
-        (gameState.players.red.id === session.user.id ||
-          gameState.players.black.id === session.user.id)
-      ) {
-        forfeitGame(session.user.id);
-      }
       togglePolling(false);
       setGameId("");
     };
-  }, [
-    gameId,
-    setGameId,
-    refetch,
-    togglePolling,
-    forfeitGame,
-    gameState,
-    isSpectator,
-    session,
-  ]);
+  }, [gameId, setGameId, refetch, togglePolling]);
 
   if (isLoading && !gameState) {
     return <LoadingSpinner />;

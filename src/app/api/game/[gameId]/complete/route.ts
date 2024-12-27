@@ -3,11 +3,17 @@ import { connectToDatabase } from "@/lib/db/db-connect";
 import GameModel from "@/lib/db/models/gameState";
 import PlayerModel, { updatePlayerStats } from "@/lib/db/models/player.model";
 
-const RATING_CHANGE = {
-  win: 15,
-  loss: -15,
-  draw: 0,
-};
+// ELO rating calculation
+function calculateEloChange(
+  playerRating: number,
+  opponentRating: number,
+  actualScore: number
+) {
+  const K = 32; // K-factor for rating calculations
+  const expectedScore =
+    1 / (1 + Math.pow(10, (opponentRating - playerRating) / 400));
+  return Math.round(K * (actualScore - expectedScore));
+}
 
 export async function POST(
   request: NextRequest,
@@ -36,34 +42,61 @@ export async function POST(
     const blackPlayer = game.players.black;
 
     // Find player documents by userId
-    if (!redPlayer.isGuest) {
-      const redPlayerDoc = await PlayerModel.findOne({ userId: redPlayer.id });
+    const redPlayerDoc = !redPlayer.isGuest
+      ? await PlayerModel.findOne({ userId: redPlayer.id })
+      : null;
+    const blackPlayerDoc = !blackPlayer.isGuest
+      ? await PlayerModel.findOne({ userId: blackPlayer.id })
+      : null;
+
+    if (redPlayerDoc && blackPlayerDoc) {
+      // Calculate ELO changes
+      const redScore = winner === "Red" ? 1 : winner === "Black" ? 0 : 0.5;
+      const blackScore = 1 - redScore;
+
+      const redRatingChange = calculateEloChange(
+        redPlayerDoc.rating,
+        blackPlayerDoc.rating,
+        redScore
+      );
+      const blackRatingChange = calculateEloChange(
+        blackPlayerDoc.rating,
+        redPlayerDoc.rating,
+        blackScore
+      );
+
+      // Update red player stats
+      await updatePlayerStats(
+        redPlayerDoc._id.toString(),
+        winner === "Red" ? "win" : winner === "Black" ? "loss" : "draw",
+        redRatingChange
+      );
+
+      // Update black player stats
+      await updatePlayerStats(
+        blackPlayerDoc._id.toString(),
+        winner === "Black" ? "win" : winner === "Red" ? "loss" : "draw",
+        blackRatingChange
+      );
+    } else {
+      // If one player is a guest or bot, use simpler rating changes
       if (redPlayerDoc) {
+        const ratingChange =
+          winner === "Red" ? 15 : winner === "Black" ? -15 : 0;
         await updatePlayerStats(
           redPlayerDoc._id.toString(),
           winner === "Red" ? "win" : winner === "Black" ? "loss" : "draw",
-          winner === "Red"
-            ? RATING_CHANGE.win
-            : winner === "Black"
-            ? RATING_CHANGE.loss
-            : RATING_CHANGE.draw
+          ratingChange
         );
       }
-    }
 
-    if (!blackPlayer.isGuest) {
-      const blackPlayerDoc = await PlayerModel.findOne({
-        userId: blackPlayer.id,
-      });
       if (blackPlayerDoc) {
+        const ratingChange =
+          winner === "Black" ? 15 : winner === "Red" ? -15 : 0;
         await updatePlayerStats(
           blackPlayerDoc._id.toString(),
           winner === "Black" ? "win" : winner === "Red" ? "loss" : "draw",
-          winner === "Black"
-            ? RATING_CHANGE.win
-            : winner === "Red"
-            ? RATING_CHANGE.loss
-            : RATING_CHANGE.draw
+          ratingChange
         );
       }
     }
