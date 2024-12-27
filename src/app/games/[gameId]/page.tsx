@@ -7,36 +7,38 @@ import { useGameContext } from "@/hooks/useGameState";
 import styles from "@/styles/Page.module.css";
 import LeftPanel from "@/components/LeftPanel";
 import RightPanel from "@/components/RightPanel";
+import LoadingSpinner from "@/components/LoadingSpinner";
+import GameNotFoundModal from "@/components/GameNotFoundModal";
 import "@/styles/XiangqiGround.css";
 import "@/app/globals.css";
 
 export default function GamePage() {
   const params = useParams();
   const searchParams = useSearchParams();
-  const { setGameId, gameState, isLoading } = useGameContext();
+  const { setGameId, gameState, isLoading, refetch, togglePolling } =
+    useGameContext();
   const gameId = params.gameId as string;
   const isSpectator = searchParams.get("spectate") === "true";
 
   useEffect(() => {
     if (gameId) {
       setGameId(gameId);
+      refetch(true);
+      togglePolling(true); // Start polling when component mounts
     }
-  }, [gameId, setGameId]);
+
+    return () => {
+      togglePolling(false); // Stop polling when component unmounts
+      setGameId(""); // Reset gameId
+    };
+  }, [gameId, setGameId, refetch, togglePolling]);
 
   if (isLoading && !gameState) {
-    return (
-      <div className={styles.loading}>
-        <p>Loading game...</p>
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   if (!gameState) {
-    return (
-      <div className={styles.error}>
-        <p>Game not found</p>
-      </div>
-    );
+    return <GameNotFoundModal isOpen={true} />;
   }
 
   return (

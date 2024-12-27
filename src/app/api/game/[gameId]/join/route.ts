@@ -36,6 +36,7 @@ export async function POST(
     game.players[side] = {
       ...playerInfo,
       orientation: side,
+      isBot: false,
     };
 
     // If both sides are filled, set the game to active
@@ -43,9 +44,9 @@ export async function POST(
     const blackPlayer = game.players.black;
     if (
       redPlayer.id &&
-      redPlayer.id !== "waiting" &&
+      redPlayer.id !== "waiting-red" &&
       blackPlayer.id &&
-      blackPlayer.id !== "waiting"
+      blackPlayer.id !== "waiting-black"
     ) {
       game.status = "active";
       console.log("Game activated:", gameId); // Add logging for debugging

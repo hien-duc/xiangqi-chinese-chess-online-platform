@@ -7,9 +7,19 @@ export async function GET(
   { params }: { params: { userId: string } }
 ) {
   try {
-    await connectToDatabase();
     const { userId } = await params;
+    if (userId.startsWith("waiting-")) {
+      return NextResponse.json({
+        rating: 0,
+        gamesPlayed: 0,
+        wins: 0,
+        losses: 0,
+        draws: 0,
+        rank: "Unknown",
+      });
+    }
 
+    await connectToDatabase();
     const player = await PlayerModel.findOne({ userId });
     if (!player) {
       return NextResponse.json({ error: "Player not found" }, { status: 404 });
