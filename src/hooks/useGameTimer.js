@@ -54,7 +54,7 @@ export const useGameTimer = () => {
           // Check for timeout
           if (newTimes[currentTurn] === 0) {
             stopTimer();
-            setTimeoutWinner(currentTurn === "red" ? "Black" : "Red");
+            setTimeoutWinner(currentTurn === "red" ? "black" : "red");
             setTimeoutLoser(currentTurn);
             setShowWinModal(true);
             updateTimeInDB(newTimes);

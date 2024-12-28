@@ -51,7 +51,7 @@ export async function POST(
 
     if (redPlayerDoc && blackPlayerDoc) {
       // Calculate ELO changes
-      const redScore = winner === "Red" ? 1 : winner === "Black" ? 0 : 0.5;
+      const redScore = winner === "red" ? 1 : winner === "black" ? 0 : 0.5;
       const blackScore = 1 - redScore;
 
       const redRatingChange = calculateEloChange(
@@ -68,34 +68,34 @@ export async function POST(
       // Update red player stats
       await updatePlayerStats(
         redPlayerDoc._id.toString(),
-        winner === "Red" ? "win" : winner === "Black" ? "loss" : "draw",
+        winner === "red" ? "win" : winner === "black" ? "loss" : "draw",
         redRatingChange
       );
 
       // Update black player stats
       await updatePlayerStats(
         blackPlayerDoc._id.toString(),
-        winner === "Black" ? "win" : winner === "Red" ? "loss" : "draw",
+        winner === "black" ? "win" : winner === "red" ? "loss" : "draw",
         blackRatingChange
       );
     } else {
       // If one player is a guest or bot, use simpler rating changes
       if (redPlayerDoc) {
         const ratingChange =
-          winner === "Red" ? 15 : winner === "Black" ? -15 : 0;
+          winner === "red" ? 15 : winner === "black" ? -15 : 0;
         await updatePlayerStats(
           redPlayerDoc._id.toString(),
-          winner === "Red" ? "win" : winner === "Black" ? "loss" : "draw",
+          winner === "red" ? "win" : winner === "black" ? "loss" : "draw",
           ratingChange
         );
       }
 
       if (blackPlayerDoc) {
         const ratingChange =
-          winner === "Black" ? 15 : winner === "Red" ? -15 : 0;
+          winner === "black" ? 15 : winner === "red" ? -15 : 0;
         await updatePlayerStats(
           blackPlayerDoc._id.toString(),
-          winner === "Black" ? "win" : winner === "Red" ? "loss" : "draw",
+          winner === "black" ? "win" : winner === "red" ? "loss" : "draw",
           ratingChange
         );
       }

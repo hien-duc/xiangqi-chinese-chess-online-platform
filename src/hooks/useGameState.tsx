@@ -126,10 +126,6 @@ export const GameProvider: React.FC<GameProviderProps> = ({
           // The turn in responseData.game.turn is already switched to the next player
           // So if turn is 'red', it means black just won
           const currentTurn = getTurnColor(responseData.game.fen);
-          console.log(
-            "Game over! Checkmate detected for",
-            currentTurn === "red" ? "black" : "red"
-          );
           // Keep winningColor lowercase for API, capitalize for display
           const winningColor = currentTurn === "red" ? "black" : "red";
           const displayWinner =
@@ -140,12 +136,6 @@ export const GameProvider: React.FC<GameProviderProps> = ({
 
           // Update game status in database
           try {
-            console.log(
-              "Completing game",
-              gameIdState,
-              "with winner:",
-              winningColor
-            );
             // Complete the game and update player stats
             const completeResponse = await fetch(
               `/api/game/${gameIdState}/complete`,
@@ -238,7 +228,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({
           if (inactiveTime > timeoutThreshold) {
             // The current turn player has been inactive too long
             const inactivePlayer = currentTurn; // red or black
-            const winner = inactivePlayer === "red" ? "Black" : "Red";
+            const winner = inactivePlayer === "red" ? "black" : "red";
 
             // Complete the game and update stats
             await fetch(`/api/game/${gameIdState}/complete`, {
@@ -345,7 +335,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({
           currentPlayer = getTurnColor(gameState.fen);
         }
 
-        const winner = currentPlayer === "red" ? "Black" : "Red";
+        const winner = currentPlayer === "red" ? "black" : "red";
 
         await fetch(`/api/game/${gameIdState}/complete`, {
           method: "POST",

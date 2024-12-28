@@ -22,8 +22,8 @@ describe("Xiangqi Piece Movement Tests", () => {
       const redMoves = getValidMoves(pieces, "e6");
       const blackMoves = getValidMoves(pieces, "e3");
 
-      expect(redMoves).toContain("e7"); // Red moves up
-      expect(blackMoves).toContain("e2"); // Black moves down
+      expect(redMoves).toContain("e7"); // red moves up
+      expect(blackMoves).toContain("e2"); // black moves down
     });
 
     it("should move sideways after crossing river", () => {
@@ -75,8 +75,8 @@ describe("Xiangqi Piece Movement Tests", () => {
       const redMoves = getValidMoves(redPieces, "e8");
       const blackMoves = getValidMoves(blackPieces, "e1");
 
-      expect(redMoves.sort()).toEqual(["d7", "d9", "f9"].sort()); // Red advisor in top palace
-      expect(blackMoves.sort()).toEqual(["d0", "d2", "f2"].sort()); // Black advisor in bottom palace
+      expect(redMoves.sort()).toEqual(["d7", "d9", "f9"].sort()); // red advisor in top palace
+      expect(blackMoves.sort()).toEqual(["d0", "d2", "f2"].sort()); // black advisor in bottom palace
     });
   });
 

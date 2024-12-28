@@ -1,0 +1,121 @@
+3.2 XIANGQI WEB APPLICATION DESIGN SPECIFICATION
+
+TABLE OF CONTENTS
+1. System Architecture Overview
+2. Use Case Analysis
+3. Database Design
+4. User Interface Design
+5. Technical Stack
+
+1. SYSTEM ARCHITECTURE OVERVIEW
+The Xiangqi Web Application follows a modern three-tier architecture:
+- Presentation Layer: React.js-based frontend
+- Application Layer: Node.js backend with Express
+- Data Layer: MongoDB database
+
+2. USE CASE ANALYSIS
+2.1 Primary Actors
+- Regular Players
+- Guest Players
+- Administrators
+
+2.2 Core Use Cases
+a) Player Management
+   - Register new account
+   - Login/Logout
+   - View/Edit profile
+   - Track game history
+
+b) Game Functionality
+   - Start new game
+   - Make moves
+   - View game rules
+   - Save game progress
+   - Resume saved games
+
+c) Administrative Functions
+   - Manage user accounts
+   - Monitor active games
+   - System maintenance
+   - Generate reports
+
+3. DATABASE DESIGN
+3.1 Collections
+
+Users Collection:
+{
+    userId: ObjectId,
+    username: String,
+    email: String,
+    password: String (hashed),
+    rating: Number,
+    gamesPlayed: Number,
+    dateJoined: Date
+}
+
+Games Collection:
+{
+    gameId: ObjectId,
+    player1Id: ObjectId,
+    player2Id: ObjectId,
+    gameState: String,
+    moves: Array,
+    startTime: Date,
+    endTime: Date,
+    winner: ObjectId
+}
+
+GameHistory Collection:
+{
+    historyId: ObjectId,
+    gameId: ObjectId,
+    moveSequence: Array,
+    timestamp: Date
+}
+
+3.2. Design
+
+The design phase of the Xiangqi Web Application encompasses a comprehensive approach to transforming conceptual requirements into a concrete architectural framework. This section presents the fundamental design elements that form the backbone of the application's structure and functionality.
+
+3.2.1. Use Case Diagram
+
+The Use Case Diagram illustrates the dynamic interaction between users and the Xiangqi Web Application system. At its core, the system supports two primary user roles: Players and Administrators. Players can engage in essential game-related activities such as initiating new games, making moves, and viewing their game history. They can also manage their profiles, track their performance statistics, and interact with other players through the integrated chat system. Administrators possess elevated privileges, enabling them to oversee user management, monitor ongoing games, and maintain system integrity. The relationship between these actors and the system is designed to ensure smooth gameplay experience while maintaining proper system administration.
+
+3.2.2. Database Design
+
+The database architecture for the Xiangqi Web Application is structured to efficiently manage game data, user information, and system operations. The design implements a relational database model that captures the complex relationships between various entities within the system. The core entities include User Profiles, which store player information including their rankings and game statistics; Game Sessions, which maintain the state and progress of ongoing and completed games; and Move History, which records the sequence of moves for each game. These entities are interconnected through carefully designed relationships that ensure data integrity and enable efficient retrieval of information. The database schema incorporates appropriate constraints and indices to optimize query performance and maintain data consistency throughout the application's operation.
+
+4. USER INTERFACE DESIGN
+4.1 Key Components
+- Login/Registration Forms
+- Game Board Interface
+- Player Dashboard
+- Move History Panel
+- Chat System
+- Settings Panel
+
+4.2 Design Principles
+- Responsive layout for multiple devices
+- Intuitive game controls
+- Real-time updates
+- Clear visual feedback
+- Accessible design
+
+5. TECHNICAL STACK
+Frontend:
+- React.js
+- Redux for state management
+- Socket.io-client for real-time features
+- CSS3 with Flexbox/Grid
+
+Backend:
+- Node.js with Express
+- Socket.io for WebSocket connections
+- JWT for authentication
+- MongoDB for data persistence
+
+Development Tools:
+- Git for version control
+- npm for package management
+- ESLint for code quality
+- Jest for testing

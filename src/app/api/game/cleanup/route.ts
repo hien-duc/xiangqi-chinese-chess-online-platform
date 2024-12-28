@@ -13,7 +13,7 @@ export async function GET() {
     // Find and delete games that meet ANY of these conditions:
     // 1. Created more than 2 minutes ago with no moves and not completed
     // 2. Created more than 2 minutes ago with no players joined
-    // 3. Created more than 2 minutes ago and abandoned (no moves in last 2 minutes)
+    // 3. Created more than 2 minutes ago and abandoned (no activity in last 2 minutes)
     const result = await GameModel.deleteMany({
       $or: [
         {
@@ -32,10 +32,11 @@ export async function GET() {
           status: { $ne: "completed" },
         },
         {
-          // Condition 3: No recent moves (abandoned game)
+          // Condition 3: No recent activity (abandoned game)
           createdAt: { $lt: twoMinutesAgo },
-          lastMoveAt: { $lt: twoMinutesAgo },
+          updatedAt: { $lt: twoMinutesAgo },
           status: { $ne: "completed" },
+          gameOver: false,
         },
       ],
     });

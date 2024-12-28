@@ -74,7 +74,7 @@ export async function PUT(
     // Check if either player's time has run out
     if (game.times.red <= 0 || game.times.black <= 0) {
       // Determine winner based on who ran out of time
-      const winner = game.times.red <= 0 ? "Black" : "Red";
+      const winner = game.times.red <= 0 ? "black" : "red";
 
       // Update game status
       game.status = "completed";

@@ -107,7 +107,7 @@ export async function POST(
     // If player disconnects during active game, they forfeit
     if (game.status === "active") {
       const playerColor = game.players.red.id === playerId ? "red" : "black";
-      const winningColor = playerColor === "red" ? "Black" : "Red";
+      const winningColor = playerColor === "red" ? "black" : "red";
 
       game.status = "completed";
       game.gameOver = true;
