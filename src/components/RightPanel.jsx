@@ -85,6 +85,13 @@ const PlayerInfo = ({ player, side, isCurrentTurn, timeLeft, playerStats }) => {
   );
 };
 
+/**
+ * The RightPanel component renders the chat panel and player information
+ * for the current game. It fetches player stats and handles chat messages.
+ * It also displays a win modal when the game is won.
+ *
+ * @returns {JSX.Element} The JSX element for the RightPanel component.
+ */
 const RightPanel = () => {
   const { gameState } = useGameContext();
   const { data: session } = useSession();
@@ -193,7 +200,7 @@ const RightPanel = () => {
   return (
     <div className={styles.rightPanel}>
       <div className={styles.content}>
-        <PlayerInfo
+        <PlayerInfo 
           player={topPlayer}
           side={topSide}
           isCurrentTurn={currentTurn === topSide}

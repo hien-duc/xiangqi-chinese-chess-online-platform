@@ -8,33 +8,25 @@ import NewGameModal from "@/components/NewGameModal";
 import { useGameStore } from "@/stores/gameStore";
 import { FaChessBoard, FaUserFriends, FaRobot, FaEye } from "react-icons/fa";
 import { MdRefresh } from "react-icons/md";
-
-interface Player {
-  id: string;
-  isGuest: boolean;
-  name: string;
-  isBot?: boolean;
-}
-
-interface Game {
-  _id: string;
-  players: {
-    red: Player;
-    black: Player;
-  };
-  status: "waiting" | "active" | "completed";
-  createdAt: string;
-}
+import { IGameState } from "@/lib/db/models/gameState";
+import { startGameCleanup, stopGameCleanup } from "@/lib/cleanup/gameCleanup";
 
 export default function GamesPage() {
-  const [games, setGames] = useState<Game[]>([]);
+  const [games, setGames] = useState<IGameState[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
   const { data: session } = useSession();
 
   useEffect(() => {
+    // Initialize game cleanup and fetch games
+    startGameCleanup();
     fetchGames();
+
+    // Cleanup when component unmounts
+    return () => {
+      stopGameCleanup();
+    };
   }, []);
 
   const fetchGames = async () => {
@@ -153,7 +145,7 @@ export default function GamesPage() {
         {!isLoading && games?.length > 0 && (
           <button
             className={styles.newGameButton}
-            onClick={() => setIsModalOpen(true)}
+            onClick={() => setIsModalOpen(true)}D
           >
             New Game
           </button>

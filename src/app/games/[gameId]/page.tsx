@@ -8,7 +8,6 @@ import styles from "@/styles/Page.module.css";
 import LeftPanel from "@/components/LeftPanel";
 import RightPanel from "@/components/RightPanel";
 import LoadingSpinner from "@/components/LoadingSpinner";
-import GameNotFoundModal from "@/components/GameNotFoundModal";
 import "@/styles/XiangqiGround.css";
 import "@/app/globals.css";
 
@@ -38,7 +37,7 @@ export default function GamePage() {
   }
 
   if (!gameState) {
-    return <GameNotFoundModal isOpen={true} />;
+    return <LoadingSpinner />;
   }
 
   return (
@@ -49,6 +48,7 @@ export default function GamePage() {
           <div className={styles.boardContainer}>
             <XiangqiBoard
               className={isSpectator ? styles.spectatorBoard : ""}
+              isSpectator={isSpectator}
             />
             {isSpectator && (
               <div className={styles.spectatorBadge}>Spectator Mode</div>

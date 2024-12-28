@@ -10,6 +10,7 @@ import ForfeitModal from "@/components/ForfeitModal";
 
 interface XiangqiBoardProps {
   className?: string;
+  isSpectator?: boolean;
 }
 
 interface XiangqigroundInstance {
@@ -18,7 +19,10 @@ interface XiangqigroundInstance {
 }
 const DEFAULT_FEN = initialFen;
 
-const XiangqiBoard: React.FC<XiangqiBoardProps> = ({ className = "" }) => {
+const XiangqiBoard: React.FC<XiangqiBoardProps> = ({
+  className = "",
+  isSpectator = false,
+}) => {
   const { gameState, makeMove, isLoading, forfeitGame } = useGameContext();
   const { data: session } = useSession();
   const boardRef = useRef<HTMLDivElement | null>(null);
@@ -32,6 +36,7 @@ const XiangqiBoard: React.FC<XiangqiBoardProps> = ({ className = "" }) => {
   };
 
   const canForfeit = () => {
+    if (isSpectator) return false;
     if (!session?.user?.id || !gameState) return false;
     const isPlayer =
       gameState.players.red.id === session.user.id ||
@@ -39,33 +44,48 @@ const XiangqiBoard: React.FC<XiangqiBoardProps> = ({ className = "" }) => {
     return isPlayer && gameState.status === "active";
   };
 
+  const canMove = () => {
+    if (isSpectator) return false;
+    if (!session?.user?.id || !gameState) return false;
+    const currentTurn = getTurnColor(gameState.fen);
+    return (
+      gameState.status === "active" &&
+      ((currentTurn === "red" &&
+        gameState.players.red.id === session.user.id) ||
+        (currentTurn === "black" &&
+          gameState.players.black.id === session.user.id))
+    );
+  };
+
   // Initialize the board
   useEffect(() => {
     const isGameActive = gameState?.status === "active";
-    const currentTurn = getTurnColor(gameState.fen);
+    const currentTurn = getTurnColor(gameState?.fen || DEFAULT_FEN);
     const config: Config = {
       orientation:
         gameState?.players?.red?.id === session?.user?.id ? "red" : "black",
-      turnColor: currentTurn,
+      turnColor: canMove() ? currentTurn : undefined,
       movable: {
         free: false,
         color: isGameActive ? currentTurn : undefined,
         showDests: isGameActive,
         events: {
           after: (orig: string, dest: string) => {
-            makeMove(orig, dest);
+            if (canMove()) {
+              makeMove(orig, dest);
+            }
           },
         },
       },
       fen: gameState?.fen || DEFAULT_FEN,
       drawable: {
-        enabled: isGameActive,
+        enabled: isGameActive && !isSpectator,
         visible: isGameActive,
         defaultSnapToValidMove: true,
         eraseOnClick: true,
       },
       premovable: {
-        enabled: isGameActive,
+        enabled: isGameActive && !isSpectator,
         showDests: isGameActive,
         events: {
           set: (orig: string, dest: string) => {
@@ -99,7 +119,7 @@ const XiangqiBoard: React.FC<XiangqiBoardProps> = ({ className = "" }) => {
         groundRef.current = null;
       }
     };
-  }, [gameState?.fen, makeMove, session]);
+  }, [gameState?.fen, makeMove, session, isSpectator]);
 
   // Update the board when game state changes
   useEffect(() => {
@@ -113,6 +133,7 @@ const XiangqiBoard: React.FC<XiangqiBoardProps> = ({ className = "" }) => {
   const getMessage = () => {
     if (isLoading || !gameState) return "Loading...";
     if (gameState.status === "waiting") return "Waiting for opponent...";
+    if (gameState.status === "completed") return "Game has ended";
     if (gameState.status !== "active") return "Game is not active";
     return null;
   };

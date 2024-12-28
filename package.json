@@ -13,6 +13,7 @@
     "@auth/mongodb-adapter": "^3.7.4",
     "bcryptjs": "^2.4.3",
     "chess-web": "file:",
+    "framer-motion": "^11.15.0",
     "lucide-react": "^0.460.0",
     "mongodb": "^6.10.0",
     "mongodb-memory-server": "^10.1.2",

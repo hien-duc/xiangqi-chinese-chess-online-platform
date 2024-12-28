@@ -11,7 +11,6 @@ import React, {
 import { IGameState } from "../lib/db/models/gameState";
 import WinModal from "../components/WinModal";
 import { isCheckmate } from "../utils/chess-rules";
-import { useError } from "../context/ErrorContext";
 import { useComputerPlayer } from "./useComputerPlayer";
 import { getTurnColor } from "@/utils/fen";
 
@@ -54,12 +53,11 @@ export const GameProvider: React.FC<GameProviderProps> = ({
 
   const [lastMoveTimestamp, setLastMoveTimestamp] = useState(0);
   const [showWinModal, setShowWinModal] = useState(false);
-  const [winner, setWinner] = useState<string>("");
+  const [winner, setWinner] = useState("");
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const lastFenRef = useRef<string | null>(null);
   const isMakingMoveRef = useRef(false);
   const currentGameStateRef = useRef<IGameState | null>(null);
-  const { showError } = useError();
   const { getComputerMove, isThinking } = useComputerPlayer();
 
   useEffect(() => {
@@ -128,43 +126,64 @@ export const GameProvider: React.FC<GameProviderProps> = ({
           // The turn in responseData.game.turn is already switched to the next player
           // So if turn is 'red', it means black just won
           const currentTurn = getTurnColor(responseData.game.fen);
+          console.log(
+            "Game over! Checkmate detected for",
+            currentTurn === "red" ? "black" : "red"
+          );
+          // Keep winningColor lowercase for API, capitalize for display
+          const winningColor = currentTurn === "red" ? "black" : "red";
+          const displayWinner =
+            winningColor.charAt(0).toUpperCase() + winningColor.slice(1);
 
-          const winningColor = currentTurn === "red" ? "Black" : "Red";
-          setWinner(winningColor);
+          setWinner(displayWinner);
           setShowWinModal(true);
 
           // Update game status in database
           try {
-            await fetch(`/api/game/${gameIdState}`, {
-              method: "PATCH",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                status: "completed",
-                gameOver: true,
-                winner: winningColor,
-              }),
-            });
+            console.log(
+              "Completing game",
+              gameIdState,
+              "with winner:",
+              winningColor
+            );
+            // Complete the game and update player stats
+            const completeResponse = await fetch(
+              `/api/game/${gameIdState}/complete`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  winner: winningColor,
+                }),
+              }
+            );
 
-            // Update local state
-            setGameState((prevState) => {
-              if (!prevState) return null;
-              return {
-                ...prevState,
-                status: "completed",
-                gameOver: true,
-                winner: winningColor,
-              };
-            });
-          } catch (err) {
-            console.error("Failed to update game status:", err);
+            if (!completeResponse.ok) {
+              const errorData = await completeResponse.json();
+              console.error("Failed to complete game:", errorData);
+              throw new Error(errorData.error || "Failed to complete game");
+            }
+
+            const completedData = await completeResponse.json();
+            console.log("Game completed successfully:", completedData);
+          } catch (error) {
+            console.error("Error completing game:", error);
           }
+
+          // Update local state
+          setGameState((prevState) => {
+            if (!prevState) return null;
+            return {
+              ...prevState,
+              status: "completed",
+              gameOver: true,
+              winner: winningColor,
+            };
+          });
         }
       } catch (err) {
-        const errorMessage =
-          err instanceof Error ? err.message : "Failed to make move";
-        showError(errorMessage);
         if (err instanceof Error) {
           console.error("Move error:", err);
         }
@@ -207,11 +226,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({
         }
 
         // Check for inactive games
-        if (
-          data.game.status === "active" &&
-          data.game.moves &&
-          data.game.moves.length > 0
-        ) {
+        if (data.game.status === "active") {
           const lastMoveTime = new Date(data.game.updatedAt).getTime();
           const now = new Date().getTime();
           const inactiveTime = now - lastMoveTime;
@@ -271,22 +286,20 @@ export const GameProvider: React.FC<GameProviderProps> = ({
             togglePolling(false);
           }
 
-          // Show win modal if game just completed
+          // Show win modal if game just completed and hasn't been shown before
           if (
             data.game.status === "completed" &&
             data.game.winner &&
-            !showWinModal
+            !hasShownModal(gameIdState)
           ) {
             setWinner(data.game.winner);
             setShowWinModal(true);
+            markModalShown(gameIdState);
           }
 
           return hasChanged ? data.game : prevState;
         });
       } catch (err) {
-        const errorMessage =
-          err instanceof Error ? err.message : "Failed to fetch game state";
-        showError(errorMessage);
         console.error("Fetch error:", err);
 
         // Stop polling on any error
@@ -357,14 +370,32 @@ export const GameProvider: React.FC<GameProviderProps> = ({
           };
         });
       } catch (err) {
-        const errorMessage =
-          err instanceof Error ? err.message : "Failed to forfeit game";
-        showError(errorMessage);
         console.error("Forfeit error:", err);
       }
     },
-    [gameIdState, showError, gameState]
+    [gameIdState, gameState]
   );
+
+  // Check if modal has been shown for this game
+  const hasShownModal = (gameId: string) => {
+    return localStorage.getItem(`modal_shown_${gameId}`) === "true";
+  };
+
+  // Mark modal as shown for this game
+  const markModalShown = (gameId: string) => {
+    localStorage.setItem(`modal_shown_${gameId}`, "true");
+  };
+
+  // Clear modal shown state when game changes
+  useEffect(() => {
+    if (gameIdState) {
+      const modalShown = hasShownModal(gameIdState);
+      if (!modalShown) {
+        setShowWinModal(false);
+        setWinner("");
+      }
+    }
+  }, [gameIdState]);
 
   useEffect(() => {
     const handleBotMove = async () => {
@@ -387,7 +418,6 @@ export const GameProvider: React.FC<GameProviderProps> = ({
           }
         } catch (error) {
           console.error("Bot move error:", error);
-          showError("Failed to make bot move");
         }
       }
     };
