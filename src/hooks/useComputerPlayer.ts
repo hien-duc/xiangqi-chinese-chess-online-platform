@@ -6,7 +6,7 @@ export const useComputerPlayer = () => {
   const getComputerMove = useCallback(async (fen: string) => {
     setIsThinking(true);
     try {
-      const response = await fetch("/api/engine", {
+      const response = await fetch("/api/v1/engine", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -110,7 +110,7 @@ export const config = {
         );
         console.log("Player profile created for new user:", user.email);
       } catch (error) {
-        console.error("Error creating player profile:", error);
+        throw new Error("Failed to create player profile");
       }
     },
   },

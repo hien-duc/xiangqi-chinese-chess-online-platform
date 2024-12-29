@@ -1,12 +1,16 @@
-import { Api, start } from "./api.ts";
-import { Config, configure } from "./config.ts";
-import { HeadlessState, State, defaults } from "./state.ts";
-import { renderWrap } from "./wrap.ts";
-import * as events from "./events.ts";
-import { render, renderResized, updateBounds } from "./render.ts";
-import * as autoPieces from "./autoPieces.ts";
-import * as svg from "./svg.ts";
-import * as util from "./util.ts";
+import { Api, start } from "@/lib/api/api.ts";
+import { Config, configure } from "@/utils/config.ts";
+import { HeadlessState, State, defaults } from "@/lib/game/state.ts";
+import { renderWrap } from "@/utils/wrap.ts";
+import * as events from "@/utils/events.ts";
+import {
+  render,
+  renderResized,
+  updateBounds,
+} from "@/components/ui/board/_lib/render.ts";
+import * as autoPieces from "@/components/ui/pieces/_lib/autoPieces.ts";
+import * as svg from "@/components/ui/board/_lib/svg.ts";
+import * as util from "@/utils/util.ts";
 
 export function initModule({
   el,

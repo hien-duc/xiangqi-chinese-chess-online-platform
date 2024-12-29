@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useGameContext } from "./useGameState";
-import { getTurnColor } from "../utils/fen";
+import { getTurnColor } from "../lib/game/fen";
 
 const DEFAULT_TIME = 15 * 60; // 15 minutes in seconds
 
@@ -114,7 +114,7 @@ export const useGameTimer = () => {
     async (currentTimes) => {
       if (!gameId) return;
       try {
-        await fetch(`/api/game/${gameId}/time`, {
+        await fetch(`/api/v1/game/${gameId}/time`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",

@@ -1,8 +1,8 @@
-import { HeadlessState, State } from "./state.ts";
-import { setCheck, setSelected } from "./board.ts";
-import { read as fenRead } from "./fen.ts";
-import { DrawShape, DrawBrushes } from "./draw.ts";
-import * as cg from "./types.ts";
+import { HeadlessState, State } from "@/lib/game/state.ts";
+import { setCheck, setSelected } from "@/components/ui/board/_lib/board.ts";
+import { read as fenRead } from "@/lib/game/fen.ts";
+import { DrawShape, DrawBrushes } from "@/components/ui/board/_lib/draw.ts";
+import * as cg from "@/utils/types.ts";
 
 export interface Config {
   fen?: cg.FEN; // chess position in Forsyth notation

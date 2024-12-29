@@ -9,10 +9,11 @@ import React, {
   useRef,
 } from "react";
 import { IGameState } from "../lib/db/models/gameState";
-import WinModal from "../components/WinModal";
-import { isCheckmate } from "../utils/chess-rules";
+import WinModal from "../components/game/modals/WinModal";
+import { isCheckmate } from "../lib/game/chess-rules";
 import { useComputerPlayer } from "./useComputerPlayer";
-import { getTurnColor } from "@/utils/fen";
+import { getTurnColor } from "@/lib/game/fen";
+import { notFound } from "next/navigation";
 
 interface GameContextType {
   gameId: string;
@@ -73,7 +74,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({
 
       try {
         // First validate the move
-        const validateResponse = await fetch("/api/game/validate-move", {
+        const validateResponse = await fetch("/api/v1/game/validate-move", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -138,7 +139,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({
           try {
             // Complete the game and update player stats
             const completeResponse = await fetch(
-              `/api/game/${gameIdState}/complete`,
+              `/api/v1/game/${gameIdState}/complete`,
               {
                 method: "POST",
                 headers: {
@@ -197,7 +198,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({
 
       try {
         if (!silent) setIsLoading(true);
-        const response = await fetch(`/api/game/${gameIdState}`);
+        const response = await fetch(`/api/v1/game/${gameIdState}`);
         const data = await response.json();
 
         if (response.status === 404) {
@@ -212,7 +213,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({
         }
 
         if (!data.game) {
-          throw new Error("No game data received");
+          notFound();
         }
 
         // Check for inactive games
@@ -231,7 +232,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({
             const winner = inactivePlayer === "red" ? "black" : "red";
 
             // Complete the game and update stats
-            await fetch(`/api/game/${gameIdState}/complete`, {
+            await fetch(`/api/v1/game/${gameIdState}/complete`, {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
@@ -337,7 +338,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({
 
         const winner = currentPlayer === "red" ? "black" : "red";
 
-        await fetch(`/api/game/${gameIdState}/complete`, {
+        await fetch(`/api/v1/game/${gameIdState}/complete`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

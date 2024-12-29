@@ -1,4 +1,4 @@
-import { DrawBrush } from "./draw";
+import { DrawBrush } from "@/components/ui/board/_lib/draw";
 
 export type Color = (typeof colors)[number];
 export type Role =

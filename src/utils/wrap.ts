@@ -1,11 +1,11 @@
-import { HeadlessState } from "./state.ts";
-import { setVisible, createEl } from "./util.ts";
-import { colors, files, fileNums, Elements, ranks } from "./types.ts";
+import { HeadlessState } from "@/lib/game/state.ts";
+import { setVisible, createEl } from "@/utils/util.ts";
+import { colors, files, fileNums, Elements, ranks } from "@/utils/types.ts";
 import {
   createElement as createSVG,
   setAttributes,
   createDefs,
-} from "./svg.ts";
+} from "@/components/ui/board/_lib/svg.ts";
 
 export function renderWrap(element: HTMLElement, s: HeadlessState): Elements {
   // .cg-wrap (element passed to Xiangqiground)

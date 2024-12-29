@@ -1,5 +1,5 @@
-import { isCheckmate, wouldBeInCheck, getLegalMoves } from "../chess-rules";
-import { readXiangqi } from "../fen";
+import { isCheckmate, wouldBeInCheck, getLegalMoves } from "../../lib/game/chess-rules";
+import { readXiangqi } from "../../lib/game/fen";
 import { Key, Pieces } from "../types";
 
 describe("Chess Rules - Check Logic", () => {

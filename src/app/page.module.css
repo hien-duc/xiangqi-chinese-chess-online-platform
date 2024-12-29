@@ -32,7 +32,8 @@
   justify-content: center;
 }
 
-.playButton, .signUpButton {
+.playButton,
+.signUpButton {
   padding: 1rem 2.5rem;
   font-size: 1.25rem;
   font-weight: 600;
@@ -79,12 +80,13 @@
   .title {
     font-size: 2.5rem;
   }
-  
+
   .buttonGroup {
     flex-direction: column;
   }
-  
-  .playButton, .signUpButton {
+
+  .playButton,
+  .signUpButton {
     width: 100%;
   }
 }

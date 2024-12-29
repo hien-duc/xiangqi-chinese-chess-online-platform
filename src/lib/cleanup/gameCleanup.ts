@@ -8,15 +8,16 @@ export function startGameCleanup() {
   // Run cleanup every minute
   cleanupInterval = setInterval(async () => {
     try {
-      const response = await fetch("/api/game/cleanup", {
+      const response = await fetch("/api/v1/game/cleanup", {
         method: "GET",
       });
 
       if (!response.ok) {
-        console.error("Game cleanup failed:", await response.text());
+        throw new Error("Failed to run game cleanup");
       }
     } catch (error) {
-      console.error("Error running game cleanup:", error);
+      throw new Error("Failed to run game cleanup");
+
     }
   }, 60000); // Run every minute
 }

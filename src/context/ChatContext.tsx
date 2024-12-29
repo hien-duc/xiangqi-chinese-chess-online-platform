@@ -26,7 +26,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
   // Polling function
   const pollMessages = async (gameId: string) => {
     try {
-      const response = await fetch(`/api/game/${gameId}/chat`);
+      const response = await fetch(`/api/v1/game/${gameId}/chat`);
       if (!response.ok) return;
 
       const data = await response.json();
@@ -58,7 +58,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     if (!session?.user) return;
 
     try {
-      const response = await fetch(`/api/game/${gameId}/chat`, {
+      const response = await fetch(`/api/v1/game/${gameId}/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

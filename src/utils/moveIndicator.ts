@@ -1,6 +1,6 @@
-import { State } from "./state";
-import { DrawShape } from "./draw";
-import * as cg from "./types";
+import { State } from "@/lib/game/state";
+import { DrawShape } from "@/components/ui/board/_lib/draw";
+import * as cg from "@/utils/types";
 
 export function generateMoveIndicators(
   state: State,
@@ -38,7 +38,7 @@ export function generateMoveIndicators(
 
 export function showMoveIndicators(state: State, orig: cg.Key): void {
   if (!state.drawable.moveIndicator?.enabled) return;
-  
+
   // Clear existing auto shapes
   state.drawable.autoShapes = [];
   // Generate and set new indicators

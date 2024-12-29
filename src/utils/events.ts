@@ -1,9 +1,9 @@
-import { State } from './state.ts';
-import * as drag from './drag.ts';
-import * as draw from './draw.ts';
-import { drop } from './drop.ts';
-import { isRightButton } from './util.ts';
-import * as cg from './types.ts';
+import { State } from "@/lib/game/state.ts";
+import * as drag from "@/components/ui/pieces/_lib/drag.ts";
+import * as draw from "@/components/ui/board/_lib/draw.ts";
+import { drop } from "@/components/ui/pieces/_lib/drop.ts";
+import { isRightButton } from "@/utils/util.ts";
+import * as cg from "@/utils/types.ts";
 
 type MouchBind = (e: cg.MouchEvent) => void;
 type StateMouchBind = (d: State, e: cg.MouchEvent) => void;
@@ -11,10 +11,11 @@ type StateMouchBind = (d: State, e: cg.MouchEvent) => void;
 export function bindBoard(s: State, onResize: () => void): void {
   const boardEl = s.dom.elements.board;
 
-  if ('ResizeObserver' in window) new ResizeObserver(onResize).observe(s.dom.elements.wrap);
+  if ("ResizeObserver" in window)
+    new ResizeObserver(onResize).observe(s.dom.elements.wrap);
 
   if (s.disableContextMenu || s.drawable.enabled) {
-    boardEl.addEventListener('contextmenu', e => e.preventDefault());
+    boardEl.addEventListener("contextmenu", (e) => e.preventDefault());
   }
 
   if (s.viewOnly) return;
@@ -22,10 +23,10 @@ export function bindBoard(s: State, onResize: () => void): void {
   // Cannot be passive, because we prevent touch scrolling and dragging of
   // selected elements.
   const onStart = startDragOrDraw(s);
-  boardEl.addEventListener('touchstart', onStart as EventListener, {
+  boardEl.addEventListener("touchstart", onStart as EventListener, {
     passive: false,
   });
-  boardEl.addEventListener('mousedown', onStart as EventListener, {
+  boardEl.addEventListener("mousedown", onStart as EventListener, {
     passive: false,
   });
 }
@@ -36,30 +37,33 @@ export function bindDocument(s: State, onResize: () => void): cg.Unbind {
 
   // Old versions of Edge and Safari do not support ResizeObserver. Send
   // xiangqiground.resize if a user action has changed the bounds of the board.
-  if (!('ResizeObserver' in window))
-    unbinds.push(unbindable(document.body, 'xiangqiground.resize', onResize));
+  if (!("ResizeObserver" in window))
+    unbinds.push(unbindable(document.body, "xiangqiground.resize", onResize));
 
   if (!s.viewOnly) {
     const onmove = dragOrDraw(s, drag.move, draw.move);
     const onend = dragOrDraw(s, drag.end, draw.end);
 
-    for (const ev of ['touchmove', 'mousemove'])
+    for (const ev of ["touchmove", "mousemove"])
       unbinds.push(unbindable(document, ev, onmove as EventListener));
-    for (const ev of ['touchend', 'mouseup']) unbinds.push(unbindable(document, ev, onend as EventListener));
+    for (const ev of ["touchend", "mouseup"])
+      unbinds.push(unbindable(document, ev, onend as EventListener));
 
     const onScroll = () => s.dom.bounds.clear();
-    unbinds.push(unbindable(document, 'scroll', onScroll, { capture: true, passive: true }));
-    unbinds.push(unbindable(window, 'resize', onScroll, { passive: true }));
+    unbinds.push(
+      unbindable(document, "scroll", onScroll, { capture: true, passive: true })
+    );
+    unbinds.push(unbindable(window, "resize", onScroll, { passive: true }));
   }
 
-  return () => unbinds.forEach(f => f());
+  return () => unbinds.forEach((f) => f());
 }
 
 function unbindable(
   el: EventTarget,
   eventName: string,
   callback: EventListener,
-  options?: AddEventListenerOptions,
+  options?: AddEventListenerOptions
 ): cg.Unbind {
   el.addEventListener(eventName, callback, options);
   return () => el.removeEventListener(eventName, callback, options);
@@ -67,7 +71,7 @@ function unbindable(
 
 const startDragOrDraw =
   (s: State): MouchBind =>
-  e => {
+  (e) => {
     if (s.draggable.current) drag.cancel(s);
     else if (s.drawable.current) draw.cancel(s);
     else if (e.shiftKey || isRightButton(e)) {
@@ -80,7 +84,7 @@ const startDragOrDraw =
 
 const dragOrDraw =
   (s: State, withDrag: StateMouchBind, withDraw: StateMouchBind): MouchBind =>
-  e => {
+  (e) => {
     if (s.drawable.current) {
       if (s.drawable.enabled) withDraw(s, e);
     } else if (!s.viewOnly) withDrag(s, e);

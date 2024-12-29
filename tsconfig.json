@@ -38,8 +38,8 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "src/components/XiangqiBoard.tsx",
-    "src/app/layout.jsx"
-  ],
+    "src/components/ui/board/XiangqiBoard.tsx",
+    "src/app/layout.tsx"
+, "src/app/(game)/games/loading.tsx"  ],
   "exclude": ["node_modules"]
 }

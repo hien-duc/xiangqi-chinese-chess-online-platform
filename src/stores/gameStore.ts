@@ -1,12 +1,12 @@
-import { create } from 'zustand'
-import { IGameState } from '@/lib/db/models/gameState'
+import { create } from "zustand";
+import { IGameState } from "@/lib/db/models/gameState";
 
 interface GameStore {
-  games: IGameState[]
-  setGames: (games: IGameState[]) => void
-  updateGame: (gameId: string, updatedGame: IGameState) => void
-  addGame: (game: IGameState) => void
-  fetchGames: () => Promise<void>
+  games: IGameState[];
+  setGames: (games: IGameState[]) => void;
+  updateGame: (gameId: string, updatedGame: IGameState) => void;
+  addGame: (game: IGameState) => void;
+  fetchGames: () => Promise<void>;
 }
 
 export const useGameStore = create<GameStore>((set) => ({
@@ -24,13 +24,13 @@ export const useGameStore = create<GameStore>((set) => ({
     })),
   fetchGames: async () => {
     try {
-      const response = await fetch('/api/games')
+      const response = await fetch("/api/v1/games");
       if (response.ok) {
-        const data = await response.json()
-        set({ games: data.games })
+        const data = await response.json();
+        set({ games: data.games });
       }
     } catch (error) {
-      console.error('Error fetching games:', error)
+      console.error("Error fetching games:", error);
     }
   },
-}))
+}));

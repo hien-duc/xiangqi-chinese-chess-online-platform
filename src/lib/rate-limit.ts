@@ -32,7 +32,7 @@ export function rateLimit(req: NextRequest): NextResponse | null {
   }
 
   // Rate limit login attempts
-  if (req.nextUrl?.pathname.startsWith("/api/auth/callback/credentials")) {
+  if (req.nextUrl?.pathname.startsWith("/api/v1/auth/callback/credentials")) {
     if (context.attempts >= 5) {
       return new NextResponse(
         JSON.stringify({
@@ -52,7 +52,7 @@ export function rateLimit(req: NextRequest): NextResponse | null {
   }
 
   // Rate limit chat messages
-  if (req.nextUrl?.pathname.startsWith("/api/chat") && req.method === "POST") {
+  if (req.nextUrl?.pathname.startsWith("/api/v1/chat") && req.method === "POST") {
     // Reset chat counter if time expired
     if (context.chatResetTime < now) {
       context.chatMessages = 0;
