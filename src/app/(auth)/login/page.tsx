@@ -1,9 +1,9 @@
 import { auth, signIn } from "auth";
 import { redirect } from "next/navigation";
 import { Github, Mail } from "lucide-react";
-import "../../styles/LogIn.css";
+import "@/styles/LogIn.css";
 import { signInSchema } from "@/lib/validations/authenticationZod";
-import "../globals.css";
+import "../../globals.css";
 import Link from "next/link";
 import { Params } from "next/dist/server/request/params";
 import { SearchParams } from "next/dist/server/request/search-params";
@@ -48,18 +48,9 @@ export default async function LoginPage(props: {
       redirect(searchParams?.callbackUrl || "/");
     } catch (error) {
       if (error instanceof Error) {
-        const errorMessage =
-          error.message === "NEXT_REDIRECT"
-            ? "Invalid credentials"
-            : error.message;
-
-        const params = new URLSearchParams({
-          message: errorMessage,
-          email: rawData.email as string,
-        });
-        redirect(`/login?${params.toString()}`);
+        throw new Error("Invalid credentials");
       }
-      throw new Error("Failed to sign in");
+      throw error;
     }
   }
 
@@ -72,11 +63,6 @@ export default async function LoginPage(props: {
           <div className="header">
             <h1>Xiangqi</h1>
             <p>Chinese Chess Online</p>
-            {searchParams?.message && (
-              <div className="error-message" role="alert">
-                {searchParams.message}
-              </div>
-            )}
           </div>
 
           <div className="button-container">

@@ -38,23 +38,46 @@ const XiangqiBoard: React.FC<XiangqiBoardProps> = ({
 
   const canForfeit = () => {
     if (isSpectator) return false;
-    if (!session?.user?.id || !gameState) return false;
+    if (!gameState) return false;
+
+    // Get player ID from either session or game state
+    const playerId =
+      session?.user?.id ||
+      (gameState.players.red.id.startsWith("guest-")
+        ? gameState.players.red.id
+        : gameState.players.black.id.startsWith("guest-")
+        ? gameState.players.black.id
+        : null);
+
+    if (!playerId) return false;
+
     const isPlayer =
-      gameState.players.red.id === session.user.id ||
-      gameState.players.black.id === session.user.id;
+      gameState.players.red.id === playerId ||
+      gameState.players.black.id === playerId;
+
     return isPlayer && gameState.status === "active";
   };
 
   const canMove = () => {
     if (isSpectator) return false;
-    if (!session?.user?.id || !gameState) return false;
+    if (!gameState) return false;
+
+    // Get player ID from either session or game state
+    const playerId =
+      session?.user?.id ||
+      (gameState.players.red.id.startsWith("guest-")
+        ? gameState.players.red.id
+        : gameState.players.black.id.startsWith("guest-")
+        ? gameState.players.black.id
+        : null);
+
+    if (!playerId) return false;
+
     const currentTurn = getTurnColor(gameState.fen);
     return (
       gameState.status === "active" &&
-      ((currentTurn === "red" &&
-        gameState.players.red.id === session.user.id) ||
-        (currentTurn === "black" &&
-          gameState.players.black.id === session.user.id))
+      ((currentTurn === "red" && gameState.players.red.id === playerId) ||
+        (currentTurn === "black" && gameState.players.black.id === playerId))
     );
   };
 
@@ -62,9 +85,18 @@ const XiangqiBoard: React.FC<XiangqiBoardProps> = ({
   useEffect(() => {
     const isGameActive = gameState?.status === "active";
     const currentTurn = getTurnColor(gameState?.fen || DEFAULT_FEN);
+
+    // Get player ID from either session or game state
+    const playerId =
+      session?.user?.id ||
+      (gameState?.players?.red?.id?.startsWith("guest-")
+        ? gameState.players.red.id
+        : gameState?.players?.black?.id?.startsWith("guest-")
+        ? gameState.players.black.id
+        : null);
+
     const config: Config = {
-      orientation:
-        gameState?.players?.red?.id === session?.user?.id ? "red" : "black",
+      orientation: gameState?.players?.red?.id === playerId ? "red" : "black",
       turnColor: canMove() ? currentTurn : undefined,
       movable: {
         free: false,

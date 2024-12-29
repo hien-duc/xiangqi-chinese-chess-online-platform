@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useGameContext } from "@/hooks/useGameState";
 import { useGameTimer } from "@/hooks/useGameTimer";
 import { useChat } from "@/context/ChatContext";
@@ -32,7 +32,14 @@ const isCurrentUser = (senderId, session) => {
   return senderId === session?.user?.id;
 };
 
-const PlayerInfo = ({ player, side, isCurrentTurn, timeLeft, playerStats }) => {
+const PlayerInfo = ({
+  player,
+  side,
+  isCurrentTurn,
+  timeLeft,
+  playerStats,
+  timer,
+}) => {
   if (!player) return null;
 
   return (
@@ -79,6 +86,15 @@ const PlayerInfo = ({ player, side, isCurrentTurn, timeLeft, playerStats }) => {
         <div className={styles.timeInfo}>
           <div className={styles.timeLeft}>Time: {formatTime(timeLeft)}</div>
           {isCurrentTurn && <div className={styles.thinking}>Thinking...</div>}
+          {timer !== null && (
+            <div
+              className={`${styles.timer} ${
+                timer <= 10 ? styles.timerWarning : ""
+              }`}
+            >
+              {formatTime(timer)}
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -101,6 +117,11 @@ const RightPanel = () => {
   const [blackPlayerStats, setBlackPlayerStats] = useState(null);
   const [unreadCount, setUnreadCount] = useState(0);
   const [previousMessageCount, setPreviousMessageCount] = useState(0);
+  const [redTimer, setRedTimer] = useState(120); // 2 minutes for red player
+  const [blackTimer, setBlackTimer] = useState(120); // 2 minutes for black player
+  const redTimerRef = useRef(null);
+  const blackTimerRef = useRef(null);
+  const [showChat, setShowChat] = useState(false);
 
   const {
     times,
@@ -112,7 +133,7 @@ const RightPanel = () => {
     onWinModalClose,
   } = useGameTimer();
 
-  const [showChat, setShowChat] = useState(false);
+  const { forfeitGame } = useGameContext();
 
   // Fetch player stats when game state changes
   useEffect(() => {
@@ -178,8 +199,72 @@ const RightPanel = () => {
     }
   }, [showChat]);
 
+  useEffect(() => {
+    if (gameState?.status !== "active") {
+      setRedTimer(120);
+      setBlackTimer(120);
+      if (redTimerRef.current) clearInterval(redTimerRef.current);
+      if (blackTimerRef.current) clearInterval(blackTimerRef.current);
+      return;
+    }
+
+    const currentTurn = getTurnColor(gameState?.fen);
+
+    // Clear previous intervals
+    if (redTimerRef.current) clearInterval(redTimerRef.current);
+    if (blackTimerRef.current) clearInterval(blackTimerRef.current);
+
+    // Start timer for current turn
+    if (currentTurn === "red") {
+      redTimerRef.current = setInterval(() => {
+        setRedTimer((prev) => {
+          if (prev <= 0) {
+            clearInterval(redTimerRef.current);
+            // Handle red player timeout
+            if (gameState.status === "active") {
+              forfeitGame("red");
+            }
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    } else {
+      blackTimerRef.current = setInterval(() => {
+        setBlackTimer((prev) => {
+          if (prev <= 0) {
+            clearInterval(blackTimerRef.current);
+            // Handle black player timeout
+            if (gameState.status === "active") {
+              forfeitGame("black");
+            }
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+
+    return () => {
+      if (redTimerRef.current) clearInterval(redTimerRef.current);
+      if (blackTimerRef.current) clearInterval(blackTimerRef.current);
+    };
+  }, [gameState?.fen, gameState?.status]);
+
+  // Reset timers when a move is made
+  useEffect(() => {
+    const currentTurn = getTurnColor(gameState?.fen);
+    if (currentTurn === "red") {
+      setRedTimer(120);
+    } else {
+      setBlackTimer(120);
+    }
+  }, [gameState?.fen]);
+
   const currentTurn = getTurnColor(gameState?.fen);
-  const isRedPlayer = session?.user?.id === gameState?.players?.red?.id;
+  const isRedPlayer =
+    session?.user?.id === gameState?.players?.red?.id ||
+    gameState?.players?.red?.id.startsWith("guest-");
 
   // Determine which player should be shown at the bottom based on board orientation
   const [topPlayer, bottomPlayer] = isRedPlayer
@@ -200,12 +285,13 @@ const RightPanel = () => {
   return (
     <div className={styles.rightPanel}>
       <div className={styles.content}>
-        <PlayerInfo 
+        <PlayerInfo
           player={topPlayer}
           side={topSide}
           isCurrentTurn={currentTurn === topSide}
           timeLeft={topTime}
           playerStats={topPlayerStats}
+          timer={topSide === "red" ? redTimer : blackTimer}
         />
 
         <PlayerInfo
@@ -214,6 +300,7 @@ const RightPanel = () => {
           isCurrentTurn={currentTurn === bottomSide}
           timeLeft={bottomTime}
           playerStats={bottomPlayerStats}
+          timer={bottomSide === "red" ? redTimer : blackTimer}
         />
       </div>
 

@@ -156,7 +156,7 @@ export default function GamesPage() {
             <MdRefresh />
           </button>
         </div>
-        
+
         {games?.length > 0 && (
           <button
             className={styles.newGameButton}

@@ -12,7 +12,11 @@ export async function GET() {
     }).sort({ createdAt: -1 });
     return NextResponse.json({ games });
   } catch (error) {
-    throw new Error("Failed to fetch games");
+    console.error("Error fetching games:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch games" },
+      { status: 500 }
+    );
   }
 }
 
@@ -80,6 +84,10 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ game });
   } catch (error) {
-    throw new Error("Failed to create game");
+    console.error("Error creating game:", error);
+    return NextResponse.json(
+      { error: "Failed to create game" },
+      { status: 500 }
+    );
   }
 }

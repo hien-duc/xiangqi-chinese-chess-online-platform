@@ -8,7 +8,11 @@ export async function GET(
 ) {
   try {
     const { userId } = await params;
-    if (userId.startsWith("waiting-")) {
+    if (
+      userId.startsWith("waiting-") ||
+      userId.startsWith("bot-") ||
+      userId.startsWith("guest-")
+    ) {
       return NextResponse.json({
         rating: 0,
         gamesPlayed: 0,
