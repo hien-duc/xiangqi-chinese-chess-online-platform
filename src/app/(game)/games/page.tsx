@@ -5,11 +5,12 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import styles from "@/styles/Games.module.css";
 import NewGameModal from "@/components/game/modals/NewGameModal";
-import { useGameStore } from "@/stores/gameStore";
+import { useGameContext } from "@/hooks/useGameState";
 import { FaChessBoard, FaUserFriends, FaRobot, FaEye } from "react-icons/fa";
 import { MdRefresh } from "react-icons/md";
 import { IGameState } from "@/lib/db/models/gameState";
 import { startGameCleanup, stopGameCleanup } from "@/lib/cleanup/gameCleanup";
+import { useGameStore } from "@/stores/gameStore";
 
 export default function GamesPage() {
   const [games, setGames] = useState<IGameState[]>([]);
@@ -17,6 +18,7 @@ export default function GamesPage() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const router = useRouter();
   const { data: session } = useSession();
+  const { setGameId, refetch, togglePolling } = useGameContext();
 
   useEffect(() => {
     // Initialize game cleanup and fetch games
@@ -131,6 +133,12 @@ export default function GamesPage() {
       }
 
       const data = await response.json();
+
+      // Initialize game state before navigation
+      setGameId(data.game._id);
+      await refetch(true);
+      togglePolling(true);
+      // Navigate to the game page
       router.push(`/games/${data.game._id}`);
     } catch (error) {
       console.error("Error creating game:", error);

@@ -328,7 +328,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({
         let currentPlayer: "red" | "black";
 
         if (leavingPlayerId) {
-          // If we have a specifi c player ID that's leaving
+          // If we have a specific player ID that's leaving
           currentPlayer =
             gameState.players.red.id === leavingPlayerId ? "red" : "black";
         } else {

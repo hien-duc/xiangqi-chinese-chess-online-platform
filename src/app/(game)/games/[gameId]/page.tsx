@@ -14,41 +14,40 @@ export default function GamePage() {
   const params = useParams();
   const searchParams = useSearchParams();
 
-  const { setGameId, gameState, refetch, togglePolling } = useGameContext();
-  const gameId = params.gameId as string;
+  const { gameState, isLoading, setGameId, refetch, togglePolling } =
+    useGameContext();
   const isSpectator = searchParams.get("spectate") === "true";
-
-  if (!params?.gameId) {
-    notFound();
-  }
-
   useEffect(() => {
-    const fetchGame = async () => {
+    if (!params?.gameId) {
+      notFound();
+    }
+
+    const initializeGame = async () => {
+      setGameId(params.gameId as string);
       try {
-        const response = await fetch(`/api/v1/game/${params.gameId}`);
-        if (!response.ok) {
-          notFound();
-        }
+        await refetch(true);
+        togglePolling(true);
       } catch (error) {
-        console.error("Error fetching game:", error);
+        console.error("Error initializing game:", error);
         notFound();
       }
     };
-    fetchGame();
-  }, [params.gameId]);
 
-  useEffect(() => {
-    setGameId(gameId);
-    refetch(true);
-    togglePolling(true);
+    initializeGame();
 
     return () => {
       togglePolling(false);
       setGameId("");
     };
-  }, [gameId, setGameId, refetch, togglePolling]);
+  }, [params?.gameId, setGameId, refetch, togglePolling]);
 
-  if (!gameState) {
+  // Show loading state while fetching initial game data
+  if (isLoading) {
+    return;
+  }
+
+  // If game state is null after loading, the game doesn't exist
+  if (!gameState && !isLoading) {
     notFound();
   }
 
@@ -63,7 +62,7 @@ export default function GamePage() {
               isSpectator={isSpectator}
             />
           </div>
-          <RightPanel />  
+          <RightPanel />
         </div>
       </div>
     </main>

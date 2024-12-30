@@ -16,7 +16,7 @@ export default function PlayModal({ isOpen, onClose }: PlayModalProps) {
   if (!isOpen) return null;
 
   const handlePlayAsGuest = () => {
-    router.push("/play/online");
+    router.push("/games");
     onClose();
   };
 

@@ -1,0 +1,149 @@
+.puzzlePage {
+  min-height: 100vh;
+  padding: 2rem;
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  color: #ffffff;
+}
+
+.puzzleContainer {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 1rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.puzzleHeader {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.puzzleHeader h1 {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(45deg, #ff4d4d, #f9cb28);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.puzzleHeader p {
+  font-size: 1.1rem;
+  color: #cccccc;
+}
+
+.difficultySelector {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.difficultyButton {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.difficultyButton.easy {
+  background: linear-gradient(45deg, #4CAF50, #8BC34A);
+  color: white;
+}
+
+.difficultyButton.medium {
+  background: linear-gradient(45deg, #FF9800, #FFC107);
+  color: white;
+}
+
+.difficultyButton.hard {
+  background: linear-gradient(45deg, #f44336, #FF5722);
+  color: white;
+}
+
+.difficultyButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.difficultyButton.active {
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+}
+
+.puzzleBoard {
+  margin: 0 auto;
+  max-width: 600px;
+}
+
+.puzzleControls {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.puzzleButton {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.puzzleButton:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.puzzleButton.primary {
+  background: linear-gradient(45deg, #2196F3, #03A9F4);
+}
+
+.puzzleButton.primary:hover {
+  background: linear-gradient(45deg, #1976D2, #039BE5);
+}
+
+.puzzleStatus {
+  text-align: center;
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+}
+
+.puzzleStatus.correct {
+  background: rgba(76, 175, 80, 0.2);
+  color: #4CAF50;
+}
+
+.puzzleStatus.incorrect {
+  background: rgba(244, 67, 54, 0.2);
+  color: #f44336;
+}
+
+@media (max-width: 768px) {
+  .puzzlePage {
+    padding: 1rem;
+  }
+
+  .puzzleContainer {
+    padding: 1rem;
+  }
+
+  .puzzleHeader h1 {
+    font-size: 2rem;
+  }
+
+  .difficultyButton {
+    padding: 0.5rem 1rem;
+  }
+}

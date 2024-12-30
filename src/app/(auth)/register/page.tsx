@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
 import "@/styles/LogIn.css";
-import "../globals.css";
+import "../../globals.css";
 import Link from "next/link";
 import { SignupFormSchema } from "@/lib/validations/authenticationZod";
 

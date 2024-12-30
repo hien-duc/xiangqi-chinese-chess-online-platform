@@ -32,7 +32,7 @@ export default function LobbyPage() {
       <div className={styles.content}>
         <h1 className={styles.title}>
           Welcome to
-          <span className={styles.highlight}>Xiangqi.com!</span>
+          <span className={styles.highlight}>Online Chinese Chess</span>
         </h1>
 
         <div className={styles.optionsGrid}>
@@ -57,7 +57,7 @@ export default function LobbyPage() {
             <p>Test your skills against AI</p>
           </Link>
 
-          <Link href="#" className={styles.option}>
+          <Link href="/puzzles" className={styles.option}>
             <div className={styles.iconWrapper}>
               <GiChessKnight className={styles.icon} />
             </div>
