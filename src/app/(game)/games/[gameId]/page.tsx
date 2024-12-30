@@ -45,8 +45,8 @@ export default function GamePage() {
   }, [params?.gameId, setGameId, refetch, togglePolling]);
 
   // Show loading state while fetching initial game data
-  if (isLoading) {
-    return;
+  if (isLoading && !gameState) {
+    return <div>Loading game...</div>;
   }
 
   // If game state is null after loading, the game doesn't exist

@@ -253,27 +253,31 @@ export const GameProvider: React.FC<GameProviderProps> = ({
         // Update state if any field has changed
         setGameState((prevState) => {
           if (!prevState) return data.game;
-          const previousTurn = getTurnColor(prevState.fen);
-          const currentTurn = getTurnColor(data.game.fen);
 
-          // Check if any field has changed
-          const hasChanged =
+          // Check if only player info changed
+          const playersChanged =
+            prevState.players.red.id !== data.game.players.red.id ||
+            prevState.players.black.id !== data.game.players.black.id;
+
+          // Check if game state changed
+          const gameStateChanged =
             prevState.fen !== data.game.fen ||
             prevState.status !== data.game.status ||
-            previousTurn !== currentTurn ||
-            prevState.players.red.id !== data.game.players.red.id ||
-            prevState.players.black.id !== data.game.players.black.id ||
-            JSON.stringify(prevState.moves) !==
-              JSON.stringify(data.game.moves) ||
+            JSON.stringify(prevState.moves) !== JSON.stringify(data.game.moves);
+
+          // Check if only messages changed
+          const messagesChanged =
             JSON.stringify(prevState.messages) !==
-              JSON.stringify(data.game.messages);
+            JSON.stringify(data.game.messages);
 
-          // Stop polling only if game is completed
-          if (data.game.status === "completed" || data.game.gameOver) {
-            togglePolling(false);
+          // If only players or messages changed, update just those fields
+          if (playersChanged && !gameStateChanged) {
+            return {
+              ...prevState,
+              players: data.game.players,
+              status: data.game.status,
+            };
           }
-
-          // Show win modal if game just completed and hasn't been shown before
           if (
             data.game.status === "completed" &&
             data.game.winner &&
@@ -283,8 +287,20 @@ export const GameProvider: React.FC<GameProviderProps> = ({
             setShowWinModal(true);
             markModalShown(gameIdState);
           }
+          // If messages changed, update just messages
+          if (messagesChanged && !playersChanged && !gameStateChanged) {
+            return {
+              ...prevState,
+              messages: data.game.messages,
+            };
+          }
 
-          return hasChanged ? data.game : prevState;
+          // If game state changed, update everything
+          if (gameStateChanged) {
+            return data.game;
+          }
+
+          return prevState;
         });
       } catch (err) {
         console.error("Fetch error:", err);
