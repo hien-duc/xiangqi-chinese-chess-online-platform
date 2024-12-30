@@ -17,16 +17,19 @@ export default function GamePage() {
   const { gameState, isLoading, setGameId, refetch, togglePolling } =
     useGameContext();
   const isSpectator = searchParams.get("spectate") === "true";
+
   useEffect(() => {
     if (!params?.gameId) {
       notFound();
     }
 
+    // Start polling immediately
+    togglePolling(true);
+
     const initializeGame = async () => {
       setGameId(params.gameId as string);
       try {
         await refetch(true);
-        togglePolling(true);
       } catch (error) {
         console.error("Error initializing game:", error);
         notFound();

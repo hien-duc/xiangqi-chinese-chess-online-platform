@@ -134,10 +134,11 @@ export default function GamesPage() {
 
       const data = await response.json();
 
-      // Initialize game state before navigation
+      // Initialize game state and start polling before navigation
       setGameId(data.game._id);
-      await refetch(true);
-      togglePolling(true);
+      togglePolling(true);  // Start polling immediately
+      await refetch(true);  // Initial fetch of game state
+      
       // Navigate to the game page
       router.push(`/games/${data.game._id}`);
     } catch (error) {

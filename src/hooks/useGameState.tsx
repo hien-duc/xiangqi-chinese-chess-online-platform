@@ -268,12 +268,8 @@ export const GameProvider: React.FC<GameProviderProps> = ({
             JSON.stringify(prevState.messages) !==
               JSON.stringify(data.game.messages);
 
-          // Stop polling if game is completed or inactive
-          if (
-            data.game.status === "completed" ||
-            data.game.gameOver ||
-            data.game.status === "waiting"
-          ) {
+          // Stop polling only if game is completed
+          if (data.game.status === "completed" || data.game.gameOver) {
             togglePolling(false);
           }
 
