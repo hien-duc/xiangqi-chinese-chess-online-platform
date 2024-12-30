@@ -1,18 +1,18 @@
-"use client"
+"use client";
 
-import { useSession, signIn, signOut } from "next-auth/react"
-import Link from "next/link"
-import styles from "@/styles/Navbar.module.css"
+import { useSession, signIn, signOut } from "next-auth/react";
+import Link from "next/link";
+import styles from "@/styles/Navbar.module.css";
 
 export function Navbar() {
-  const { data: session, status } = useSession()
+  const { data: session, status } = useSession();
 
   return (
     <nav className={styles.nav}>
       <div className={styles.container}>
         <div className={styles.navContent}>
           <div className={styles.logo}>
-            <Link href="/" className={styles.logo}>
+            <Link href="/lobby" className={styles.logo}>
               <span className={styles.logoText}>Xiangqi</span>
             </Link>
           </div>
@@ -40,10 +40,7 @@ export function Navbar() {
                 >
                   Sign In
                 </button>
-                <Link
-                  href="/register"
-                  className={styles.registerButton}
-                >
+                <Link href="/register" className={styles.registerButton}>
                   Register
                 </Link>
               </div>
@@ -52,5 +49,5 @@ export function Navbar() {
         </div>
       </div>
     </nav>
-  )
+  );
 }

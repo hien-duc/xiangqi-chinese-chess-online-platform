@@ -161,6 +161,26 @@ export function generalsAreFacing(pieces: cg.Pieces): boolean {
   return true;
 }
 
+// Check if a player is in check
+export function isInCheck(fen: string): boolean {
+  const pieces = readXiangqi(fen);
+  const currentTurn = getTurnColor(fen);
+
+  // Find the general's position
+  let generalPos: cg.Key | undefined;
+  for (const [key, p] of pieces.entries()) {
+    if (p.role === "king" && p.color === currentTurn) {
+      generalPos = key;
+      break;
+    }
+  }
+
+  if (!generalPos) return false;
+
+  // Check if the general is under attack
+  return wouldBeInCheck(pieces, generalPos, generalPos, currentTurn);
+}
+
 // Get all legal moves (considering check)
 export function getLegalMoves(pieces: cg.Pieces, from: cg.Key): cg.Key[] {
   const piece = pieces.get(from);

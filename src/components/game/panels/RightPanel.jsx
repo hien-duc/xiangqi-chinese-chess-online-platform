@@ -117,12 +117,12 @@ const RightPanel = () => {
   const [blackPlayerStats, setBlackPlayerStats] = useState(null);
   const [unreadCount, setUnreadCount] = useState(0);
   const [previousMessageCount, setPreviousMessageCount] = useState(0);
-  const [redTimer, setRedTimer] = useState(120); // 2 minutes for red player
-  const [blackTimer, setBlackTimer] = useState(120); // 2 minutes for black player
+  const initialTimer = 1200;
+  const [redTimer, setRedTimer] = useState(initialTimer); // 2 minutes for red player
+  const [blackTimer, setBlackTimer] = useState(initialTimer); // 2 minutes for black player
   const redTimerRef = useRef(null);
   const blackTimerRef = useRef(null);
   const [showChat, setShowChat] = useState(false);
-
   const {
     times,
     startTimer,
@@ -201,8 +201,8 @@ const RightPanel = () => {
 
   useEffect(() => {
     if (gameState?.status !== "active") {
-      setRedTimer(120);
-      setBlackTimer(120);
+      setRedTimer(initialTimer);
+      setBlackTimer(initialTimer);
       if (redTimerRef.current) clearInterval(redTimerRef.current);
       if (blackTimerRef.current) clearInterval(blackTimerRef.current);
       return;
@@ -255,9 +255,9 @@ const RightPanel = () => {
   useEffect(() => {
     const currentTurn = getTurnColor(gameState?.fen);
     if (currentTurn === "red") {
-      setRedTimer(120);
+      setRedTimer(initialTimer);
     } else {
-      setBlackTimer(120);
+      setBlackTimer(initialTimer);
     }
   }, [gameState?.fen]);
 

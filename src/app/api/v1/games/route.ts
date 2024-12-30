@@ -4,12 +4,30 @@ import GameModel, { IPlayer } from "@/lib/db/models/gameState";
 import { initialFen } from "@/lib/game/fen";
 
 // GET /api/games - Get all games
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const currentUserId = searchParams.get("currentUserId");
+
     await connectToDatabase();
-    const games = await GameModel.find({
-      status: { $ne: "completed" },
-    }).sort({ createdAt: -1 });
+
+    let query = { status: { $ne: "completed" } };
+
+    // If currentUserId is provided, filter out games where the user is already a participant
+    if (currentUserId) {
+      /* query = {
+        ...query,
+        $nor: [
+          { "players.red.id": currentUserId },
+          { "players.black.id": currentUserId }
+        ]
+      }; */
+    }
+
+    const games = await GameModel.find(query).sort({
+      createdAt: -1,
+    });
+
     return NextResponse.json({ games });
   } catch (error) {
     console.error("Error fetching games:", error);
@@ -64,8 +82,8 @@ export async function POST(request: Request) {
       status:
         players.red.isBot && players.black.isBot ? "completed" : "waiting",
       times: {
-        red: 600,
-        black: 600,
+        red: 6000,
+        black: 6000,
       },
       createdAt: new Date(),
       updatedAt: new Date(),

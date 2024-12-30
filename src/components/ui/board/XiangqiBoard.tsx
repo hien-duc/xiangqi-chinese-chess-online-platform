@@ -8,6 +8,8 @@ import styles from "@/styles/FloatingButton.module.css";
 import { FaFlag } from "react-icons/fa";
 import ForfeitModal from "@/components/game/modals/ForfeitModal";
 import "@styles/XiangqiGround.css";
+import { Key } from "@/utils/types";
+import { isInCheck } from "@/lib/game/chess-rules";
 
 interface XiangqiBoardProps {
   className?: string;
@@ -17,6 +19,7 @@ interface XiangqiBoardProps {
 interface XiangqigroundInstance {
   destroy?: () => void;
   set?: (config: Partial<Config>) => void;
+  move?: (orig: string, dest: string) => void;
 }
 const DEFAULT_FEN = initialFen;
 
@@ -94,10 +97,11 @@ const XiangqiBoard: React.FC<XiangqiBoardProps> = ({
         : gameState?.players?.black?.id?.startsWith("guest-")
         ? gameState.players.black.id
         : null);
-
     const config: Config = {
+      viewOnly: isSpectator,
       orientation: gameState?.players?.red?.id === playerId ? "red" : "black",
       turnColor: canMove() ? currentTurn : undefined,
+      check: isInCheck(gameState?.fen || DEFAULT_FEN),
       movable: {
         free: false,
         color: isGameActive ? currentTurn : undefined,
@@ -109,6 +113,13 @@ const XiangqiBoard: React.FC<XiangqiBoardProps> = ({
             }
           },
         },
+      },
+      lastMove: gameState?.lastMove
+        ? gameState.lastMove.map((move) => move as Key)
+        : undefined,
+      highlight: {
+        lastMove: true,
+        check: true,
       },
       fen: gameState?.fen || DEFAULT_FEN,
       drawable: {
@@ -129,10 +140,6 @@ const XiangqiBoard: React.FC<XiangqiBoardProps> = ({
           },
         },
       },
-      highlight: {
-        lastMove: true,
-        check: true,
-      },
       animation: {
         enabled: true,
         duration: 200,
@@ -143,16 +150,15 @@ const XiangqiBoard: React.FC<XiangqiBoardProps> = ({
         deleteOnDropOff: false,
       },
     };
-    if (boardRef.current && !groundRef.current) {
+
+    if (!boardRef.current) return;
+
+    if (!groundRef.current) {
       groundRef.current = Xiangqiground(boardRef.current, config);
+    } else {
+      groundRef.current.set(config);
     }
-    return () => {
-      if (groundRef.current?.destroy) {
-        groundRef.current.destroy();
-        groundRef.current = null;
-      }
-    };
-  }, [gameState?.fen, makeMove, session, isSpectator]);
+  }, [gameState, isSpectator, session?.user?.id, canMove, makeMove]);
 
   // Update the board when game state changes
   useEffect(() => {

@@ -1,5 +1,5 @@
-import { State } from './state.ts';
-import { Key } from './types.ts';
+import { State } from "@/lib/game/state.ts";
+import { Key } from "@/utils/types.ts";
 
 export function explosion(state: State, keys: Key[]): void {
   state.exploding = { stage: 1, keys };

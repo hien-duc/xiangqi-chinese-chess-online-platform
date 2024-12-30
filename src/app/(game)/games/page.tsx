@@ -34,7 +34,14 @@ export default function GamesPage() {
   const fetchGames = async () => {
     try {
       setIsRefreshing(true);
-      const response = await fetch("/api/v1/games");
+      const url = new URL('/api/v1/games', window.location.origin);
+      
+      // Add currentUserId to filter out games where the user is already playing
+      if (session?.user?.id) {
+        url.searchParams.append('currentUserId', session.user.id);
+      }
+
+      const response = await fetch(url);
       if (!response.ok) {
         throw new Error("Failed to fetch games");
       }
@@ -136,9 +143,9 @@ export default function GamesPage() {
 
       // Initialize game state and start polling before navigation
       setGameId(data.game._id);
-      togglePolling(true);  // Start polling immediately
-      await refetch(true);  // Initial fetch of game state
-      
+      togglePolling(true); // Start polling immediately
+      await refetch(true); // Initial fetch of game state
+
       // Navigate to the game page
       router.push(`/games/${data.game._id}`);
     } catch (error) {

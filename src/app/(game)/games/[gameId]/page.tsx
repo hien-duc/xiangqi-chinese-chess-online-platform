@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect } from "react";
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { notFound } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 import XiangqiBoard from "@/components/ui/board/XiangqiBoard";
 import { useGameContext } from "@/hooks/useGameState";
@@ -13,9 +14,17 @@ import RightPanel from "@/components/game/panels/RightPanel";
 export default function GamePage() {
   const params = useParams();
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const { data: session } = useSession();
 
-  const { gameState, isLoading, setGameId, refetch, togglePolling } =
-    useGameContext();
+  const {
+    gameState,
+    isLoading,
+    setGameId,
+    refetch,
+    togglePolling,
+    forfeitGame,
+  } = useGameContext();
   const isSpectator = searchParams.get("spectate") === "true";
 
   useEffect(() => {
@@ -38,11 +47,71 @@ export default function GamePage() {
 
     initializeGame();
 
+    // Handle page unload/navigation
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (!gameState || gameState.status !== "active" || isSpectator) return;
+
+      const isPlayer =
+        gameState.players.red.id === session?.user?.id ||
+        gameState.players.black.id === session?.user?.id;
+
+      if (isPlayer) {
+        e.preventDefault();
+        e.returnValue =
+          "Are you sure you want to leave? You will forfeit the game.";
+        return e.returnValue;
+      }
+    };
+
+    // Handle browser back button
+    const handleBackButton = (e: PopStateEvent) => {
+      if (!gameState || gameState.status !== "active" || isSpectator) return;
+
+      const isPlayer =
+        gameState.players.red.id === session?.user?.id ||
+        gameState.players.black.id === session?.user?.id;
+
+      if (isPlayer) {
+        const confirmLeave = window.confirm(
+          "Are you sure you want to leave? You will forfeit the game."
+        );
+
+        if (confirmLeave && session?.user?.id) {
+          forfeitGame(session.user.id).then(() => {
+            window.removeEventListener("beforeunload", handleBeforeUnload);
+            window.removeEventListener("popstate", handleBackButton);
+            router.back();
+          });
+        }
+
+        // Prevent default navigation
+        window.history.pushState(null, "", window.location.href);
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    window.addEventListener("popstate", handleBackButton);
+
+    // Push a new history state to handle the back button
+    window.history.pushState(null, "", window.location.href);
+
     return () => {
       togglePolling(false);
       setGameId("");
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      window.removeEventListener("popstate", handleBackButton);
     };
-  }, [params?.gameId, setGameId, refetch, togglePolling]);
+  }, [
+    params?.gameId,
+    setGameId,
+    refetch,
+    togglePolling,
+    gameState,
+    isSpectator,
+    session?.user?.id,
+    forfeitGame,
+    router,
+  ]);
 
   // Show loading state while fetching initial game data
   if (isLoading && !gameState) {
