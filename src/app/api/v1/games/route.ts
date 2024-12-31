@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db/db-connect";
-import GameModel, { IPlayer } from "@/lib/db/models/gameState";
+import GameModel, { IPlayer } from "@/lib/db/models/gameState.model";
 import { initialFen } from "@/lib/game/fen";
 
 // GET /api/games - Get all games

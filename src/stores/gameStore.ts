@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { IGameState } from "@/lib/db/models/gameState";
+import { IGameState } from "@/lib/db/models/gameState.model";
 
 interface GameStore {
   games: IGameState[];

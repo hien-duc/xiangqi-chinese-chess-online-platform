@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db/db-connect";
 import PlayerModel from "@/lib/db/models/player.model";
+import UserModel from "@/lib/db/models/user.model";
 
 export async function GET(
   request: NextRequest,
@@ -14,33 +15,48 @@ export async function GET(
       userId.startsWith("guest-")
     ) {
       return NextResponse.json({
-        rating: 0,
-        gamesPlayed: 0,
-        wins: 0,
-        losses: 0,
-        draws: 0,
-        rank: "Unknown",
+        stats: {
+          rating: 0,
+          gamesPlayed: 0,
+          wins: 0,
+          losses: 0,
+          draws: 0,
+          rank: "Unknown",
+          winRate: 0,
+        },
+        recentGames: [],
+        user: {
+          name: "Guest",
+          image: null,
+        },
       });
     }
 
     await connectToDatabase();
     const player = await PlayerModel.findOne({ userId });
-    if (!player) {
+    const user = await UserModel.findById(userId).select("name email image");
+    // const [player, user] = await Promise.all([
+    //   PlayerModel.findOne({ userId }),
+    //   UserModel.findById(userId).select("name email image"),
+    // ]);
+
+    if (!player || !user) {
       return NextResponse.json({ error: "Player not found" }, { status: 404 });
     }
 
+    const profile = await player.getPlayerProfile();
     return NextResponse.json({
-      rating: player.rating,
-      gamesPlayed: player.gamesPlayed,
-      wins: player.wins,
-      losses: player.losses,
-      draws: player.draws,
-      rank: player.rank,
+      ...profile,
+      user: {
+        name: user.name,
+        email: user.email,
+        image: user.image,
+      },
     });
   } catch (error) {
-    console.error("Error fetching player stats:", error);
+    console.error("Error fetching player profile:", error);
     return NextResponse.json(
-      { error: "Internal Server Error" },
+      { error: "Failed to fetch player profile" },
       { status: 500 }
     );
   }

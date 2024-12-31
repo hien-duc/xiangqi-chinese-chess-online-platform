@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db/db-connect";
-import GameModel from "@/lib/db/models/gameState";
+import GameModel from "@/lib/db/models/gameState.model";
 import { readXiangqi, write, getTurnColor } from "@/lib/game/fen";
 import { getValidMoves } from "@/lib/game/moves";
 import { Key, Piece } from "@/utils/types";

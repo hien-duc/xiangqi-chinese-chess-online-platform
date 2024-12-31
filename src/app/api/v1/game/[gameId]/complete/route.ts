@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db/db-connect";
-import GameModel from "@/lib/db/models/gameState";
+import GameModel from "@/lib/db/models/gameState.model";
 import PlayerModel, { updatePlayerStats } from "@/lib/db/models/player.model";
 
 // ELO rating calculation

@@ -117,6 +117,7 @@ GameSchema.index({ "players.red.id": 1 });
 GameSchema.index({ "players.black.id": 1 });
 GameSchema.index({ createdAt: 1 });
 
-const GameModel = mongoose.models.Game || model("Game", GameSchema);
+const GameStateModel =
+  mongoose.models.GameState || model("GameState", GameSchema);
 
-export default GameModel;
+export default GameStateModel;

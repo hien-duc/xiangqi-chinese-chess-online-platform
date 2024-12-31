@@ -47,59 +47,9 @@ export default function GamePage() {
 
     initializeGame();
 
-    // Handle page unload/navigation
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (!gameState || gameState.status !== "active" || isSpectator) return;
-
-      const isPlayer =
-        gameState.players.red.id === session?.user?.id ||
-        gameState.players.black.id === session?.user?.id;
-
-      if (isPlayer) {
-        e.preventDefault();
-        e.returnValue =
-          "Are you sure you want to leave? You will forfeit the game.";
-        return e.returnValue;
-      }
-    };
-
-    // Handle browser back button
-    const handleBackButton = (e: PopStateEvent) => {
-      if (!gameState || gameState.status !== "active" || isSpectator) return;
-
-      const isPlayer =
-        gameState.players.red.id === session?.user?.id ||
-        gameState.players.black.id === session?.user?.id;
-
-      if (isPlayer) {
-        const confirmLeave = window.confirm(
-          "Are you sure you want to leave? You will forfeit the game."
-        );
-
-        if (confirmLeave && session?.user?.id) {
-          forfeitGame(session.user.id).then(() => {
-            window.removeEventListener("beforeunload", handleBeforeUnload);
-            window.removeEventListener("popstate", handleBackButton);
-            router.back();
-          });
-        }
-
-        // Prevent default navigation
-        window.history.pushState(null, "", window.location.href);
-      }
-    };
-
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    window.addEventListener("popstate", handleBackButton);
-
-    // Push a new history state to handle the back button
-    window.history.pushState(null, "", window.location.href);
-
     return () => {
       togglePolling(false);
       setGameId("");
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-      window.removeEventListener("popstate", handleBackButton);
     };
   }, [
     params?.gameId,
@@ -115,7 +65,7 @@ export default function GamePage() {
 
   // Show loading state while fetching initial game data
   if (isLoading && !gameState) {
-    return <div>Loading game...</div>;
+    return <div></div>;
   }
 
   // If game state is null after loading, the game doesn't exist

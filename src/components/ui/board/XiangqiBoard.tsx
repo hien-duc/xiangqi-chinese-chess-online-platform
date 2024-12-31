@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useRef, useState } from "react";
 import { Xiangqiground } from "@/utils/xiangqiground";
 import { useGameContext } from "@/hooks/useGameState";
@@ -98,7 +99,7 @@ const XiangqiBoard: React.FC<XiangqiBoardProps> = ({
         ? gameState.players.black.id
         : null);
     const config: Config = {
-      viewOnly: isSpectator,
+      viewOnly: isSpectator || gameState?.status === "completed",
       orientation: gameState?.players?.red?.id === playerId ? "red" : "black",
       turnColor: canMove() ? currentTurn : undefined,
       check: isInCheck(gameState?.fen || DEFAULT_FEN),

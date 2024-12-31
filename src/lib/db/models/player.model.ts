@@ -12,6 +12,29 @@ export interface IPlayer extends Document {
   lastPlayed: Date;
 }
 
+export interface IPlayerStats {
+  rating: number;
+  gamesPlayed: number;
+  wins: number;
+  losses: number;
+  draws: number;
+  rank: string;
+  winRate: number;
+  averageTime?: number;
+}
+
+export interface IRecentGame {
+  id: string;
+  opponent: string;
+  result: "win" | "loss" | "draw" | "active";
+  date: Date;
+}
+
+export interface IPlayerProfile {
+  stats: IPlayerStats;
+  recentGames: IRecentGame[];
+}
+
 const PlayerSchema = new Schema(
   {
     userId: {
@@ -30,6 +53,90 @@ const PlayerSchema = new Schema(
   },
   {
     timestamps: true,
+    methods: {
+      async getPlayerProfile(): Promise<IPlayerProfile> {
+        // Get recent games from GameState model
+        const recentGames = await mongoose
+          .model("gameState")
+          .find({
+            $or: [
+              { "players.red.id": this.userId.toString() },
+              { "players.black.id": this.userId.toString() },
+            ],
+            status: { $in: ["completed", "active"] },
+          })
+          .sort({ updatedAt: -1 })
+          .limit(5)
+          .lean();
+
+        // Calculate win rate
+        const winRate =
+          this.gamesPlayed > 0 ? (this.wins / this.gamesPlayed) * 100 : 0;
+
+        // Calculate average time from completed games
+        const completedGames = await mongoose
+          .model("gameState")
+          .find({
+            $or: [
+              { "players.red.id": this.userId.toString() },
+              { "players.black.id": this.userId.toString() },
+            ],
+            status: "completed",
+          })
+          .select("players times winner")
+          .lean();
+
+        let totalTime = 0;
+        let gameCount = 0;
+
+        completedGames.forEach((game) => {
+          const isRed = game.players.red.id === this.userId.toString();
+          const playerTime = isRed ? game.times?.red : game.times?.black;
+
+          if (playerTime) {
+            totalTime += playerTime;
+            gameCount++;
+          }
+        });
+
+        const averageTime =
+          gameCount > 0
+            ? Math.round(totalTime / gameCount / 60) // Convert to minutes
+            : undefined;
+
+        // Format recent games
+        const formattedGames = recentGames.map((game) => ({
+          id: game._id.toString(),
+          opponent:
+            game.players.red.id === this.userId.toString()
+              ? game.players.black.name
+              : game.players.red.name,
+          result:
+            game.status === "completed"
+              ? game.winner === this.userId.toString()
+                ? "win"
+                : game.winner
+                ? "loss"
+                : "draw"
+              : "active",
+          date: game.updatedAt,
+        }));
+
+        return {
+          stats: {
+            rating: this.rating,
+            gamesPlayed: this.gamesPlayed,
+            wins: this.wins,
+            losses: this.losses,
+            draws: this.draws,
+            rank: this.rank,
+            winRate: Math.round(winRate),
+            averageTime,
+          },
+          recentGames: formattedGames,
+        };
+      },
+    },
   }
 );
 

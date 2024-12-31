@@ -8,7 +8,7 @@ import NewGameModal from "@/components/game/modals/NewGameModal";
 import { useGameContext } from "@/hooks/useGameState";
 import { FaChessBoard, FaUserFriends, FaRobot, FaEye } from "react-icons/fa";
 import { MdRefresh } from "react-icons/md";
-import { IGameState } from "@/lib/db/models/gameState";
+import { IGameState } from "@/lib/db/models/gameState.model";
 import { startGameCleanup, stopGameCleanup } from "@/lib/cleanup/gameCleanup";
 import { useGameStore } from "@/stores/gameStore";
 

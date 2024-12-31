@@ -16,8 +16,8 @@ export function startGameCleanup() {
         throw new Error("Failed to run game cleanup");
       }
     } catch (error) {
+      console.error("Error running game cleanup:", error);
       throw new Error("Failed to run game cleanup");
-
     }
   }, 60000); // Run every minute
 }

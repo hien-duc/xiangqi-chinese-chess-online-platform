@@ -8,7 +8,7 @@ import React, {
   useCallback,
   useRef,
 } from "react";
-import { IGameState } from "../lib/db/models/gameState";
+import { IGameState } from "../lib/db/models/gameState.model";
 import WinModal from "../components/game/modals/WinModal";
 import { isCheckmate } from "../lib/game/chess-rules";
 import { useComputerPlayer } from "./useComputerPlayer";
