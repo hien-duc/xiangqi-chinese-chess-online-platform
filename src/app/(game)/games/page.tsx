@@ -18,7 +18,6 @@ export default function GamesPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [autoRefresh, setAutoRefresh] = useState(true);
   const router = useRouter();
   const { data: session } = useSession();
   const { setGameId, refetch, togglePolling } = useGameContext();
@@ -43,9 +42,7 @@ export default function GamesPage() {
 
     // Set up auto-refresh interval
     let refreshInterval: NodeJS.Timeout;
-    if (autoRefresh) {
-      refreshInterval = setInterval(fetchGames, 10000); // Refresh every 10 seconds
-    }
+    refreshInterval = setInterval(fetchGames, 10000); // Refresh every 10 seconds
 
     // Cleanup when component unmounts
     return () => {
@@ -54,7 +51,7 @@ export default function GamesPage() {
         clearInterval(refreshInterval);
       }
     };
-  }, [autoRefresh]);
+  }, []);
 
   const fetchGames = async () => {
     try {
@@ -183,10 +180,6 @@ export default function GamesPage() {
     setIsDarkMode(!isDarkMode);
   };
 
-  const toggleAutoRefresh = () => {
-    setAutoRefresh(!autoRefresh);
-  };
-
   return (
     <div className={`${styles.container} ${isDarkMode ? styles.darkMode : ""}`}>
       <div className={styles.wrapper}>
@@ -203,22 +196,9 @@ export default function GamesPage() {
                   isRefreshing ? styles.spinning : ""
                 }`}
                 disabled={isRefreshing}
-                title={
-                  autoRefresh ? "Auto-refresh enabled" : "Auto-refresh disabled"
-                }
+                title="Refresh games"
               >
                 <MdRefresh />
-              </button>
-              <button
-                onClick={toggleAutoRefresh}
-                className={`${styles.refreshButton} ${
-                  autoRefresh ? styles.active : ""
-                }`}
-                title={
-                  autoRefresh ? "Disable auto-refresh" : "Enable auto-refresh"
-                }
-              >
-                {autoRefresh ? "Auto" : "Manual"}
               </button>
             </div>
           </div>

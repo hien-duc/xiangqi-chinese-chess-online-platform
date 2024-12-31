@@ -1,6 +1,27 @@
 :root {
   --accent-rgb: 34, 84, 61;
   /* Keep existing variables */
+  --primary-color: #4f46e5;
+  --primary-light: rgba(79, 70, 229, 0.1);
+  --text-primary: #1f2937;
+  --text-secondary: #6b7280;
+  --border-color: #e5e7eb;
+  --card-bg: #ffffff;
+  --input-bg: #f3f4f6;
+  --hover-bg: #f9fafb;
+  --preview-bg: #f3f4f6;
+}
+
+[data-theme="dark"] {
+  --primary-color: #6366f1;
+  --primary-light: rgba(99, 102, 241, 0.1);
+  --text-primary: #f9fafb;
+  --text-secondary: #d1d5db;
+  --border-color: #374151;
+  --card-bg: #1f2937;
+  --input-bg: #374151;
+  --hover-bg: #374151;
+  --preview-bg: #111827;
 }
 
 * {

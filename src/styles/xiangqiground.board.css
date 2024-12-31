@@ -1,6 +1,6 @@
 /** Colored board squares as an embedded SVG */
 cg-board {
-  background-image: url("../../public/assets/board.svg");
+  background-image: url("../../public/assets/boards/board-default.svg");
 }
 
 /** Interactive board square colors */
