@@ -1,6 +1,10 @@
+:root {
+  --accent-rgb: 34, 84, 61;
+  /* Keep existing variables */
+}
+
 * {
   box-sizing: border-box;
   padding: 0;
   margin: 0;
 }
-

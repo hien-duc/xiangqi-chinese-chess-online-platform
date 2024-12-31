@@ -60,8 +60,8 @@ const PlayerSchema = new Schema(
           .model("gameState")
           .find({
             $or: [
-              { "players.red.id": this.userId.toString() },
-              { "players.black.id": this.userId.toString() },
+              { "players.red.id": this.userId },
+              { "players.black.id": this.userId },
             ],
             status: { $in: ["completed", "active"] },
           })
@@ -78,20 +78,22 @@ const PlayerSchema = new Schema(
           .model("gameState")
           .find({
             $or: [
-              { "players.red.id": this.userId.toString() },
-              { "players.black.id": this.userId.toString() },
+              { "players.red.id": this.userId },
+              { "players.black.id": this.userId },
             ],
             status: "completed",
           })
-          .select("players times winner")
+          .select("times players")
           .lean();
 
         let totalTime = 0;
         let gameCount = 0;
 
         completedGames.forEach((game) => {
-          const isRed = game.players.red.id === this.userId.toString();
-          const playerTime = isRed ? game.times?.red : game.times?.black;
+          const playerTime =
+            game.players.red.id === this.userId
+              ? game.times?.red
+              : game.times?.black;
 
           if (playerTime) {
             totalTime += playerTime;
@@ -108,12 +110,12 @@ const PlayerSchema = new Schema(
         const formattedGames = recentGames.map((game) => ({
           id: game._id.toString(),
           opponent:
-            game.players.red.id === this.userId.toString()
+            game.players.red.id === this.userId
               ? game.players.black.name
               : game.players.red.name,
           result:
             game.status === "completed"
-              ? game.winner === this.userId.toString()
+              ? game.winner === this.userId
                 ? "win"
                 : game.winner
                 ? "loss"

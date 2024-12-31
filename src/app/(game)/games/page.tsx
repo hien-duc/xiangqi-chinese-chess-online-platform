@@ -8,6 +8,7 @@ import NewGameModal from "@/components/game/modals/NewGameModal";
 import { useGameContext } from "@/hooks/useGameState";
 import { FaChessBoard, FaUserFriends, FaRobot, FaEye } from "react-icons/fa";
 import { MdRefresh } from "react-icons/md";
+import { Sun, Moon } from "lucide-react";
 import { IGameState } from "@/lib/db/models/gameState.model";
 import { startGameCleanup, stopGameCleanup } from "@/lib/cleanup/gameCleanup";
 import { useGameStore } from "@/stores/gameStore";
@@ -16,30 +17,54 @@ export default function GamesPage() {
   const [games, setGames] = useState<IGameState[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [autoRefresh, setAutoRefresh] = useState(true);
   const router = useRouter();
   const { data: session } = useSession();
   const { setGameId, refetch, togglePolling } = useGameContext();
+
+  useEffect(() => {
+    // Check for saved dark mode preference
+    const savedDarkMode = localStorage.getItem("gamesDarkMode");
+    if (savedDarkMode) {
+      setIsDarkMode(savedDarkMode === "true");
+    }
+  }, []);
+
+  useEffect(() => {
+    // Save dark mode preference
+    localStorage.setItem("gamesDarkMode", isDarkMode.toString());
+  }, [isDarkMode]);
 
   useEffect(() => {
     // Initialize game cleanup and fetch games
     startGameCleanup();
     fetchGames();
 
+    // Set up auto-refresh interval
+    let refreshInterval: NodeJS.Timeout;
+    if (autoRefresh) {
+      refreshInterval = setInterval(fetchGames, 10000); // Refresh every 10 seconds
+    }
+
     // Cleanup when component unmounts
     return () => {
       stopGameCleanup();
+      if (refreshInterval) {
+        clearInterval(refreshInterval);
+      }
     };
-  }, []);
+  }, [autoRefresh]);
 
   const fetchGames = async () => {
     try {
       setIsRefreshing(true);
-      const url = new URL('/api/v1/games', window.location.origin);
-      
+      const url = new URL("/api/v1/games", window.location.origin);
+
       // Add currentUserId to filter out games where the user is already playing
-      if (session?.user?.id) {
-        url.searchParams.append('currentUserId', session.user.id);
-      }
+      // if (session?.user?.id) {
+      //   url.searchParams.append("currentUserId", session.user.id);
+      // }
 
       const response = await fetch(url);
       if (!response.ok) {
@@ -154,127 +179,188 @@ export default function GamesPage() {
     }
   };
 
+  const toggleDarkMode = () => {
+    setIsDarkMode(!isDarkMode);
+  };
+
+  const toggleAutoRefresh = () => {
+    setAutoRefresh(!autoRefresh);
+  };
+
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
-        <div className={styles.titleSection}>
-          <h1 className={styles.title}>
-            <FaChessBoard className={styles.titleIcon} />
-            Available Games
-          </h1>
-          <button
-            onClick={fetchGames}
-            className={`${styles.refreshButton} ${
-              isRefreshing ? styles.spinning : ""
-            }`}
-            disabled={isRefreshing}
-          >
-            <MdRefresh />
-          </button>
+    <div className={`${styles.container} ${isDarkMode ? styles.darkMode : ""}`}>
+      <div className={styles.wrapper}>
+        <div className={styles.header}>
+          <div className={styles.titleSection}>
+            <h1 className={styles.title}>
+              <FaChessBoard className={styles.titleIcon} />
+              Available Games
+            </h1>
+            <div className={styles.controls}>
+              <button
+                onClick={fetchGames}
+                className={`${styles.refreshButton} ${
+                  isRefreshing ? styles.spinning : ""
+                }`}
+                disabled={isRefreshing}
+                title={
+                  autoRefresh ? "Auto-refresh enabled" : "Auto-refresh disabled"
+                }
+              >
+                <MdRefresh />
+              </button>
+              <button
+                onClick={toggleAutoRefresh}
+                className={`${styles.refreshButton} ${
+                  autoRefresh ? styles.active : ""
+                }`}
+                title={
+                  autoRefresh ? "Disable auto-refresh" : "Enable auto-refresh"
+                }
+              >
+                {autoRefresh ? "Auto" : "Manual"}
+              </button>
+            </div>
+          </div>
+
+          <div className={styles.actionButtons}>
+            <button
+              onClick={toggleDarkMode}
+              className={styles.darkModeButton}
+              aria-label="Toggle dark mode"
+            >
+              {isDarkMode ? (
+                <Sun className={styles.darkModeIcon} />
+              ) : (
+                <Moon className={styles.darkModeIcon} />
+              )}
+              {isDarkMode ? "Light Mode" : "Dark Mode"}
+            </button>
+
+            {games?.length > 0 && (
+              <button
+                className={styles.newGameButton}
+                onClick={() => setIsModalOpen(true)}
+              >
+                <FaChessBoard /> New Game
+              </button>
+            )}
+          </div>
         </div>
 
-        {games?.length > 0 && (
-          <button
-            className={styles.newGameButton}
-            onClick={() => setIsModalOpen(true)}
-          >
-            New Game
-          </button>
+        {games.length === 0 ? (
+          <div className={styles.emptyState}>
+            <FaChessBoard className={styles.emptyIcon} />
+            <h2>No Games Available</h2>
+            <p>Be the first to create a new game!</p>
+            <button
+              className={styles.createGameButton}
+              onClick={() => setIsModalOpen(true)}
+            >
+              <FaChessBoard /> Create Game
+            </button>
+          </div>
+        ) : (
+          <div className={styles.gamesList}>
+            {games.map((game) => (
+              <div key={game._id} className={styles.gameCard}>
+                <div className={styles.gameInfo}>
+                  <div className={styles.players}>
+                    <div className={styles.player}>
+                      <span className={`${styles.side} ${styles.redSide}`}>
+                        Red
+                      </span>
+                      <span className={styles.name}>
+                        {game.players.red?.name || "Waiting..."}
+                        {game.players.red?.isBot && (
+                          <FaRobot className={styles.playerIcon} />
+                        )}
+                        {!game.players.red?.isBot && game.players.red?.name && (
+                          <FaUserFriends className={styles.playerIcon} />
+                        )}
+                      </span>
+                    </div>
+                    <div className={styles.player}>
+                      <span className={`${styles.side} ${styles.blackSide}`}>
+                        Black
+                      </span>
+                      <span className={styles.name}>
+                        {game.players.black?.name || "Waiting..."}
+                        {game.players.black?.isBot && (
+                          <FaRobot className={styles.playerIcon} />
+                        )}
+                        {!game.players.black?.isBot &&
+                          game.players.black?.name && (
+                            <FaUserFriends className={styles.playerIcon} />
+                          )}
+                      </span>
+                    </div>
+                  </div>
+                  <div className={styles.status}>
+                    <span
+                      className={
+                        game.status === "waiting"
+                          ? styles.waiting
+                          : game.status === "active"
+                          ? styles.active
+                          : styles.completed
+                      }
+                    >
+                      {game.status.charAt(0).toUpperCase() +
+                        game.status.slice(1)}
+                    </span>
+                  </div>
+                  <div className={styles.created}>
+                    Created {new Date(game.createdAt).toLocaleString()}
+                  </div>
+                </div>
+                <div className={styles.actions}>
+                  {game.status === "waiting" && (
+                    <>
+                      {(!game.players.red.id ||
+                        game.players.red.name === "Waiting for player...") && (
+                        <button
+                          className={`${styles.actionButton} ${styles.join}`}
+                          onClick={() => handleJoinGame(game._id, "red")}
+                        >
+                          <FaUserFriends />
+                          Join as Red
+                        </button>
+                      )}
+                      {(!game.players.black.id ||
+                        game.players.black.name ===
+                          "Waiting for player...") && (
+                        <button
+                          className={`${styles.actionButton} ${styles.join}`}
+                          onClick={() => handleJoinGame(game._id, "black")}
+                        >
+                          <FaUserFriends /> Join as Black
+                        </button>
+                      )}
+                    </>
+                  )}
+                  {game.status !== "completed" && (
+                    <button
+                      className={`${styles.actionButton} ${styles.spectate}`}
+                      onClick={() => handleSpectate(game._id)}
+                    >
+                      <FaEye /> Spectate
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {isModalOpen && (
+          <NewGameModal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            onSelectSide={handleCreateGame}
+          />
         )}
       </div>
-
-      {games.length === 0 ? (
-        <div className={styles.emptyState}>
-          <FaChessBoard className={styles.emptyIcon} />
-          <h2>No Games Available</h2>
-          <p>Be the first to create a new game!</p>
-          <button
-            className={styles.createGameButton}
-            onClick={() => setIsModalOpen(true)}
-          >
-            Create Game
-          </button>
-        </div>
-      ) : (
-        <div className={styles.gamesList}>
-          {games.map((game) => (
-            <div key={game._id} className={styles.gameCard}>
-              <div className={styles.gameInfo}>
-                <div className={styles.players}>
-                  <div className={styles.player}>
-                    <span className={`${styles.side} ${styles.redSide}`}>
-                      Red:
-                    </span>
-                    <span className={styles.name}>
-                      {game.players.red.name || "Waiting..."}
-                      {game.players.red.isBot && (
-                        <FaRobot className={styles.playerIcon} />
-                      )}
-                    </span>
-                  </div>
-                  <div className={styles.player}>
-                    <span className={`${styles.side} ${styles.blackSide}`}>
-                      Black:
-                    </span>
-                    <span className={styles.name}>
-                      {game.players.black.name || "Waiting..."}
-                      {game.players.black.isBot && (
-                        <FaRobot className={styles.playerIcon} />
-                      )}
-                    </span>
-                  </div>
-                </div>
-                <div className={styles.status}>
-                  <span className={styles[game.status]}>
-                    {game.status.charAt(0).toUpperCase() + game.status.slice(1)}
-                  </span>
-                </div>
-                <div className={styles.created}>
-                  Created: {new Date(game.createdAt).toLocaleString()}
-                </div>
-              </div>
-              <div className={styles.actions}>
-                {game.status === "waiting" && (
-                  <>
-                    {(!game.players.red.id ||
-                      game.players.red.name === "Waiting for player...") && (
-                      <button
-                        onClick={() => handleJoinGame(game._id, "red")}
-                        className={`${styles.button} ${styles.redSide}`}
-                      >
-                        <FaUserFriends /> Join as Red
-                      </button>
-                    )}
-                    {(!game.players.black.id ||
-                      game.players.black.name === "Waiting for player...") && (
-                      <button
-                        onClick={() => handleJoinGame(game._id, "black")}
-                        className={`${styles.button} ${styles.blackSide}`}
-                      >
-                        <FaUserFriends /> Join as Black
-                      </button>
-                    )}
-                  </>
-                )}
-                {game.status !== "completed" && (
-                  <button
-                    onClick={() => handleSpectate(game._id)}
-                    className={`${styles.button} ${styles.spectate}`}
-                  >
-                    <FaEye /> Spectate
-                  </button>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      <NewGameModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSelectSide={handleCreateGame}
-      />
     </div>
   );
 }

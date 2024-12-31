@@ -18,6 +18,7 @@ export async function GET(
         stats: {
           rating: 0,
           gamesPlayed: 0,
+          totalGames: 0,
           wins: 0,
           losses: 0,
           draws: 0,

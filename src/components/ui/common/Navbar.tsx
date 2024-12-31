@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useSession, signIn, signOut } from "next-auth/react";
 import Link from "next/link";
 import Image from "next/image";
@@ -15,12 +15,18 @@ import {
   User,
 } from "lucide-react";
 import styles from "@/styles/Navbar.module.css";
+import { useClickOutside } from "@/hooks/useClickOutside";
 
 export function Navbar() {
   const { data: session, status } = useSession();
   const [isOpen, setIsOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const userId = session?.user?.id;
+  const profileRef = useRef<HTMLDivElement>(null);
+
+  useClickOutside(profileRef, () => {
+    setIsProfileOpen(false);
+  });
 
   const toggleMenu = () => setIsOpen(!isOpen);
   const toggleProfile = () => setIsProfileOpen(!isProfileOpen);
@@ -58,7 +64,7 @@ export function Navbar() {
                 <div className={styles.spinner}></div>
               </div>
             ) : session ? (
-              <div className={styles.userSection}>
+              <div className={styles.userSection} ref={profileRef}>
                 <button
                   onClick={toggleProfile}
                   className={styles.profileButton}
@@ -92,7 +98,10 @@ export function Navbar() {
                         {session.user.email}
                       </p>
                     </div>
-                    <Link href={`/profile/${userId}`} className={styles.dropdownItem}>
+                    <Link
+                      href={`/profile/${userId}`}
+                      className={styles.dropdownItem}
+                    >
                       <User className={styles.dropdownIcon} />
                       <span>Profile</span>
                     </Link>
