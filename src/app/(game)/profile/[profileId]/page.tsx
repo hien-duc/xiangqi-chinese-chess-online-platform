@@ -89,7 +89,7 @@ export default function ProfilePage() {
           throw new Error("Failed to fetch profile data");
         }
         const data = await response.json();
-        
+
         // Add some sample achievements (you can replace this with real data)
         const achievements: Achievement[] = [
           {
@@ -144,19 +144,11 @@ export default function ProfilePage() {
   };
 
   if (isLoading) {
-    return (
-      <div className={`${styles.container} ${isDarkMode ? styles.darkMode : ""}`}>
-        <div className={styles.loading}></div>
-      </div>
-    );
+    return <div></div>;
   }
 
   if (!profileData) {
-    return (
-      <div className={`${styles.container} ${isDarkMode ? styles.darkMode : ""}`}>
-        <div className={styles.error}>Profile not found</div>
-      </div>
-    );
+    throw new Error("Profile data not found");
   }
 
   return (
@@ -277,7 +269,11 @@ export default function ProfilePage() {
                             <span className={styles.opponent}>
                               vs {game.opponent}
                             </span>
-                            <span className={`${styles.result} ${styles[game.result]}`}>
+                            <span
+                              className={`${styles.result} ${
+                                styles[game.result]
+                              }`}
+                            >
                               {game.result.toUpperCase()}
                             </span>
                           </div>
@@ -305,7 +301,9 @@ export default function ProfilePage() {
                   {profileData.achievements?.slice(0, 4).map((achievement) => (
                     <div key={achievement.id} className={styles.achievement}>
                       {achievement.icon}
-                      <h3 className={styles.achievementTitle}>{achievement.title}</h3>
+                      <h3 className={styles.achievementTitle}>
+                        {achievement.title}
+                      </h3>
                       <p className={styles.achievementDesc}>
                         {achievement.description}
                       </p>
@@ -314,7 +312,8 @@ export default function ProfilePage() {
                           className={styles.progressFill}
                           style={{
                             width: `${Math.min(
-                              (achievement.progress / achievement.maxProgress) * 100,
+                              (achievement.progress / achievement.maxProgress) *
+                                100,
                               100
                             )}%`,
                           }}
@@ -347,7 +346,9 @@ export default function ProfilePage() {
                 {profileData.achievements?.map((achievement) => (
                   <div key={achievement.id} className={styles.achievement}>
                     {achievement.icon}
-                    <h3 className={styles.achievementTitle}>{achievement.title}</h3>
+                    <h3 className={styles.achievementTitle}>
+                      {achievement.title}
+                    </h3>
                     <p className={styles.achievementDesc}>
                       {achievement.description}
                     </p>
@@ -356,7 +357,8 @@ export default function ProfilePage() {
                         className={styles.progressFill}
                         style={{
                           width: `${Math.min(
-                            (achievement.progress / achievement.maxProgress) * 100,
+                            (achievement.progress / achievement.maxProgress) *
+                              100,
                             100
                           )}%`,
                         }}

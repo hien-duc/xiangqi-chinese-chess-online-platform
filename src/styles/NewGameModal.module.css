@@ -4,84 +4,111 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.75);
+  background-color: rgba(0, 0, 0, 0.8);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(6px);
   animation: fadeIn 0.3s ease-out;
 }
 
 .modal {
-  background: linear-gradient(145deg, #ffffff, #f5f5f5);
-  padding: 2.5rem;
-  border-radius: 20px;
+  background: #ffffff;
+  padding: 2rem;
+  border-radius: 24px;
   box-shadow: 
-    0 10px 25px rgba(0, 0, 0, 0.1),
-    0 2px 10px rgba(0, 0, 0, 0.05);
-  width: 90%;
-  max-width: 450px;
+    0 20px 40px rgba(0, 0, 0, 0.2),
+    0 8px 16px rgba(0, 0, 0, 0.1);
+  width: 640px;
   text-align: center;
   animation: slideUp 0.4s ease-out;
-  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .modal h2 {
   margin-bottom: 2rem;
-  color: #2c3e50;
-  font-size: 2rem;
+  color: #1a1a1a;
+  font-size: 1.8rem;
   font-weight: 700;
   letter-spacing: -0.5px;
-  position: relative;
-  display: inline-block;
 }
 
-.modal h2::after {
-  content: '';
-  position: absolute;
-  bottom: -8px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 60px;
-  height: 3px;
-  background: linear-gradient(90deg, #ff4d4d, #333);
-  border-radius: 2px;
+.modesGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.modeSection {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 20px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: 2px solid transparent;
+}
+
+.modeSection:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.botSection:hover {
+  border-color: rgba(255, 77, 77, 0.3);
+}
+
+.playerSection:hover {
+  border-color: rgba(44, 62, 80, 0.3);
+}
+
+.modeHeader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.modeIcon {
+  width: 24px;
+  height: 24px;
+  color: #666;
 }
 
 .modal h3 {
-  color: #555;
-  font-size: 1.3rem;
-  margin: 1.5rem 0 1rem;
+  color: #333;
+  font-size: 1.25rem;
   font-weight: 600;
+  margin: 0;
 }
 
-.modeContainer {
-  background: white;
-  padding: 1.5rem;
-  border-radius: 15px;
-  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.05);
+.modeDescription {
+  color: #666;
+  font-size: 0.95rem;
   margin-bottom: 1.5rem;
+  line-height: 1.4;
 }
 
 .buttonContainer {
   display: flex;
-  gap: 1.2rem;
-  margin-bottom: 2rem;
-  justify-content: center;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
 .sideButton {
-  padding: 1rem 2rem;
+  padding: 0.9rem 1.2rem;
   border: none;
   border-radius: 12px;
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  min-width: 140px;
+  transition: all 0.2s ease;
   position: relative;
   overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
 }
 
 .sideButton::before {
@@ -93,62 +120,59 @@
   height: 100%;
   background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
   transform: translateX(-100%);
-  transition: 0.5s;
+  transition: 0.4s;
+}
+
+.sideButton:hover {
+  transform: translateY(-1px);
 }
 
 .sideButton:hover::before {
   transform: translateX(100%);
 }
 
-.sideButton:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
-}
-
 .redSide {
   background: linear-gradient(135deg, #ff4d4d, #ff3333);
   color: white;
+  box-shadow: 0 2px 8px rgba(255, 77, 77, 0.2);
 }
 
 .redSide:hover {
-  background: linear-gradient(135deg, #ff3333, #ff1a1a);
+  box-shadow: 0 4px 12px rgba(255, 77, 77, 0.3);
 }
 
 .blackSide {
-  background: linear-gradient(135deg, #333, #222);
+  background: linear-gradient(135deg, #2c3e50, #1a1a1a);
   color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .blackSide:hover {
-  background: linear-gradient(135deg, #222, #111);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
 }
 
 .closeButton {
-  padding: 0.8rem 2rem;
-  border: 2px solid #e0e0e0;
-  border-radius: 10px;
+  margin-top: 0.5rem;
+  padding: 0.7rem 2rem;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 12px;
   background: transparent;
   color: #666;
+  font-size: 0.95rem;
   font-weight: 600;
-  font-size: 1rem;
   cursor: pointer;
-  transition: all 0.3s ease;
-  margin-top: 0.5rem;
+  transition: all 0.2s ease;
 }
 
 .closeButton:hover {
-  background: #f8f9fa;
-  border-color: #666;
+  background: #f5f5f5;
+  border-color: #d0d0d0;
   color: #333;
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes slideUp {

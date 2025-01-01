@@ -18,7 +18,6 @@ import Link from "next/link";
 import Image from "next/image";
 
 export default function Home() {
-  const router = useRouter();
   const { data: session } = useSession();
   const [isDarkMode, setIsDarkMode] = useState(false);
 

@@ -96,8 +96,8 @@ const GameSchema = new Schema<IGameState>(
     },
     times: {
       type: {
-        red: { type: Number, required: true, default: 600 }, // 10 minutes in seconds
-        black: { type: Number, required: true, default: 600 },
+        red: { type: Number, required: true, default: 1800 }, // 10 minutes in seconds
+        black: { type: Number, required: true, default: 1800 },
       },
       default: { red: 600, black: 600 },
     },
@@ -118,6 +118,6 @@ GameSchema.index({ "players.black.id": 1 });
 GameSchema.index({ createdAt: 1 });
 
 const GameStateModel =
-  mongoose.models.GameState || model("GameState", GameSchema);
+  mongoose.models.gameStates || model("gameStates", GameSchema);
 
 export default GameStateModel;

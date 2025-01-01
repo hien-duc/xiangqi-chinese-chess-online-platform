@@ -7,7 +7,7 @@ import { useSession } from "next-auth/react";
 
 import XiangqiBoard from "@/components/ui/board/XiangqiBoard";
 import { useGameContext } from "@/hooks/useGameState";
-import styles from "@/styles/Page.module.css";
+import styles from "@/styles/GameId.module.css";
 import LeftPanel from "@/components/game/panels/LeftPanel";
 import RightPanel from "@/components/game/panels/RightPanel";
 

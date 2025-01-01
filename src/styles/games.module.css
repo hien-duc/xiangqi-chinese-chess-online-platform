@@ -155,8 +155,12 @@
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Dark Mode Button */
@@ -210,14 +214,14 @@
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 4px 6px rgba(var(--accent-rgb), 0.1),
-              0 2px 4px rgba(var(--accent-rgb), 0.06);
+    0 2px 4px rgba(var(--accent-rgb), 0.06);
 }
 
 .newGameButton:hover,
 .createGameButton:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 8px rgba(var(--accent-rgb), 0.15),
-              0 3px 6px rgba(var(--accent-rgb), 0.1);
+    0 3px 6px rgba(var(--accent-rgb), 0.1);
   filter: brightness(1.1);
 }
 
@@ -234,8 +238,14 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .gameCard {
@@ -254,13 +264,17 @@
 }
 
 .gameCard::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(to right, var(--accent-color), var(--accent-dark));
+  background: linear-gradient(
+    to right,
+    var(--accent-color),
+    var(--accent-dark)
+  );
   opacity: 0;
   transition: opacity 0.3s ease;
 }
@@ -388,7 +402,7 @@
 }
 
 .actionButton::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 50%;
   left: 50%;
@@ -411,11 +425,15 @@
 }
 
 .actionButton.join {
-  background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-dark) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--accent-color) 0%,
+    var(--accent-dark) 100%
+  );
   color: white;
   border: none;
   box-shadow: 0 4px 6px rgba(var(--accent-rgb), 0.1),
-              0 2px 4px rgba(var(--accent-rgb), 0.06);
+    0 2px 4px rgba(var(--accent-rgb), 0.06);
 }
 
 .actionButton.join::before {
@@ -426,7 +444,7 @@
   transform: translateY(-2px);
   filter: brightness(1.1);
   box-shadow: 0 6px 8px rgba(var(--accent-rgb), 0.15),
-              0 3px 6px rgba(var(--accent-rgb), 0.1);
+    0 3px 6px rgba(var(--accent-rgb), 0.1);
 }
 
 .actionButton.spectate {
@@ -487,8 +505,12 @@
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .loadingState {
@@ -528,8 +550,14 @@
 }
 
 @keyframes slideIn {
-  from { transform: translateY(-20px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 @media (max-width: 768px) {

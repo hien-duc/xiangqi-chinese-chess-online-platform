@@ -2,7 +2,6 @@
   box-sizing: content-box;
   position: relative;
   display: block;
-  margin-top: 25px;
   margin-bottom: 25px;
 }
 
@@ -156,14 +155,22 @@ piece.fading {
   bottom: -35px;
   left: 0;
   flex-flow: row;
-  color: #494d64;
   width: 100%;
   height: 20px;
-  font-weight: bold;
-  font-size: 1rem;
   text-transform: uppercase;
   text-align: center;
+  font-family: 'Crimson Text', serif;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #2c3e50;
+  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.1);
+  transition: color 0.3s ease;
 }
+
+.cg-wrap coords.files coord:hover {
+  color: #3498db;
+}
+
 .cg-wrap coords.files.top {
   top: -25px;
   left: 0;
@@ -173,6 +180,7 @@ piece.fading {
   text-transform: uppercase;
   text-align: center;
 }
+
 .cg-wrap coords.files.rev {
   flex-flow: row-reverse;
 }
@@ -187,15 +195,22 @@ piece.fading {
 
 .cg-wrap coords.squares {
   top: 15px;
-  color: #494d64;
   left: -35px;
   text-transform: uppercase;
   text-align: left;
   flex-flow: column-reverse;
-  gap: 34.5px;
-  font-weight: bold;
-  font-size: 0.95rem;
+  gap: 31px;
+  font-family: 'Crimson Text', serif;
+  font-size: 1.1rem;
+  font-weight: 600;
   width: 12.5%;
+  color: #2c3e50;
+  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.1);
+  transition: color 0.3s ease;
+}
+
+.cg-wrap coords.squares coord:hover {
+  color: #3498db;
 }
 
 .cg-wrap coords.squares.black {

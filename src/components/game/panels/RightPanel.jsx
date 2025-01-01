@@ -63,28 +63,40 @@ const PlayerInfo = ({
           )}
         </div>
 
-        <div className={styles.statsSection}>
-          <div className={styles.winStats}>
-            <div className={styles.statItem}>
-              <FaTrophy className={styles.statIcon} />
-              <span>{playerStats?.wins || 0}</span>
-              <div className={styles.statLabel}>Wins</div>
+        {!player.isBot && playerStats?.stats && (
+          <div className={styles.statsSection}>
+            <div className={styles.winStats}>
+              <div className={styles.statItem}>
+                <FaTrophy className={styles.statIcon} />
+                <span>{playerStats.stats.wins}</span>
+                <div className={styles.statLabel}>Wins</div>
+              </div>
+              <div className={styles.statItem}>
+                <FaSkull className={styles.statIcon} />
+                <span>{playerStats.stats.losses}</span>
+                <div className={styles.statLabel}>Losses</div>
+              </div>
+              <div className={styles.statItem}>
+                <FaHandshake className={styles.statIcon} />
+                <span>{playerStats.stats.draws}</span>
+                <div className={styles.statLabel}>Draws</div>
+              </div>
             </div>
-            <div className={styles.statItem}>
-              <FaSkull className={styles.statIcon} />
-              <span>{playerStats?.losses || 0}</span>
-              <div className={styles.statLabel}>Losses</div>
-            </div>
-            <div className={styles.statItem}>
-              <FaHandshake className={styles.statIcon} />
-              <span>{playerStats?.draws || 0}</span>
-              <div className={styles.statLabel}>Draws</div>
+            <div className={styles.additionalStats}>
+              <div className={styles.gamesPlayed}>
+                Games: {playerStats.stats.gamesPlayed}
+              </div>
+              <div className={styles.winRate}>
+                {playerStats.stats.winRate}% WR
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         <div className={styles.timeInfo}>
-          <div className={styles.timeLeft}>Time: {formatTime(timeLeft)}</div>
+          <div className={styles.timeLeft}>
+            Time: {formatTime(timeLeft || timer)}
+          </div>
           {isCurrentTurn && <div className={styles.thinking}>Thinking...</div>}
           {timer !== null && (
             <div
@@ -148,10 +160,27 @@ const RightPanel = () => {
           );
           if (redResponse.ok) {
             const redData = await redResponse.json();
+            console.log(redData);
+
             setRedPlayerStats(redData);
+          } else {
+            console.error(
+              "Failed to fetch red player stats:",
+              await redResponse.text()
+            );
           }
         } else {
-          setRedPlayerStats({ rating: "BOT", rank: "Bot Player" });
+          setRedPlayerStats({
+            stats: {
+              rating: "BOT",
+              rank: "Bot Player",
+              wins: 0,
+              losses: 0,
+              draws: 0,
+              gamesPlayed: 0,
+              winRate: 0,
+            },
+          });
         }
 
         // Fetch black player stats if not a bot
@@ -162,9 +191,24 @@ const RightPanel = () => {
           if (blackResponse.ok) {
             const blackData = await blackResponse.json();
             setBlackPlayerStats(blackData);
+          } else {
+            console.error(
+              "Failed to fetch black player stats:",
+              await blackResponse.text()
+            );
           }
         } else {
-          setBlackPlayerStats({ rating: "BOT", rank: "Bot Player" });
+          setBlackPlayerStats({
+            stats: {
+              rating: "BOT",
+              rank: "Bot Player",
+              wins: 0,
+              losses: 0,
+              draws: 0,
+              gamesPlayed: 0,
+              winRate: 0,
+            },
+          });
         }
       } catch (error) {
         console.error("Error fetching player stats:", error);

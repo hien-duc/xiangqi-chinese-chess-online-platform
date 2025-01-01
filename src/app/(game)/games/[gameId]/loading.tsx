@@ -1,7 +1,7 @@
 "use client";
 import styles from "@/styles/Loading.module.css";
 
-export default function GameLoading() {
+export default function GameIdLoading() {
   return (
     <div className={styles.gameContainer}>
       <div className={styles.gameBoard}>

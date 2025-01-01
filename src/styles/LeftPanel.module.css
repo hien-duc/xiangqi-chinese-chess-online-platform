@@ -1,16 +1,15 @@
 /* LeftPanel.module.css */
 .leftPanel {
   width: 300px;
-  height: calc(100vh - 80px); /* Account for header and padding */
-  margin-top: 8px;
+  height: calc(100vh - 65px); /* Account for header and padding */
   background: linear-gradient(to bottom, #ffffff, #f8fafc);
   border-right: 1px solid rgba(229, 231, 235, 0.5);
   display: flex;
   flex-direction: column;
   overflow: hidden;
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.03);
-  border-radius: 12px;
   padding: 12px;
+  margin-right: 10rem;
 }
 
 .turnIndicator {

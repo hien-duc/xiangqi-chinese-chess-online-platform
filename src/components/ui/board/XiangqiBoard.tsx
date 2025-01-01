@@ -11,10 +11,12 @@ import ForfeitModal from "@/components/game/modals/ForfeitModal";
 import "@styles/XiangqiGround.css";
 import { Key } from "@/utils/types";
 import { isInCheck } from "@/lib/game/chess-rules";
+import EvaluationBar from "@/components/game/EvaluationBar";
 
 interface XiangqiBoardProps {
   className?: string;
   isSpectator?: boolean;
+  evaluation?: number;
 }
 
 interface XiangqigroundInstance {
@@ -27,6 +29,7 @@ const DEFAULT_FEN = initialFen;
 const XiangqiBoard: React.FC<XiangqiBoardProps> = ({
   className = "",
   isSpectator = false,
+  evaluation = 0,
 }) => {
   const { gameState, makeMove, isLoading, forfeitGame } = useGameContext();
   const { data: session } = useSession();
@@ -183,6 +186,13 @@ const XiangqiBoard: React.FC<XiangqiBoardProps> = ({
 
   return (
     <div style={{ position: "relative", width: "540px", height: "600px" }}>
+      {/* <EvaluationBar
+        evaluation={evaluation}
+        isLoading={isLoading}
+        orientation={
+          gameState?.players?.red?.id === session?.user?.id ? "red" : "black"
+        }
+      /> */}
       <div
         ref={boardRef}
         className={`xiangqiground ${className} ${
@@ -190,6 +200,7 @@ const XiangqiBoard: React.FC<XiangqiBoardProps> = ({
         }`}
         style={{ width: "100%", height: "100%" }}
       />
+
       {message && (
         <div
           style={{

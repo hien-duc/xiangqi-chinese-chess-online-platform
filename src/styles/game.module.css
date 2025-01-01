@@ -4,12 +4,17 @@
   gap: 2rem;
   padding: 2rem;
   min-height: 100vh;
-  background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0));
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.1),
+    rgba(255, 255, 255, 0)
+  );
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 }
 
-.leftPanel, .rightPanel {
+.leftPanel,
+.rightPanel {
   background: rgba(255, 255, 255, 0.1);
   border-radius: 16px;
   padding: 1.5rem;
@@ -39,7 +44,8 @@
   opacity: 0.8;
 }
 
-.loading, .error {
+.loading,
+.error {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -91,18 +97,14 @@
   border-radius: 24px;
   overflow: hidden;
   background: white;
-  box-shadow: 
-    0 0 0 1px rgba(0, 0, 0, 0.05),
-    0 4px 6px rgba(0, 0, 0, 0.05),
-    0 10px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.05), 0 4px 6px rgba(0, 0, 0, 0.05),
+    0 10px 20px rgba(186, 155, 155, 0.1);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .boardContainer:hover {
   transform: translateY(-2px);
-  box-shadow: 
-    0 0 0 1px rgba(0, 0, 0, 0.05),
-    0 4px 6px rgba(0, 0, 0, 0.05),
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.05), 0 4px 6px rgba(0, 0, 0, 0.05),
     0 20px 25px rgba(0, 0, 0, 0.1);
 }
 
@@ -143,8 +145,12 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .errorContainer {
@@ -169,8 +175,9 @@
     grid-template-columns: 1fr;
     grid-template-rows: auto 1fr auto;
   }
-  
-  .leftPanel, .rightPanel {
+
+  .leftPanel,
+  .rightPanel {
     padding: 1rem;
   }
 }

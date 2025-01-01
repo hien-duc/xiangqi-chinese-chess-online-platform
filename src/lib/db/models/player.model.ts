@@ -57,7 +57,7 @@ const PlayerSchema = new Schema(
       async getPlayerProfile(): Promise<IPlayerProfile> {
         // Get recent games from GameState model
         const recentGames = await mongoose
-          .model("gameState")
+          .model("gameStates")
           .find({
             $or: [
               { "players.red.id": this.userId },
@@ -73,9 +73,9 @@ const PlayerSchema = new Schema(
         const winRate =
           this.gamesPlayed > 0 ? (this.wins / this.gamesPlayed) * 100 : 0;
 
-        // Calculate average time from completed games
+        // Calculate average time from complpeted games
         const completedGames = await mongoose
-          .model("gameState")
+          .model("gameStates")
           .find({
             $or: [
               { "players.red.id": this.userId },

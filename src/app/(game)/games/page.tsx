@@ -17,6 +17,7 @@ export default function GamesPage() {
   const [games, setGames] = useState<IGameState[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const router = useRouter();
   const { data: session } = useSession();
@@ -41,8 +42,7 @@ export default function GamesPage() {
     fetchGames();
 
     // Set up auto-refresh interval
-    let refreshInterval: NodeJS.Timeout;
-    refreshInterval = setInterval(fetchGames, 10000); // Refresh every 10 seconds
+    const refreshInterval: NodeJS.Timeout = setInterval(fetchGames, 10000);
 
     // Cleanup when component unmounts
     return () => {
@@ -58,22 +58,18 @@ export default function GamesPage() {
       setIsRefreshing(true);
       const url = new URL("/api/v1/games", window.location.origin);
 
-      // Add currentUserId to filter out games where the user is already playing
-      // if (session?.user?.id) {
-      //   url.searchParams.append("currentUserId", session.user.id);
-      // }
-
       const response = await fetch(url);
       if (!response.ok) {
         throw new Error("Failed to fetch games");
       }
+
       const data = await response.json();
       setGames(data.games);
     } catch (error) {
       console.error("Error fetching games:", error);
-      throw new Error("Failed to fetch games");
     } finally {
       setIsRefreshing(false);
+      setIsLoading(false);
     }
   };
 
@@ -228,7 +224,7 @@ export default function GamesPage() {
           </div>
         </div>
 
-        {games.length === 0 ? (
+        {!isLoading && games.length === 0 ? (
           <div className={styles.emptyState}>
             <FaChessBoard className={styles.emptyIcon} />
             <h2>No Games Available</h2>
