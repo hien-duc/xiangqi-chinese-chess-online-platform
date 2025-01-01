@@ -159,7 +159,7 @@ piece.fading {
   height: 20px;
   text-transform: uppercase;
   text-align: center;
-  font-family: 'Crimson Text', serif;
+  font-family: "Crimson Text", serif;
   font-size: 1.2rem;
   font-weight: 600;
   color: #2c3e50;
@@ -200,7 +200,7 @@ piece.fading {
   text-align: left;
   flex-flow: column-reverse;
   gap: 31px;
-  font-family: 'Crimson Text', serif;
+  font-family: "Crimson Text", serif;
   font-size: 1.1rem;
   font-weight: 600;
   width: 12.5%;

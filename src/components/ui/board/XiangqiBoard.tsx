@@ -12,6 +12,7 @@ import "@styles/XiangqiGround.css";
 import { Key } from "@/utils/types";
 import { isInCheck } from "@/lib/game/chess-rules";
 import EvaluationBar from "@/components/game/EvaluationBar";
+import { evaluatePosition } from "@/lib/game/evaluation";
 
 interface XiangqiBoardProps {
   className?: string;
@@ -29,7 +30,7 @@ const DEFAULT_FEN = initialFen;
 const XiangqiBoard: React.FC<XiangqiBoardProps> = ({
   className = "",
   isSpectator = false,
-  evaluation = 0,
+  evaluation: initialEvaluation = 0,
 }) => {
   const { gameState, makeMove, isLoading, forfeitGame } = useGameContext();
   const { data: session } = useSession();
@@ -37,6 +38,8 @@ const XiangqiBoard: React.FC<XiangqiBoardProps> = ({
   const groundRef = useRef<XiangqigroundInstance | null>(null);
   const isInitialMount = useRef(true);
   const [showForfeitModal, setShowForfeitModal] = useState(false);
+  const [evaluation, setEvaluation] = useState(initialEvaluation);
+  const [isEvaluating, setIsEvaluating] = useState(false);
 
   const handleForfeit = async () => {
     await forfeitGame();
@@ -102,7 +105,7 @@ const XiangqiBoard: React.FC<XiangqiBoardProps> = ({
         ? gameState.players.black.id
         : null);
     const config: Config = {
-      viewOnly: isSpectator || gameState?.status === "completed",
+      viewOnly: isSpectator || !isGameActive,
       orientation: gameState?.players?.red?.id === playerId ? "red" : "black",
       turnColor: canMove() ? currentTurn : undefined,
       check: isInCheck(gameState?.fen || DEFAULT_FEN),
@@ -162,14 +165,43 @@ const XiangqiBoard: React.FC<XiangqiBoardProps> = ({
     } else {
       groundRef.current.set(config);
     }
+
+    // Cleanup function
+    return () => {
+      if (groundRef.current?.destroy) {
+        groundRef.current.destroy();
+        groundRef.current = null;
+      }
+    };
   }, [gameState, isSpectator, session?.user?.id, canMove, makeMove]);
 
   // Update the board when game state changes
   useEffect(() => {
     if (!isInitialMount.current && groundRef.current?.set && gameState?.fen) {
-      groundRef.current.set({ fen: gameState.fen });
+      groundRef.current.set({
+        fen: gameState.fen,
+        viewOnly: isSpectator || gameState.status !== "active",
+      });
     }
     isInitialMount.current = false;
+  }, [gameState?.fen, gameState?.status, isSpectator]);
+
+  // Update evaluation when game state changes
+  useEffect(() => {
+    const updateEvaluation = async () => {
+      if (!gameState?.fen || isEvaluating) return;
+      setIsEvaluating(true);
+      try {
+        const newEvaluation = await evaluatePosition(gameState.fen);
+        setEvaluation(newEvaluation);
+      } catch (error) {
+        console.error("Error evaluating position:", error);
+      } finally {
+        setIsEvaluating(false);
+      }
+    };
+
+    updateEvaluation();
   }, [gameState?.fen]);
 
   // Get message based on game state
@@ -186,13 +218,10 @@ const XiangqiBoard: React.FC<XiangqiBoardProps> = ({
 
   return (
     <div style={{ position: "relative", width: "540px", height: "600px" }}>
-      {/* <EvaluationBar
+      <EvaluationBar
         evaluation={evaluation}
-        isLoading={isLoading}
-        orientation={
-          gameState?.players?.red?.id === session?.user?.id ? "red" : "black"
-        }
-      /> */}
+        isLoading={isLoading || isEvaluating}
+      />
       <div
         ref={boardRef}
         className={`xiangqiground ${className} ${
@@ -208,7 +237,7 @@ const XiangqiBoard: React.FC<XiangqiBoardProps> = ({
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",
-            zIndex: 9999,
+            zIndex: 2,
             background: "rgba(0, 0, 0, 0.7)",
             color: "white",
             padding: "1rem 2rem",

@@ -5,42 +5,76 @@ import styles from "@/styles/EvaluationBar.module.css";
 interface EvaluationBarProps {
   evaluation: number; // Centipawns value, positive for red advantage, negative for black
   isLoading?: boolean;
-  orientation?: "red" | "black";
 }
 
 export default function EvaluationBar({
   evaluation,
   isLoading = false,
-  orientation = "red",
 }: EvaluationBarProps) {
-  const [barHeight, setBarHeight] = useState("50%");
   const [displayValue, setDisplayValue] = useState("");
+  const [barHeight, setBarHeight] = useState("50%");
 
   useEffect(() => {
-    // Convert evaluation to a percentage (capped at ±10 pawns)
-    const maxEval = 1000; // 10 pawns
-    const percentage = Math.min(
-      Math.max(50 + (evaluation / maxEval) * 50, 0),
-      100
+    // Scale the evaluation for display
+    const scaleEvaluation = (evalValue: number): number => {
+      const absEval = Math.abs(evalValue);
+      // Use a non-linear scaling for better visualization
+      if (absEval <= 100) {
+        // Linear scaling for small advantages (up to 1 pawn)
+        return absEval;
+      } else if (absEval <= 500) {
+        // Slightly compressed scaling for medium advantages (1-5 pawns)
+        return 100 + Math.pow(absEval - 100, 0.8);
+      } else {
+        // More compressed scaling for large advantages
+        return 400 + Math.pow(absEval - 500, 0.6);
+      }
+    };
+
+    // Convert evaluation to a percentage with non-linear scaling
+    const scaledEval = scaleEvaluation(evaluation);
+    const maxScaledEval = 800; // Maximum scaled value for display
+    const basePercentage = Math.min(
+      Math.max((scaledEval / maxScaledEval) * 50, 1),
+      49
     );
-    
-    // Invert the bar if playing as black
-    const adjustedPercentage = orientation === "black" ? 100 - percentage : percentage;
-    setBarHeight(`${adjustedPercentage}%`);
+
+    // Calculate bar height
+    let height;
+    if (evaluation === 0) {
+      height = "50%";
+    } else if (evaluation > 0) {
+      height = `${50 + basePercentage}%`;
+    } else {
+      height = `${50 - basePercentage}%`;
+    }
+
+    setBarHeight(height);
 
     // Format the display value
-    if (evaluation === 0) {
-      setDisplayValue("0.0");
-    } else {
-      const absEval = Math.abs(evaluation);
-      const sign = evaluation > 0 ? "+" : "-";
+    const formatEvaluation = (evalValue: number): string => {
+      const absEval = Math.abs(evalValue);
+      if (evalValue === 0) return "0.0";
+
+      // Handle mate scores
       if (absEval >= 10000) {
-        setDisplayValue(`M${sign}${Math.ceil(20000 - absEval) / 2}`);
-      } else {
-        setDisplayValue(`${sign}${(absEval / 100).toFixed(1)}`);
+        const movesToMate = Math.ceil((20000 - absEval) / 2);
+        return `M${movesToMate}`;
       }
-    }
-  }, [evaluation, orientation]);
+
+      // Format regular evaluations
+      const pawns = absEval / 100;
+      if (pawns >= 10) {
+        // Show without decimal for large advantages
+        return `${Math.floor(pawns)}`;
+      } else {
+        // Show one decimal place for smaller advantages
+        return pawns.toFixed(1);
+      }
+    };
+
+    setDisplayValue(formatEvaluation(evaluation));
+  }, [evaluation]);
 
   return (
     <div className={styles.container}>
@@ -52,10 +86,19 @@ export default function EvaluationBar({
         ) : (
           <>
             <div
+              className={styles.evaluationValue}
+              style={{
+                top: evaluation < 0 ? "10px" : "auto",
+                bottom: evaluation < 0 ? "auto" : "10px",
+                color: Math.abs(evaluation) > 1000 ? "#ff4444" : "#fff",
+              }}
+            >
+              {displayValue}
+            </div>
+            <div
               className={styles.evaluationBar}
               style={{ height: barHeight }}
-            ></div>
-            <div className={styles.evaluationValue}>{displayValue}</div>
+            />
           </>
         )}
       </div>

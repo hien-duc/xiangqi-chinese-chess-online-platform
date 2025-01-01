@@ -18,12 +18,8 @@ export async function POST(req: Request) {
 
     if (!engineHandler) {
       // Initialize engine handler with your engine path
-      // const enginePath = path.join(process.cwd(), "engines", "xiangqi.exe");
-      const enginePath = path.join(
-        process.cwd(),
-        "engines",
-        "chess_engine.exe"
-      );
+      const enginePath = path.join(process.cwd(), "engines", "chess_engine.exe");
+      // const enginePath = path.join(process.cwd(), "engines", "fairyfish.exe");
       engineHandler = new EngineHandler(enginePath);
       await engineHandler.start();
     }

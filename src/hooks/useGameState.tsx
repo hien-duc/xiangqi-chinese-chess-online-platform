@@ -39,6 +39,17 @@ const GameContext = createContext<GameContextType>({
 
 const POLLING_INTERVAL = 2000;
 
+// Track shown modals
+const shownModals = new Set<string>();
+
+const hasShownModal = (gameId: string) => {
+  return shownModals.has(gameId);
+};
+
+const markModalShown = (gameId: string) => {
+  shownModals.add(gameId);
+};
+
 interface GameProviderProps {
   children: React.ReactNode;
   gameId: string;
@@ -132,8 +143,11 @@ export const GameProvider: React.FC<GameProviderProps> = ({
           const displayWinner =
             winningColor.charAt(0).toUpperCase() + winningColor.slice(1);
 
-          setWinner(displayWinner);
-          setShowWinModal(true);
+          if (!hasShownModal(gameIdState)) {
+            setWinner(displayWinner);
+            setShowWinModal(true);
+            markModalShown(gameIdState);
+          }
 
           // Update game status in database
           try {
@@ -278,25 +292,21 @@ export const GameProvider: React.FC<GameProviderProps> = ({
               status: data.game.status,
             };
           }
-          if (
-            data.game.status === "completed" &&
-            data.game.winner &&
-            !hasShownModal(gameIdState)
-          ) {
-            setWinner(data.game.winner);
-            setShowWinModal(true);
-            markModalShown(gameIdState);
-          }
-          // If messages changed, update just messages
-          if (messagesChanged && !playersChanged && !gameStateChanged) {
-            return {
-              ...prevState,
-              messages: data.game.messages,
-            };
-          }
-
           // If game state changed, update everything
           if (gameStateChanged) {
+            // Check if we need to show the win modal
+            if (
+              data.game.status === "completed" &&
+              data.game.winner &&
+              !hasShownModal(gameIdState)
+            ) {
+              const displayWinner =
+                data.game.winner.charAt(0).toUpperCase() +
+                data.game.winner.slice(1);
+              setWinner(displayWinner);
+              setShowWinModal(true);
+              markModalShown(gameIdState);
+            }
             return data.game;
           }
 
@@ -379,27 +389,6 @@ export const GameProvider: React.FC<GameProviderProps> = ({
     [gameIdState, gameState]
   );
 
-  // Check if modal has been shown for this game
-  const hasShownModal = (gameId: string) => {
-    return localStorage.getItem(`modal_shown_${gameId}`) === "true";
-  };
-
-  // Mark modal as shown for this game
-  const markModalShown = (gameId: string) => {
-    localStorage.setItem(`modal_shown_${gameId}`, "true");
-  };
-
-  // Clear modal shown state when game changes
-  useEffect(() => {
-    if (gameIdState) {
-      const modalShown = hasShownModal(gameIdState);
-      if (!modalShown) {
-        setShowWinModal(false);
-        setWinner("");
-      }
-    }
-  }, [gameIdState]);
-
   useEffect(() => {
     const handleBotMove = async () => {
       if (!gameState || gameState.status !== "active" || isThinking) return;
@@ -466,9 +455,8 @@ export const GameProvider: React.FC<GameProviderProps> = ({
       {showWinModal && (
         <WinModal
           isOpen={showWinModal}
-          winner={winner}
           onClose={() => setShowWinModal(false)}
-          gameId={gameIdState}
+          winner={winner}
         />
       )}
     </GameContext.Provider>
@@ -482,4 +470,3 @@ export const useGameContext = () => {
   }
   return context;
 };
-  

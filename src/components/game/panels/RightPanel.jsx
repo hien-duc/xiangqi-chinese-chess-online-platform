@@ -160,8 +160,6 @@ const RightPanel = () => {
           );
           if (redResponse.ok) {
             const redData = await redResponse.json();
-            console.log(redData);
-
             setRedPlayerStats(redData);
           } else {
             console.error(
