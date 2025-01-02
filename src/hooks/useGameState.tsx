@@ -285,7 +285,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({
             JSON.stringify(data.game.messages);
 
           // If only players or messages changed, update just those fields
-          if (playersChanged && !gameStateChanged) {
+          if (playersChanged && !gameStateChanged && !messagesChanged) {
             return {
               ...prevState,
               players: data.game.players,

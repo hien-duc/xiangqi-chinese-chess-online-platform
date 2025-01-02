@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import styles from "./settings.module.css";
+import styles from "@/styles/settings.module.css";
 import {
   Settings,
   Moon,
