@@ -9,6 +9,7 @@ export default function GameIdLoading() {
         <div className={styles.piece} />
         <div className={styles.piece} />
       </div>
+      
 
       <div className={styles.sidebar}>
         <div className={styles.chatLoading}>
