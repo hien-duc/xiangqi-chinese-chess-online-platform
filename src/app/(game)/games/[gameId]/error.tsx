@@ -8,6 +8,7 @@ export default function GameError({
 }: {
   error: Error & { digest?: string };
   reset: () => void;
+  
 }) {
   return <ErrorDisplay error={error} reset={reset} variant="game" />;
 }
