@@ -1,25 +1,16 @@
 // app/api/auth/register/route.ts
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-import { z } from "zod";
 import { connectToDatabase } from "@/lib/db/db-connect";
 import User from "@/lib/db/models/user.model";
 import { createPlayerProfile } from "@/lib/db/models/player.model";
-
-const registerSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  email: z.string().email("Invalid email"),
-  password: z
-    .string()
-    .min(8, "Password must be at least 8 characters")
-    .max(32, "Password must be less than 32 characters"),
-});
+import { SignupFormSchema } from "@/lib/validations/authenticationZod";
 
 export async function POST(request: Request) {
   try {
     // Parse and validate the request body
     const body = await request.json();
-    const { name, email, password } = registerSchema.parse(body);
+    const { name, email, password } = SignupFormSchema.parse(body);
     await connectToDatabase();
 
     // Check if user already exists

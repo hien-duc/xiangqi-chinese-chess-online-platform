@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import styles from "@/styles/settings.module.css";
+import styles from "@/styles/Settings.module.css";
 import {
   Settings,
   Moon,
@@ -10,7 +10,6 @@ import {
   Eye,
   Languages,
   ChevronDown,
-  Save,
   Swords,
 } from "lucide-react";
 import Image from "next/image";
