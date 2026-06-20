@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document } from "mongoose";
+import { connectToDatabase } from "../db-connect";
 
 export interface IPlayer extends Document {
   userId: string | Schema.Types.ObjectId; // Allow both string and ObjectId
@@ -107,20 +108,19 @@ const PlayerSchema = new Schema(
             : undefined;
 
         // Format recent games
-        const formattedGames = recentGames.map((game) => ({
+        const formattedGames: IRecentGame[] = (recentGames as any[]).map((game) => ({
           id: game._id.toString(),
           opponent:
             game.players.red.id === this.userId
               ? game.players.black.name
               : game.players.red.name,
-          result:
-            game.status === "completed"
-              ? game.winner === this.userId
-                ? "win"
-                : game.winner
-                ? "loss"
-                : "draw"
-              : "active",
+          result: (game.status === "completed"
+            ? game.winner === this.userId
+              ? "win"
+              : game.winner
+              ? "loss"
+              : "draw"
+            : "active") as "win" | "loss" | "draw" | "active",
           date: game.updatedAt,
         }));
 
@@ -154,6 +154,7 @@ function calculateRank(rating: number): string {
 
 // Create player profile after user registration
 export async function createPlayerProfile(userId: string, name: string) {
+  await connectToDatabase();
   const PlayerModel =
     mongoose.models.Player || mongoose.model<IPlayer>("Player", PlayerSchema);
 
@@ -188,6 +189,7 @@ export async function updatePlayerStats(
   result: "win" | "loss" | "draw",
   ratingChange: number
 ) {
+  await connectToDatabase();
   const PlayerModel =
     mongoose.models.Player || mongoose.model<IPlayer>("Player", PlayerSchema);
 

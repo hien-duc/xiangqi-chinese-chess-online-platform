@@ -2,6 +2,8 @@
 
 A modern implementation of Chinese Chess using Next.js and TypeScript.
 
+Xiangqi
+
 ## Tech Stack
 
 - **Framework**: Next.js 15

@@ -5,7 +5,6 @@ if (!process.env.MONGODB_URI) {
   throw new Error('Invalid/Missing environment variable: "MONGODB_URI"');
 }
 
-const uri = process.env.MONGODB_URI;
 const options = {
   serverApi: {
     version: ServerApiVersion.v1,
@@ -14,37 +13,69 @@ const options = {
   },
 };
 
-let client;
-let clientPromise: Promise<MongoClient>;
+const globalWithMongo = global as typeof globalThis & {
+  _mongoClientPromise?: Promise<MongoClient>;
+  _mongoUriPromise?: Promise<string>;
+  _mongoMemoryServer?: any;
+};
 
-if (process.env.NODE_ENV === "development") {
-  const globalWithMongo = global as typeof globalThis & {
-    _mongoClientPromise?: Promise<MongoClient>;
-  };
-  if (!globalWithMongo._mongoClientPromise) {
-    client = new MongoClient(uri, options);
-    globalWithMongo._mongoClientPromise = client.connect();
+async function resolveUri(): Promise<string> {
+  const defaultUri = process.env.MONGODB_URI!;
+  
+  if (process.env.NODE_ENV !== "development") {
+    return defaultUri;
   }
-  clientPromise = globalWithMongo._mongoClientPromise;
-} else {
-  client = new MongoClient(uri, options);
-  clientPromise = client.connect();
+
+  try {
+    // Ping configured MongoDB with a short timeout to see if it's reachable
+    const client = new MongoClient(defaultUri, {
+      ...options,
+      serverSelectionTimeoutMS: 2000,
+    });
+    await client.connect();
+    await client.close();
+    return defaultUri;
+  } catch (err) {
+    console.warn("⚠️ Local MongoDB is unreachable. Attempting to start in-memory MongoDB fallback...");
+    
+    if (!globalWithMongo._mongoMemoryServer) {
+      try {
+        const { MongoMemoryServer } = require("mongodb-memory-server");
+        const mongoServer = await MongoMemoryServer.create();
+        globalWithMongo._mongoMemoryServer = mongoServer;
+        console.log("✅ In-memory MongoDB fallback started successfully.");
+      } catch (memErr) {
+        console.error("❌ Failed to start in-memory MongoDB server:", memErr);
+        throw err;
+      }
+    }
+    return globalWithMongo._mongoMemoryServer.getUri();
+  }
 }
 
+if (!globalWithMongo._mongoUriPromise) {
+  globalWithMongo._mongoUriPromise = resolveUri();
+}
+
+const clientPromise: Promise<MongoClient> = globalWithMongo._mongoUriPromise.then(async (resolvedUri) => {
+  const client = new MongoClient(resolvedUri, options);
+  return client.connect();
+});
+
 export async function connectToDatabase() {
-  const options: ConnectOptions = {
+  const connectOptions: ConnectOptions = {
     bufferCommands: false,
     maxIdleTimeMS: 10000,
-    serverSelectionTimeoutMS: 100000,
+    serverSelectionTimeoutMS: 10000,
     socketTimeoutMS: 20000,
   };
   try {
     if (mongoose.connection.readyState === 1) {
       return true;
     }
+    const resolvedUri = (await globalWithMongo._mongoUriPromise) as string;
     await mongoose.disconnect();
-    await mongoose.connect(uri, options);
-
+    await mongoose.connect(resolvedUri, connectOptions);
     console.log("✅ Connected to MongoDB");
     return true;
   } catch (error) {

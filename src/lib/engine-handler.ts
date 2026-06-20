@@ -10,6 +10,7 @@ export class EngineHandler {
   private engine: ChildProcess | null = null;
   private enginePath: string;
   private isReady: boolean = false;
+  private useFallback: boolean = false;
   private requestQueue: MoveRequest[] = [];
   private currentRequest: MoveRequest | null = null;
   private isProcessing: boolean = false;
@@ -23,17 +24,24 @@ export class EngineHandler {
       try {
         this.engine = spawn(this.enginePath);
 
+        this.engine.on("error", (err) => {
+          console.warn(`⚠️ Failed to spawn engine binary: ${err.message}. Falling back to JS minimax engine.`);
+          this.useFallback = true;
+          this.isReady = true;
+          resolve();
+        });
+
         this.engine.stdout?.on("data", (data: Buffer) => {
           const output = data.toString();
           console.log("Engine output:", output);
 
           if (output.includes("bestmove")) {
             const move = this.parseBestMove(output);
-            if (move && this.currentRequest?.callback) {
-              this.currentRequest.callback(move);
-              this.currentRequest = null;
-              this.processNextRequest();
+            if (this.currentRequest?.callback) {
+              this.currentRequest.callback(move || "");
             }
+            this.currentRequest = null;
+            this.processNextRequest();
           }
 
           if (output.includes("uciok")) {
@@ -51,10 +59,17 @@ export class EngineHandler {
           this.isReady = false;
           this.currentRequest = null;
           this.requestQueue = [];
+          if (code !== 0 && code !== null) {
+            console.warn(`⚠️ Engine process exited unexpectedly. Falling back to JS minimax engine.`);
+            this.useFallback = true;
+            this.isReady = true;
+            resolve();
+          }
         });
 
         // Initialize UCI protocol
         this.sendCommand("uci");
+        this.sendCommand("setoption name UCI_Variant value xiangqi");
         this.sendCommand("isready");
       } catch (error) {
         reject(error);
@@ -81,6 +96,21 @@ export class EngineHandler {
   }
 
   public sendMove(fen: string, callback: (move: string) => void): void {
+    if (this.useFallback) {
+      console.log("Using JS fallback minimax engine to find move...");
+      const { getBestMoveMinimax } = require("./game/minimax-bot");
+      getBestMoveMinimax(fen)
+        .then((move: string | null) => {
+          console.log("JS Minimax bot chose move:", move);
+          callback(move || "");
+        })
+        .catch((err: any) => {
+          console.error("Error in fallback minimax engine:", err);
+          callback("");
+        });
+      return;
+    }
+
     if (!this.isReady || !this.engine) {
       console.error("Engine not ready");
       return;
@@ -107,10 +137,13 @@ export class EngineHandler {
 
   private parseBestMove(output: string): string | null {
     console.log("Raw engine output:", output);
-    const match = output.match(/bestmove\s+(\w+)/);
+    const match = output.match(/bestmove\s+([^\s]+)/);
     if (match && match[1]) {
       const engineMove = match[1];
       console.log("Engine move format:", engineMove);
+      if (engineMove === "(none)" || engineMove === "none") {
+        return null;
+      }
       return engineMove;
     }
     return null;

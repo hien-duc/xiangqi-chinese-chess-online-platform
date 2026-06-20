@@ -1,5 +1,5 @@
 // Piece values in centipawns (1 pawn = 100 centipawns)
-const PIECE_VALUES = {
+const PIECE_VALUES: { [key: string]: number } = {
   R: 1000, // Red Chariot (increased value)
   N: 450, // Red Horse (slightly increased)
   B: 250, // Red Elephant (slightly increased)
@@ -35,7 +35,7 @@ const CENTER_CONTROL = {
   RIVER_CONTROL: 25,
 };
 
-const MOBILITY_BONUS = {
+const MOBILITY_BONUS: { [key: string]: number } = {
   R: 10, // Chariot mobility bonus
   N: 8, // Horse mobility bonus
   C: 8, // Cannon mobility bonus
@@ -47,7 +47,7 @@ const MOBILITY_BONUS = {
 };
 
 // Position bonuses for different pieces
-const POSITION_BONUSES = {
+const POSITION_BONUSES: { [key: string]: number[][] } = {
   // Pawn position values
   P: [
     // Red Pawn
@@ -135,6 +135,7 @@ import { isInCheck, isCheckmate } from "./chess-rules";
 import { getValidMoves } from "./moves";
 import * as cg from "@/utils/types";
 import { readXiangqi } from "./fen";
+import { key2pos } from "@/utils/util";
 
 function countDefenders(
   board: string[][],
@@ -264,8 +265,9 @@ export async function evaluatePosition(fen: string): Promise<number> {
     // Material value
     evaluation += PIECE_VALUES[pieceChar] || 0;
 
-    // Position bonus from position tables
-    const [row, col] = key.split("").map(Number);
+    const pos = key2pos(key);
+    const col = pos[0];
+    const row = pos[1];
     if (POSITION_BONUSES[pieceChar] && POSITION_BONUSES[pieceChar][row]) {
       evaluation += POSITION_BONUSES[pieceChar][row][col];
     }
@@ -368,7 +370,9 @@ function boardFromPieces(pieces: cg.Pieces): string[][] {
 
   // Place pieces on the board
   for (const [key, piece] of pieces.entries()) {
-    const [row, col] = key.split("").map(Number);
+    const pos = key2pos(key);
+    const col = pos[0];
+    const row = pos[1];
     if (row >= 0 && row < 10 && col >= 0 && col < 9) {
       board[row][col] = getPieceChar(piece);
     }
@@ -396,17 +400,22 @@ function wouldBeInCheck(
   color: string
 ): boolean {
   // Simulate the move
-  const newPieces = { ...pieces };
-  newPieces[to] = newPieces[from];
-  delete newPieces[from];
+  const newPieces = new Map(pieces);
+  const movingPiece = newPieces.get(from as cg.Key);
+  if (movingPiece) {
+    newPieces.set(to as cg.Key, movingPiece);
+  }
+  newPieces.delete(from as cg.Key);
 
   // Check if the king is in check
   const kingPosition = getKingPosition(newPieces, color);
   if (!kingPosition) return false;
 
-  const [kingRow, kingCol] = kingPosition.split("").map(Number);
+  const pos = key2pos(kingPosition as cg.Key);
+  const col = pos[0];
+  const row = pos[1];
   const board = boardFromPieces(newPieces);
-  const attackers = countAttackers(board, kingRow, kingCol, color === "red");
+  const attackers = countAttackers(board, row, col, color === "red");
 
   return attackers > 0;
 }

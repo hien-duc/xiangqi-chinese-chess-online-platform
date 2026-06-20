@@ -75,16 +75,21 @@ export default function LeaderboardPage() {
       const response = await fetch(
         `/api/v1/leaderboard?page=${page}&limit=${pagination.perPage}`
       );
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       const data = await response.json();
-      setPlayers(data.players);
-      setPagination(data.pagination);
+      if (data && data.players && data.pagination) {
+        setPlayers(data.players);
+        setPagination(data.pagination);
 
-      if (session?.user?.id) {
-        const userIndex = data.players.findIndex(
-          (player: Player) => player.id === session.user.id
-        );
-        if (userIndex !== -1) {
-          setUserRank((page - 1) * pagination.perPage + userIndex + 1);
+        if (session?.user?.id) {
+          const userIndex = data.players.findIndex(
+            (player: Player) => player.id === session.user.id
+          );
+          if (userIndex !== -1) {
+            setUserRank((page - 1) * pagination.perPage + userIndex + 1);
+          }
         }
       }
     } catch (error) {

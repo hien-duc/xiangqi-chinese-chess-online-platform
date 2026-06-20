@@ -7,7 +7,7 @@ import { z } from "zod";
 import bcrypt from "bcryptjs";
 import { findUserByEmail } from "./src/lib/user-service";
 import { MongoDBAdapter } from "@auth/mongodb-adapter";
-import clientPromise from "./src/lib/db/db-connect";
+import clientPromise, { connectToDatabase } from "./src/lib/db/db-connect";
 import { signInSchema } from "./src/lib/validations/authenticationZod";
 import { createPlayerProfile } from "./src/lib/db/models/player.model";
 
@@ -103,13 +103,15 @@ export const config = {
   events: {
     async createUser({ user }) {
       try {
+        await connectToDatabase();
         // Create player profile for new users
         await createPlayerProfile(
-          user.id,
+          user.id!,
           user.name || user.email?.split("@")[0] || "Player"
         );
         console.log("Player profile created for new user:", user.email);
       } catch (error) {
+        console.error("Error creating player profile:", error);
         throw new Error("Failed to create player profile");
       }
     },

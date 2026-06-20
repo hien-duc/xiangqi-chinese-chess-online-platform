@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { EngineHandler } from "@/lib/engine-handler";
 import path from "path";
 
+// Hot-reload trigger: updated engine handler options
 let engineHandler: EngineHandler | null = null;
 
 export async function POST(req: Request) {
